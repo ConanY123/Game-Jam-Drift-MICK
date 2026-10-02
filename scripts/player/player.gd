@@ -9,6 +9,7 @@ const SIZE := 24.0  # smaller than a cell so you can slip through 1-cell gaps
 const SPEED := 96.0  # 3 cells per second, about 2x the roommate
 const MASH_GAIN := 0.1  # seconds of progress per key press
 const MASH_DECAY := 0.5  # progress lost per second when not pressing
+const FALL_SPEED := 480.0  # how fast you drop while falling through a dream gap
 
 var level: LevelBase
 var push_target: Pushable
@@ -16,10 +17,39 @@ var push_dir := Vector2i.ZERO
 var push_timer := 0.0
 var locked_to: Pushable  # box just pushed; key must be released before using another
 
+# Dream-gap fall: slide off the bottom, wrap to the top, land on nearest floor.
+# This only wastes time for the player (unlike the roommate, who fails).
+var falling := false
+var land_target := Vector2.ZERO  # where to land once we've wrapped around
+var wrapped := false  # have we already looped past the bottom edge?
+
 func _ready() -> void:
 	_setup_input()
+	if level != null:
+		# Leaving the dream mid-fall cancels it (no gaps in the physical world).
+		level.realm_changed.connect(_on_realm_changed)
+
+func _on_realm_changed(new_realm: int) -> void:
+	if falling and new_realm == LevelBase.Realm.PHYSICAL:
+		falling = false
+		wrapped = false
 
 func _physics_process(delta: float) -> void:
+	if level == null:
+		return
+
+	# Falling takes over everything: no walking, no pushing until we land.
+	if falling:
+		_update_fall(delta)
+		queue_redraw()
+		return
+
+	# Standing over a dream gap? Start the fall this frame.
+	if level.player_over_dream_gap():
+		_begin_fall()
+		queue_redraw()
+		return
+
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var step := input * SPEED * delta
 
@@ -36,9 +66,37 @@ func _physics_process(delta: float) -> void:
 		target = hit_y
 		dir = Vector2i(0, int(sign(step.y)))
 	_update_push(target, dir, delta)
-	if level != null:
-		level.ensure_player_is_on_safe_dream_floor()
 	queue_redraw()
+
+# ---------- dream-gap fall ----------
+
+func _begin_fall() -> void:
+	falling = true
+	wrapped = false
+	# Lock in where we'll land: the nearest standable dream floor to here.
+	land_target = level.closest_dream_floor(position)
+	# Clear any push state so we don't resume shoving mid-fall.
+	push_target = null
+	push_timer = 0.0
+	locked_to = null
+
+func _update_fall(delta: float) -> void:
+	var field_bottom := Grid.FIELD_ROWS * Grid.CELL
+	position.y += FALL_SPEED * delta
+
+	if not wrapped:
+		# Keep dropping until fully off the bottom, then reappear above the top.
+		if position.y - SIZE / 2.0 > field_bottom:
+			wrapped = true
+			# Snap X to the landing column and re-enter from above the screen.
+			position.x = land_target.x
+			position.y = -SIZE / 2.0
+	else:
+		# Falling back down toward the landing floor.
+		if position.y >= land_target.y:
+			position = land_target
+			falling = false
+			wrapped = false
 
 # Moves if free. Returns null on success, or whatever blocked us.
 func _move_axis(offset: Vector2) -> Node:
@@ -128,7 +186,10 @@ func _setup_input() -> void:
 
 func _draw() -> void:
 	var half := SIZE / 2.0
-	draw_rect(Rect2(-half, -half, SIZE, SIZE), Color(0.35, 0.8, 1.0))
-	if push_target != null:  # little progress bar while you push
+	var body := Color(0.35, 0.8, 1.0)
+	if falling:
+		body = Color(0.35, 0.8, 1.0, 0.6)  # faded while tumbling through the void
+	draw_rect(Rect2(-half, -half, SIZE, SIZE), body)
+	if push_target != null and not falling:  # little progress bar while you push
 		var t := clampf(push_timer / push_target.hold_time(), 0.0, 1.0)
 		draw_rect(Rect2(-half, -half - 8, SIZE * t, 3), Color.WHITE)

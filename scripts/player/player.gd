@@ -36,6 +36,8 @@ func _physics_process(delta: float) -> void:
 		target = hit_y
 		dir = Vector2i(0, int(sign(step.y)))
 	_update_push(target, dir, delta)
+	if level != null:
+		level.ensure_player_is_on_safe_dream_floor()
 	queue_redraw()
 
 # Moves if free. Returns null on success, or whatever blocked us.

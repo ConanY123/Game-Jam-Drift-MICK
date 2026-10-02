@@ -48,15 +48,26 @@ func _move_axis(offset: Vector2) -> Node:
 	return blocker
 
 func _blocker_at(center: Vector2) -> Node:
+	# Current realm's objects first, then physical ones (they stay solid in the dream)
+	var b: Node = _blocker_in(center, level.realm)
+	if b == null and level.realm == LevelBase.Realm.DREAM:
+		b = _blocker_in(center, LevelBase.Realm.PHYSICAL)
+	return b
+
+func _blocker_in(center: Vector2, in_realm: int) -> Node:
 	var half := Vector2(SIZE, SIZE) / 2.0
 	var min_cell := Grid.pos_to_cell(center - half)
 	var max_cell := Grid.pos_to_cell(center + half - Vector2(0.01, 0.01))
 	for x in range(min_cell.x, max_cell.x + 1):
 		for y in range(min_cell.y, max_cell.y + 1):
-			var b := level.blocker_at(Vector2i(x, y))
+			var b := level.blocker_at(Vector2i(x, y), in_realm)
 			if b != null:
 				return b
 	return null
+
+# True if the player would be standing inside something solid in that realm.
+func is_overlapping(in_realm: int) -> bool:
+	return _blocker_in(position, in_realm) != null
 
 func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 	# Physical objects stay solid in the dream but can't be touched there

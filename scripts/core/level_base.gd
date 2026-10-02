@@ -22,6 +22,20 @@ var solids := {
 var wall_rects: Array[Rect2i] = []
 var debug_path: Array[Vector2i] = []  # placeholder until the roommate exists
 
+var dream_floor := {}  # Vector2i -> true
+
+func add_dream_floor(rect: Rect2i) -> void:
+	for x in range(rect.position.x, rect.end.x):
+		for y in range(rect.position.y, rect.end.y):
+			dream_floor[Vector2i(x, y)] = true
+
+# Can the roommate stand here in the dream?
+func is_dream_floor(cell: Vector2i) -> bool:
+	if dream_floor.has(cell):
+		return true
+	var b = solids[Realm.DREAM].get(cell)
+	return b is Pushable and b.is_floor
+
 func _ready() -> void:
 	build()
 	queue_redraw()
@@ -76,7 +90,7 @@ func add_wall(rect: Rect2i) -> void:
 			solids[Realm.PHYSICAL][Vector2i(x, y)] = self
 			solids[Realm.DREAM][Vector2i(x, y)] = self
 
-func add_pushable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color := Color(0.85, 0.65, 0.3), holdable = true, in_realm: int = Realm.PHYSICAL) -> Pushable:
+func add_pushable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color := Color(0.85, 0.65, 0.3), in_realm: int = Realm.PHYSICAL, holdable := false) -> Pushable:
 	var p := Pushable.new()
 	p.size = size
 	p.weight = weight
@@ -99,8 +113,13 @@ func add_player(cell: Vector2i) -> Player:
 func _draw() -> void:
 	var field := Vector2(Grid.FIELD_COLS, Grid.FIELD_ROWS) * Grid.CELL
 
-	var bg := Color(0.1, 0.12, 0.2) if realm == Realm.PHYSICAL else Color(0.4, 0.22, 0.45)
+	var bg := Color(0.1, 0.12, 0.2)
+	if realm == Realm.DREAM:
+		bg = Color(0.05, 0.03, 0.1)  # void
 	draw_rect(Rect2(Vector2.ZERO, field), bg)
+	if realm == Realm.DREAM:
+		for c in dream_floor:
+			draw_rect(Rect2(Grid.cell_to_pos(c), Vector2(Grid.CELL, Grid.CELL)), Color(0.55, 0.4, 0.7))
 
 	draw_rect(Rect2(Vector2(field.x, 0), Vector2(Grid.STRIP_COLS * Grid.CELL, field.y)), Color(0.06, 0.06, 0.1))
 	for r in wall_rects:

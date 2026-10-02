@@ -7,6 +7,7 @@ extends Node2D
 @export var weight := 1.0  # scales hold time (and stamina cost later)
 @export var color := Color(0.85, 0.65, 0.3)
 @export var holdable := true  # if true, player can hold instead of spamming
+@export var is_floor := false  # a dream piece that counts as ground for the roommate
 @export_enum("Physical", "Dream") var realm := 0
 
 var cell := Vector2i.ZERO  # top-left cell

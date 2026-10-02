@@ -23,11 +23,24 @@ var wall_rects: Array[Rect2i] = []
 var debug_path: Array[Vector2i] = []  # placeholder until the roommate exists
 
 var dream_floor := {}  # Vector2i -> true
+var player: Player
 
 func add_dream_floor(rect: Rect2i) -> void:
 	for x in range(rect.position.x, rect.end.x):
 		for y in range(rect.position.y, rect.end.y):
 			dream_floor[Vector2i(x, y)] = true
+
+func closest_dream_floor(pos: Vector2) -> Vector2:
+	if dream_floor.is_empty():
+		return pos
+	var best_cell := Vector2i.ZERO
+	var best_dist_sq := INF
+	for cell in dream_floor.keys():
+		var d2 := pos.distance_squared_to(Grid.cell_to_center(cell))
+		if d2 < best_dist_sq:
+			best_dist_sq = d2
+			best_cell = cell
+	return Grid.cell_to_center(best_cell)
 
 # Can the roommate stand here in the dream?
 func is_dream_floor(cell: Vector2i) -> bool:
@@ -35,6 +48,16 @@ func is_dream_floor(cell: Vector2i) -> bool:
 		return true
 	var b = solids[Realm.DREAM].get(cell)
 	return b is Pushable and b.is_floor
+
+func ensure_player_is_on_safe_dream_floor() -> void:
+	if player == null or realm != Realm.DREAM:
+		return
+	var cell := Grid.pos_to_cell(player.position)
+	if not Grid.in_bounds(cell):
+		player.position = closest_dream_floor(player.position)
+		return
+	if not is_dream_floor(cell):
+		player.position = closest_dream_floor(player.position)
 
 func _ready() -> void:
 	build()
@@ -52,6 +75,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func switch_realm() -> void:
 	realm = Realm.DREAM if realm == Realm.PHYSICAL else Realm.PHYSICAL
 	realm_changed.emit(realm)
+	ensure_player_is_on_safe_dream_floor()
 	queue_redraw()
 
 # ---------- occupancy ----------
@@ -105,7 +129,9 @@ func add_player(cell: Vector2i) -> Player:
 	var p := Player.new()
 	p.level = self
 	p.position = Grid.cell_to_center(cell)
+	player = p
 	add_child(p)
+	ensure_player_is_on_safe_dream_floor()
 	return p
 
 # ---------- debug drawing ----------

@@ -11,7 +11,6 @@ const AURA_DEATH_REASON := "was caught in a computer's signal"
 
 func _ready() -> void:
 	size = FOOTPRINT
-	can_be_pushed = true
 	initially_powered = start_on
 	super._ready()
 

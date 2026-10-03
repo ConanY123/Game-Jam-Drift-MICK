@@ -209,45 +209,6 @@ func add_roommate(route: Array[Vector2i]) -> Node2D:
 	roommate = r
 	return r
 
-# ---------- editor-authored roommate path (level 2 onward) ----------
-
-# Reads a Path2D's curve points, snaps each to a grid cell, and returns the
-# route as cells. Levels after level 1 draw the roommate's path visually by
-# adding a Path2D node (default name "RoommatePath") and dropping points on it
-# in the editor instead of hardcoding a debug_path array.
-#
-# Returns an empty array if the node is missing or has fewer than 2 points, so
-# the caller can fall back to a hardcoded route if desired.
-func route_from_path2d(path_node_name := "RoommatePath") -> Array[Vector2i]:
-	var path := get_node_or_null(path_node_name) as Path2D
-	var cells: Array[Vector2i] = []
-	if path == null or path.curve == null:
-		push_warning("route_from_path2d: no Path2D named '%s'" % path_node_name)
-		return cells
-	var curve := path.curve
-	for i in range(curve.point_count):
-		# Curve points are local to the Path2D. Apply the node's full transform
-		# (position, scale, and rotation) so a point lands on the same world cell
-		# the editor renders it at. Using only path.position would ignore any
-		# scale/rotation on the node and snap the roommate to the wrong cells.
-		var world := path.transform * curve.get_point_position(i)
-		var cell := Grid.pos_to_cell(world)
-		# Skip accidental duplicates (two points landing on the same cell).
-		if cells.is_empty() or cells[cells.size() - 1] != cell:
-			cells.append(cell)
-	if cells.size() < 2:
-		push_warning("route_from_path2d: '%s' needs at least 2 points on distinct cells" % path_node_name)
-	return cells
-
-# Convenience: build the route from an editor Path2D and spawn the roommate on
-# it, mirroring hardcoded `add_roommate(debug_path)`. Also stores the cells in
-# debug_path so the base _draw() still renders the route line for debugging.
-func add_roommate_from_path(path_node_name := "RoommatePath") -> Node2D:
-	var cells := route_from_path2d(path_node_name)
-	debug_path = cells
-	queue_redraw()
-	return add_roommate(cells)
-
 # ---------- debug drawing ----------
 
 func _draw() -> void:

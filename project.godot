@@ -17,7 +17,12 @@ run/main_scene="res://scenes/levels/level-1.tscn"
 
 [autoload]
 
+AudioManager="*res://scenes/levels/audio_manager.tscn"
 LevelManager="*res://scripts/core/level_manager.gd"
+
+[audio]
+
+buses/default_bus_layout="uid://dr3s14e4ubl6x"
 
 [display]
 

@@ -17,12 +17,23 @@ const FALL_SPIN := TAU * 2.0  # total rotation across each phase (2 turns)
 
 enum FallPhase { NONE, OUT, IN }
 
+const ARROW_SCENE := preload("res://scenes/objects/arrow.tscn")
+const SHOOT_COOLDOWN := 0.3  # min seconds between arrows
+
 var level: LevelBase
 var has_moved := false
 var push_target: Pushable
 var push_dir := Vector2i.ZERO
 var push_timer := 0.0
 var locked_to: Pushable  # box just pushed; key must be released before using another
+
+# Bow: picked up from a BowPickup. While held, holding interact draws the bow
+# (aim with WASD/arrows, you stand still and don't push), releasing fires an
+# arrow in the aimed direction.
+var has_bow := false
+var aiming := false
+var aim_dir := Vector2.RIGHT  # last aimed direction (persists between shots)
+var shoot_cd := 0.0
 
 # Dream-gap fall: drop a little while spinning + fading out, then fall back in
 # from the top spinning + fading in, landing on the nearest floor.
@@ -60,6 +71,16 @@ func _physics_process(delta: float) -> void:
 	# Standing over a dream gap? Start the fall this frame.
 	if level.player_over_dream_gap():
 		_begin_fall()
+		queue_redraw()
+		return
+
+	if shoot_cd > 0.0:
+		shoot_cd -= delta
+
+	# Bow drawn: holding interact aims (WASD steer), releasing fires. This takes
+	# over from walking/pushing while the bow is up, so there's no conflict with
+	# the interact key being shared with pushing.
+	if has_bow and _update_bow():
 		queue_redraw()
 		return
 
@@ -210,6 +231,42 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 		if target.try_push(dir):
 			locked_to = target
 
+# Returns true while the bow is drawn (so the caller skips walking/pushing).
+# Holding interact draws + aims with the direction keys; releasing fires.
+func _update_bow() -> bool:
+	if Input.is_action_pressed("interact"):
+		# Steer the aim with the movement keys. Keep the last aim if no key is
+		# held, so you can draw and then pick a direction, or hold a direction.
+		var steer := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+		if steer.length() > 0.1:
+			# Snap to 4 directions so arrows fly along the grid, matching the
+			# rest of the game's cardinal movement.
+			if absf(steer.x) >= absf(steer.y):
+				aim_dir = Vector2(signf(steer.x), 0)
+			else:
+				aim_dir = Vector2(0, signf(steer.y))
+		aiming = true
+		# Clear any push state so releasing the key doesn't trigger a shove.
+		push_target = null
+		push_timer = 0.0
+		locked_to = null
+		return true
+	# Key released: if we were drawing, loose an arrow.
+	if aiming:
+		aiming = false
+		if shoot_cd <= 0.0:
+			_fire_arrow()
+			shoot_cd = SHOOT_COOLDOWN
+		return true  # consume this frame so the release doesn't do anything else
+	return false
+
+func _fire_arrow() -> void:
+	var arrow := ARROW_SCENE.instantiate()
+	# Start a little ahead of the player so it doesn't instantly self-collide.
+	arrow.position = position + aim_dir * (SIZE * 0.5 + 2.0)
+	level.add_child(arrow)
+	arrow.call("setup", level, aim_dir)
+
 func _setup_input() -> void:
 	var map := {
 		"move_left": [KEY_A, KEY_LEFT],
@@ -242,3 +299,11 @@ func _draw() -> void:
 	if push_target != null:  # little progress bar while you push
 		var t := clampf(push_timer / push_target.hold_time(), 0.0, 1.0)
 		draw_rect(Rect2(-half, -half - 8, SIZE * t, 3), Color.WHITE)
+
+	if has_bow:
+		# A small aim marker so you can see the current/last aim direction.
+		var reach := SIZE * 0.9
+		var tip := aim_dir * reach
+		var col := Color(0.95, 0.9, 0.6, 1.0 if aiming else 0.4)
+		draw_line(Vector2.ZERO, tip, col, 2.0 if aiming else 1.0)
+		draw_circle(tip, 2.5, col)

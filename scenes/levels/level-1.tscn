@@ -46,6 +46,12 @@ size = Vector2i(3, 3)
 weight = 3.0
 holdable = false
 
+[node name="Table2" parent="." unique_id=1152306894 instance=ExtResource("6_a1qmq")]
+position = Vector2(64, 160)
+size = Vector2i(3, 3)
+weight = 3.0
+holdable = false
+
 [node name="Chair" parent="." unique_id=225586257 instance=ExtResource("2_eeqru")]
 position = Vector2(320, 288)
 
@@ -60,12 +66,6 @@ position = Vector2(192, 352)
 
 [node name="Chair5" parent="." unique_id=70905138 instance=ExtResource("2_eeqru")]
 position = Vector2(160, 160)
-
-[node name="Table2" parent="." unique_id=1152306894 instance=ExtResource("6_a1qmq")]
-position = Vector2(64, 160)
-size = Vector2i(3, 3)
-weight = 3.0
-holdable = false
 
 [node name="Chair6" parent="." unique_id=1957673657 instance=ExtResource("2_eeqru")]
 position = Vector2(96, 256)

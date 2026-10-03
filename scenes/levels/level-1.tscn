@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="5_dream_bg"]
 [ext_resource type="PackedScene" uid="uid://bpuefjr1fcltd" path="res://scenes/objects/table.tscn" id="6_a1qmq"]
 [ext_resource type="PackedScene" uid="uid://cwd8r3n5tlaab" path="res://scenes/objects/door.tscn" id="7_wubvj"]
-[ext_resource type="PackedScene" uid="uid://br1sss08ewpld" path="res://scenes/objects/sliding_cart.tscn" id="8_2ovie"]
 [ext_resource type="PackedScene" uid="uid://cchwiswkl3wjn" path="res://scenes/objects/dream block.tscn" id="8_wejd8"]
 
 [node name="Level1" type="Node2D" unique_id=402028665]
@@ -77,9 +76,6 @@ color = Color(0.6150615, 0.3924139, 0.22227415, 1)
 
 [node name="Door2" parent="." unique_id=823082349 instance=ExtResource("7_wubvj")]
 position = Vector2(448, 96)
-
-[node name="SlidingCart" parent="." unique_id=1983659059 instance=ExtResource("8_2ovie")]
-position = Vector2(401, 180)
 
 [node name="DreamBlock" parent="." unique_id=117124088 instance=ExtResource("8_wejd8")]
 position = Vector2(352, 416)

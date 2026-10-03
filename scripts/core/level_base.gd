@@ -206,9 +206,11 @@ func route_from_path2d(path_node_name := "RoommatePath") -> Array[Vector2i]:
 		return cells
 	var curve := path.curve
 	for i in range(curve.point_count):
-		# Curve points are local to the Path2D; add its position so an offset
-		# Path2D node still maps to the right world cells.
-		var world := path.position + curve.get_point_position(i)
+		# Curve points are local to the Path2D. Apply the node's full transform
+		# (position, scale, and rotation) so a point lands on the same world cell
+		# the editor renders it at. Using only path.position would ignore any
+		# scale/rotation on the node and snap the roommate to the wrong cells.
+		var world := path.transform * curve.get_point_position(i)
 		var cell := Grid.pos_to_cell(world)
 		# Skip accidental duplicates (two points landing on the same cell).
 		if cells.is_empty() or cells[cells.size() - 1] != cell:

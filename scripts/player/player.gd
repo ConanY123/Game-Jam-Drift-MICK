@@ -33,7 +33,7 @@ var has_moved := false
 var push_target: Pushable
 var push_dir := Vector2i.ZERO
 var push_timer := 0.0
-var locked_to: Pushable  # box just pushed; key must be released before using another
+var interact_locked := false
 
 # Bow: picked up from a BowPickup. While held, holding interact draws the bow
 # (aim with WASD/arrows, you stand still and don't push), releasing fires an
@@ -69,6 +69,8 @@ func _on_realm_changed(new_realm: int) -> void:
 func _physics_process(delta: float) -> void:
 	if level == null:
 		return
+	if level.gameplay_locked():
+		return
 	_recover_stamina(delta)
 
 	# Falling takes over everything: no walking, no pushing until we land.
@@ -85,13 +87,19 @@ func _physics_process(delta: float) -> void:
 
 	if shoot_cd > 0.0:
 		shoot_cd -= delta
+	if interact_locked and not Input.is_action_pressed("interact"):
+		interact_locked = false
 
 	# Bow + interact key is shared with pushing. Pushing wins when you're pressing
 	# into a pushable box (so you can still clear the real world with the bow in
 	# hand); otherwise holding interact draws the bow and aims (WASD steer),
 	# releasing fires. If we're mid-aim already, keep aiming until the key is
 	# released so a shot doesn't get cancelled by brushing a box.
-	if has_bow and (aiming or (push_target == null and not _pressing_into_pushable())):
+	if (
+		not interact_locked
+		and has_bow
+		and (aiming or (push_target == null and not _pressing_into_pushable()))
+	):
 		if _update_bow():
 			queue_redraw()
 			return
@@ -135,7 +143,7 @@ func _begin_fall() -> void:
 	# Clear any push state so we don't resume shoving mid-fall.
 	push_target = null
 	push_timer = 0.0
-	locked_to = null
+	interact_locked = false
 
 func _end_fall() -> void:
 	falling = false
@@ -220,12 +228,10 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 	# shoved there; likewise dream objects can only be pushed from the dream.)
 	if target != null and target.realm != level.realm:
 		target = null
-	# Releasing the key clears the lock.
-	if not Input.is_action_pressed("interact"):
-		locked_to = null
-	# Key is still held from the last push, so other boxes are ignored.
-	if target != null and locked_to != null and target != locked_to:
-		target = null
+	if interact_locked:
+		push_target = null
+		push_timer = 0.0
+		return
 
 	if target == null:
 		push_target = null
@@ -251,7 +257,7 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 	if push_timer >= target.hold_time():
 		push_timer = 0.0
 		if target.try_push(dir):
-			locked_to = target
+			interact_locked = true
 			# Pushing in the real world costs stamina, scaled by weight.
 			if level.realm == LevelBase.Realm.PHYSICAL:
 				_spend_stamina(target.weight)
@@ -305,7 +311,6 @@ func _update_bow() -> bool:
 		# Clear any push state so releasing the key doesn't trigger a shove.
 		push_target = null
 		push_timer = 0.0
-		locked_to = null
 		return true
 	# Key released: if we were drawing, loose an arrow.
 	if aiming:

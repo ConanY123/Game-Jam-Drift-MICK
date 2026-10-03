@@ -6,6 +6,11 @@ extends Node2D
 
 @export var debug_grid := true
 @export var level_number: int = 1
+@export_range(0.0, 5.0, 0.1) var death_transition_duration := 1.0
+@export_range(0.0, 5.0, 0.1) var death_screen_duration := 1.25
+@export_range(0.0, 5.0, 0.1) var reset_transition_duration := 1.0
+@export_range(0.0, 5.0, 0.1) var realm_transition_duration := 1.0
+@export_range(0.0, 5.0, 0.1) var completion_transition_duration := 1.0
 
 enum Realm { 
 	PHYSICAL, 
@@ -32,6 +37,8 @@ var debug_path: Array[Vector2i] = []  # placeholder until the roommate exists
 
 var dream_floor := {}  # Vector2i -> true
 var player: Player
+var result_overlay: Node
+var _level_ended := false
 
 func add_dream_floor(rect: Rect2i) -> void:
 	for x in range(rect.position.x, rect.end.x):
@@ -79,21 +86,29 @@ func _ready() -> void:
 	realm_changed.connect(func(_r): _update_layers())
 	var overlay := RESULT_OVERLAY_SCENE.instantiate()
 	add_child(overlay)
-	overlay.call("setup", self)
+	result_overlay = overlay
 	var stamina_bar := STAMINA_BAR_SCENE.instantiate()
 	add_child(stamina_bar)
 	stamina_bar.call("setup", self)
 	AudioManager.play_music(level_number)   # start this level's track (runs on load + every retry)
-	level_won.connect(func(): get_node("/root/LevelManager").call_deferred("advance_level"))
+	level_won.connect(_on_level_won)
+	level_lost.connect(_on_level_lost)
 	queue_redraw()
 
 func build() -> void:
 	pass  # levels override this
 
+func gameplay_locked() -> bool:
+	var transitions := get_node_or_null("/root/TransitionManager")
+	return _level_ended or (
+		transitions != null and transitions.call("is_transitioning")
+	)
+
 func _unhandled_input(event: InputEvent) -> void:
+	if _level_ended:
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
-		get_node("/root/AudioManager").call("play_music", level_number)
-		get_tree().reload_current_scene()
+		_play_transition(reset_transition_duration, _reset_level)
 	elif event.is_action_pressed("switch_realm"):
 		switch_realm()
 
@@ -104,9 +119,78 @@ func switch_realm() -> void:
 		and not player.can_switch_to_physical()
 	):
 		return
+	var wipe_color := Color(0.52, 0.12, 0.38, 1.0)
+	var edge_color := Color(1.0, 0.35, 0.72, 1.0)
+	if realm == Realm.DREAM:
+		wipe_color = Color(0.08, 0.16, 0.36, 1.0)
+		edge_color = Color(0.38, 0.7, 1.0, 1.0)
+	_play_transition(
+		realm_transition_duration,
+		_apply_realm_switch,
+		wipe_color,
+		edge_color
+	)
+
+func _apply_realm_switch() -> void:
 	realm = Realm.DREAM if realm == Realm.PHYSICAL else Realm.PHYSICAL
 	realm_changed.emit(realm)
 	queue_redraw()
+
+func _reset_level() -> bool:
+	get_node("/root/AudioManager").call("play_music", level_number)
+	var error := get_tree().reload_current_scene()
+	if error != OK:
+		push_error("Could not reload level: %s" % error_string(error))
+		return false
+	return true
+
+func _on_level_won() -> void:
+	if _level_ended:
+		return
+	_level_ended = true
+	_play_transition(
+		completion_transition_duration,
+		_complete_level,
+		Color(0.12, 0.28, 0.16, 1.0),
+		Color(0.55, 1.0, 0.65, 1.0)
+	)
+
+func _on_level_lost(reason: String) -> void:
+	if _level_ended:
+		return
+	_level_ended = true
+	result_overlay.call("show_loss", reason)
+	_restart_after_death()
+
+func _restart_after_death() -> void:
+	await get_tree().create_timer(death_screen_duration).timeout
+	_play_transition(
+		death_transition_duration,
+		_reset_level,
+		Color.BLACK,
+		Color.BLACK,
+		true
+	)
+
+func _play_transition(
+	duration: float,
+	action: Callable,
+	wipe_color := Color(0.015, 0.02, 0.055, 1.0),
+	edge_color := Color(0.35, 0.85, 1.0, 1.0),
+	wait_for_scene_change := false
+) -> void:
+	get_node("/root/TransitionManager").call(
+		"play",
+		duration,
+		action,
+		wipe_color,
+		edge_color,
+		wait_for_scene_change
+	)
+
+func _complete_level() -> void:
+	result_overlay.call("show_win")
+	get_node("/root/LevelManager").call("advance_level")
 
 # ---------- occupancy ----------
 

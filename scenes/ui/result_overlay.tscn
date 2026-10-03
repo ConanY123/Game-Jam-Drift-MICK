@@ -28,5 +28,5 @@ horizontal_alignment = 1
 [node name="Sub" type="Label" parent="Center/Box" unique_id=1848997085]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Press R to retry"
+text = "Restarting..."
 horizontal_alignment = 1

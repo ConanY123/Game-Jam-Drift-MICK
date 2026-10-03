@@ -28,6 +28,7 @@ func _is_traversable_dream_block(blocker: Node) -> bool:
 		level.realm == LevelBase.Realm.DREAM
 		and blocker is Pushable
 		and blocker.realm == LevelBase.Realm.DREAM
+		and not (blocker is EnergyDrink)
 	)
 
 func _blocker_at(center: Vector2) -> Node:

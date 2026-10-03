@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="2_odt7l"]
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="3_anfik"]
 [ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="4_7yn3j"]
+[ext_resource type="PackedScene" path="res://scenes/objects/energy_drink.tscn" id="6_tkmqy"]
 [ext_resource type="PackedScene" path="res://scenes/objects/goose.tscn" id="7_i1e88"]
 
 [sub_resource type="Curve2D" id="Curve2D_orn5u"]
@@ -51,6 +52,8 @@ start_direction = 1
 [node name="Goose3" parent="." unique_id=1962412394 instance=ExtResource("7_i1e88")]
 position = Vector2(480, 128)
 start_direction = 3
+
+[node name="EnergyDrink" parent="." unique_id=1540761898 instance=ExtResource("6_tkmqy")]
 
 [node name="Physical" type="Node" parent="." unique_id=1087518688]
 

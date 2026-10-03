@@ -20,9 +20,9 @@ const PUSH_SLIDE_TIME := 0.12  # seconds for a pushed goose to slide one cell
 # Number of tiles in the line, INCLUDING the one it starts on.
 # 8 means it starts on tile 1 and walks to tile 8 before turning back.
 @export var patrol_length := 8
-@export var seconds_per_cell := 0.5  # time to walk one tile
+@export var seconds_per_cell := 0.6  # time to walk one tile
 @export var push_pause := 0.75  # how long it stands still after being pushed
-@export var end_pause := 1  # how long it stands still at each end of the line
+@export var end_pause := 0.5  # how long it stands still at each end of the line
 @export var show_path := true  # draw the patrol line (handy while designing)
 
 var _origin := Vector2i.ZERO  # the cell it started on (the line's anchor)
@@ -114,6 +114,14 @@ func _off_line() -> int:
 func _along_index() -> int:
 	var rel := cell - _origin
 	return rel.x * _along.x + rel.y * _along.y
+
+
+# Every cell on this goose's patrol line (other objects use this to stay clear).
+func patrol_cells() -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for i in patrol_length:
+		cells.append(_origin + _along * i)
+	return cells
 
 
 # Only turns if the way back is still on the line, so a goose pinned against

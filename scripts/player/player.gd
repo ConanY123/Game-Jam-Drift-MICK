@@ -20,7 +20,14 @@ enum FallPhase { NONE, OUT, IN }
 const ARROW_SCENE := preload("res://scenes/objects/arrow.tscn")
 const SHOOT_COOLDOWN := 0.3  # min seconds between arrows
 
+# Stamina: spent on real-world (physical realm) push actions, scaled by the
+# object's weight. Drifting into the dream and refilling comes later; for now
+# this just drains. emitted as 0..1 fraction so the UI doesn't need the max.
+const MAX_STAMINA := 10.0  # total pushes-worth of a weight-1 object
+signal stamina_changed(fraction: float)
+
 var level: LevelBase
+var stamina := MAX_STAMINA
 var has_moved := false
 var push_target: Pushable
 var push_dir := Vector2i.ZERO
@@ -77,12 +84,15 @@ func _physics_process(delta: float) -> void:
 	if shoot_cd > 0.0:
 		shoot_cd -= delta
 
-	# Bow drawn: holding interact aims (WASD steer), releasing fires. This takes
-	# over from walking/pushing while the bow is up, so there's no conflict with
-	# the interact key being shared with pushing.
-	if has_bow and _update_bow():
-		queue_redraw()
-		return
+	# Bow + interact key is shared with pushing. Pushing wins when you're pressing
+	# into a pushable box (so you can still clear the real world with the bow in
+	# hand); otherwise holding interact draws the bow and aims (WASD steer),
+	# releasing fires. If we're mid-aim already, keep aiming until the key is
+	# released so a shot doesn't get cancelled by brushing a box.
+	if has_bow and (aiming or not _pressing_into_pushable()):
+		if _update_bow():
+			queue_redraw()
+			return
 
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var step := input * SPEED * delta
@@ -230,6 +240,29 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 		push_timer = 0.0
 		if target.try_push(dir):
 			locked_to = target
+			# Pushing in the real world costs stamina, scaled by weight.
+			if level.realm == LevelBase.Realm.PHYSICAL:
+				_spend_stamina(target.weight)
+
+func _spend_stamina(amount: float) -> void:
+	stamina = clampf(stamina - amount, 0.0, MAX_STAMINA)
+	stamina_changed.emit(stamina / MAX_STAMINA)
+
+# True if a movement key is held and the player is pushing toward a pushable in
+# the current realm. Used to let pushing win over the bow when sharing the key.
+func _pressing_into_pushable() -> bool:
+	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	if input.length() < 0.1:
+		return false
+	# Probe a short step ahead on each axis for a Pushable in this realm.
+	var probe := SPEED * 0.05  # a fraction of a second of movement
+	for off in [Vector2(signf(input.x) * probe, 0), Vector2(0, signf(input.y) * probe)]:
+		if off == Vector2.ZERO:
+			continue
+		var b := _blocker_in(position + off, level.realm)
+		if b is Pushable and b.realm == level.realm:
+			return true
+	return false
 
 # Returns true while the bow is drawn (so the caller skips walking/pushing).
 # Holding interact draws + aims with the direction keys; releasing fires.

@@ -73,6 +73,9 @@ position = Vector2(160, 160)
 [node name="Chair6" parent="Physical" unique_id=1957673657 instance=ExtResource("2_eeqru")]
 position = Vector2(96, 256)
 
+[node name="Chair7" parent="Physical" unique_id=509923649 instance=ExtResource("2_eeqru")]
+position = Vector2(512, 448)
+
 [node name="Door" parent="Physical" unique_id=1017083639 instance=ExtResource("7_wubvj")]
 position = Vector2(544, 544)
 start_angle_degrees = 180.0

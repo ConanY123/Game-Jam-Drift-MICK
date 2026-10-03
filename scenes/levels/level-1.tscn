@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://d31oy45evjsvb" path="res://scenes/objects/chair.tscn" id="2_eeqru"]
 [ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="2_gl321"]
 [ext_resource type="Script" uid="uid://b686esymdq0u6" path="res://scripts/objects/pushable.gd" id="3_urp3g"]
+[ext_resource type="PackedScene" uid="uid://cib5dtn4aqxas" path="res://scenes/levels/audio_manager.tscn" id="5_ieimj"]
 
 [node name="Level1" type="Node2D" unique_id=402028665]
 script = ExtResource("1_ktyk1")
@@ -25,3 +26,5 @@ tile_set = ExtResource("2_gl321")
 [node name="Chair" parent="." unique_id=225586257 instance=ExtResource("2_eeqru")]
 position = Vector2(128, 128)
 script = ExtResource("3_urp3g")
+
+[node name="Audio Manager" parent="." unique_id=1463628371 instance=ExtResource("5_ieimj")]

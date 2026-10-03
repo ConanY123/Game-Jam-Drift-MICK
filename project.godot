@@ -11,8 +11,17 @@ config_version=5
 [application]
 
 config/name="Drift game jam"
+run/main_scene="uid://bkn2ykjo5khnj"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
+
+[audio]
+
+buses/default_bus_layout="uid://dr3s14e4ubl6x"
+
+[autoload]
+
+AudioManager="*uid://cib5dtn4aqxas"
 
 [display]
 

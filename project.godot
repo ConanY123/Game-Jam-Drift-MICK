@@ -13,6 +13,11 @@ config_version=5
 config/name="Drift game jam"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
+run/main_scene="res://scenes/levels/level-1.tscn"
+
+[autoload]
+
+LevelManager="*res://scripts/core/level_manager.gd"
 
 [display]
 

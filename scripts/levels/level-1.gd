@@ -22,17 +22,17 @@ func build() -> void:
 	]
 
 	# Beat 1: a chair on the path, push it aside (holdable)
-	add_pushable(Vector2i(12, 5), Vector2i(1, 1), 1.0, Color(0.85, 0.65, 0.3), LevelBase.Realm.PHYSICAL, true)
+	# add_pushable(Vector2i(12, 5), Vector2i(1, 1), 1.0, Color(0.85, 0.65, 0.3), LevelBase.Realm.PHYSICAL, true)
 
 	# Beat 2: the big table on the path. Two chairs block its right side,
 	# so move them up and down first, then push the table right 3 cells.
-	add_pushable(Vector2i(5, 10), Vector2i(3, 3), 3.0, Color(0.6, 0.4, 0.25), LevelBase.Realm.PHYSICAL, false)
-	add_pushable(Vector2i(8, 10))
-	add_pushable(Vector2i(8, 12))
+	# add_pushable(Vector2i(5, 10), Vector2i(3, 3), 3.0, Color(0.6, 0.4, 0.25), LevelBase.Realm.PHYSICAL, false)
+	# add_pushable(Vector2i(8, 10))
+	# add_pushable(Vector2i(8, 12))
 
 	# Decoration: off-path chairs you can ignore
-	add_pushable(Vector2i(3, 5))
-	add_pushable(Vector2i(3, 6))
+	# add_pushable(Vector2i(3, 5))
+	# add_pushable(Vector2i(3, 6))
 
 	# Dream: platform along row 2 with a gap at x = 7 and 8
 	add_dream_floor(Rect2i(2, 2, 5, 1))

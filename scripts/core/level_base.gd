@@ -60,7 +60,10 @@ func ensure_player_is_on_safe_dream_floor() -> void:
 		player.position = closest_dream_floor(player.position)
 
 func _ready() -> void:
+	_load_tilemaps()
 	build()
+	_update_layers()
+	realm_changed.connect(func(_r): _update_layers())
 	queue_redraw()
 
 func build() -> void:
@@ -121,8 +124,8 @@ func add_pushable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color :
 	p.color = color
 	p.realm = in_realm
 	p.holdable = holdable
-	add_child(p)
-	p.setup(self, cell)
+	p.position = Grid.cell_to_pos(cell)
+	add_child(p)  # its _ready registers it with this level
 	return p
 
 func add_player(cell: Vector2i) -> Player:
@@ -134,30 +137,50 @@ func add_player(cell: Vector2i) -> Player:
 	ensure_player_is_on_safe_dream_floor()
 	return p
 
+# ---------- TILEMAS ----------
+func _load_tilemaps() -> void:
+	var walls := get_node_or_null("WallLayer") as TileMapLayer
+	if walls != null:
+		for c in walls.get_used_cells():
+			solids[Realm.PHYSICAL][c] = self
+			solids[Realm.DREAM][c] = self
+	var dream := get_node_or_null("DreamFloorLayer") as TileMapLayer
+	if dream != null:
+		for c in dream.get_used_cells():
+			dream_floor[c] = true
+
+func _update_layers() -> void:
+	var floor_layer := get_node_or_null("FloorLayer") as TileMapLayer
+	if floor_layer != null:
+		floor_layer.visible = realm == Realm.PHYSICAL
+	var dream_layer := get_node_or_null("DreamFloorLayer") as TileMapLayer
+	if dream_layer != null:
+		dream_layer.visible = realm == Realm.DREAM
+
 # ---------- debug drawing ----------
 
-func _draw() -> void:
-	var field := Vector2(Grid.FIELD_COLS, Grid.FIELD_ROWS) * Grid.CELL
+# func _draw() -> void:
+# 	var field := Vector2(Grid.FIELD_COLS, Grid.FIELD_ROWS) * Grid.CELL
 
-	var bg := Color(0.1, 0.12, 0.2)
-	if realm == Realm.DREAM:
-		bg = Color(0.05, 0.03, 0.1)  # void
-	draw_rect(Rect2(Vector2.ZERO, field), bg)
-	if realm == Realm.DREAM:
-		for c in dream_floor:
-			draw_rect(Rect2(Grid.cell_to_pos(c), Vector2(Grid.CELL, Grid.CELL)), Color(0.55, 0.4, 0.7))
+# 	var bg := Color(0.1, 0.12, 0.2)
+# 	if realm == Realm.DREAM:
+# 		bg = Color(0.05, 0.03, 0.1)  # void
+# 	draw_rect(Rect2(Vector2.ZERO, field), bg)
+# 	if realm == Realm.DREAM:
+# 		for c in dream_floor:
+# 			draw_rect(Rect2(Grid.cell_to_pos(c), Vector2(Grid.CELL, Grid.CELL)), Color(0.55, 0.4, 0.7))
 
-	draw_rect(Rect2(Vector2(field.x, 0), Vector2(Grid.STRIP_COLS * Grid.CELL, field.y)), Color(0.06, 0.06, 0.1))
-	for r in wall_rects:
-		draw_rect(Rect2(Vector2(r.position * Grid.CELL), Vector2(r.size * Grid.CELL)), Color(0.35, 0.37, 0.45))
-	if debug_grid:
-		var line_color := Color(1, 1, 1, 0.12)
-		for x in Grid.FIELD_COLS + 1:
-			draw_line(Vector2(x, 0) * Grid.CELL, Vector2(x, Grid.FIELD_ROWS) * Grid.CELL, line_color)
-		for y in Grid.FIELD_ROWS + 1:
-			draw_line(Vector2(0, y) * Grid.CELL, Vector2(Grid.FIELD_COLS, y) * Grid.CELL, line_color)
-	if debug_path.size() > 1:
-		var pts := PackedVector2Array()
-		for c in debug_path:
-			pts.append(Grid.cell_to_center(c))
-		draw_polyline(pts, Color(1, 1, 1, 0.5), 2.0)
+# 	draw_rect(Rect2(Vector2(field.x, 0), Vector2(Grid.STRIP_COLS * Grid.CELL, field.y)), Color(0.06, 0.06, 0.1))
+# 	for r in wall_rects:
+# 		draw_rect(Rect2(Vector2(r.position * Grid.CELL), Vector2(r.size * Grid.CELL)), Color(0.35, 0.37, 0.45))
+# 	if debug_grid:
+# 		var line_color := Color(1, 1, 1, 0.12)
+# 		for x in Grid.FIELD_COLS + 1:
+# 			draw_line(Vector2(x, 0) * Grid.CELL, Vector2(x, Grid.FIELD_ROWS) * Grid.CELL, line_color)
+# 		for y in Grid.FIELD_ROWS + 1:
+# 			draw_line(Vector2(0, y) * Grid.CELL, Vector2(Grid.FIELD_COLS, y) * Grid.CELL, line_color)
+# 	if debug_path.size() > 1:
+# 		var pts := PackedVector2Array()
+# 		for c in debug_path:
+# 			pts.append(Grid.cell_to_center(c))
+# 		draw_polyline(pts, Color(1, 1, 1, 0.5), 2.0)

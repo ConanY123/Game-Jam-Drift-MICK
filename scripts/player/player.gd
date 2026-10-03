@@ -73,7 +73,8 @@ func is_overlapping(in_realm: int) -> bool:
 
 func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 	# Physical objects stay solid in the dream but can't be touched there
-	if level.realm == LevelBase.Realm.DREAM:
+	# You can only push objects that belong to the realm you are in
+	if target != null and target.realm != level.realm:
 		target = null
 	# Releasing the key clears the lock.
 	if not Input.is_action_pressed("interact"):

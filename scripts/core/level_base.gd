@@ -122,7 +122,7 @@ func switch_realm() -> void:
 		realm_switch_failed_low_stamina.emit()
 		return
 	var wipe_color := Color(0.9294, 0.2157, 0.7255, 1.0)
-	var edge_color := Color(0.9294, 0.2157, 0.7255, 1.0)
+	var edge_color := Color(1.0, 0.55, 0.85, 1.0)
 	if realm == Realm.DREAM:
 		wipe_color = Color(0.08, 0.16, 0.36, 1.0)
 		edge_color = Color(0.38, 0.7, 1.0, 1.0)
@@ -252,12 +252,12 @@ func add_slidable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color :
 	add_child(s)  # its _ready registers it with this level
 	return s
 
+const PLAYER_SCENE := preload("res://scenes/actors/player.tscn")
+
 func add_player(cell: Vector2i) -> Player:
-	var p := Player.new()
+	var p := PLAYER_SCENE.instantiate() as Player
 	p.level = self
 	p.position = Grid.cell_to_center(cell)
-	p.z_index = 10
-	p.z_as_relative = false
 	player = p
 	add_child(p)
 	return p

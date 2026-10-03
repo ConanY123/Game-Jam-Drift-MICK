@@ -52,12 +52,18 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 			interact_locked = true
 			if level.realm == LevelBase.Realm.PHYSICAL:
 				_spend_stamina(target.weight)
+			elif target.realm == LevelBase.Realm.DREAM:
+				_restore_stamina(target.weight * 2.0)
 
 func _spend_stamina(amount: float) -> void:
 	stamina = clampf(stamina - amount, 0.0, MAX_STAMINA)
 	stamina_changed.emit(stamina / MAX_STAMINA)
 	if is_zero_approx(stamina) and level.realm == LevelBase.Realm.PHYSICAL:
 		level.switch_realm()
+
+func _restore_stamina(amount: float) -> void:
+	stamina = clampf(stamina + amount, 0.0, MAX_STAMINA)
+	stamina_changed.emit(stamina / MAX_STAMINA)
 
 func _recover_stamina(delta: float) -> void:
 	if level.realm != LevelBase.Realm.DREAM or stamina >= MAX_STAMINA:

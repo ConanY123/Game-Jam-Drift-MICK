@@ -1,8 +1,13 @@
 class_name Player
 extends "res://scripts/player/player_abilities.gd"
 
+@onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
+var _base_scale := Vector2.ONE
+
 func _ready() -> void:
 	_setup_input()
+	z_index = 10
+	_base_scale = _sprite.scale
 	if level != null:
 		level.realm_changed.connect(_on_realm_changed)
 
@@ -10,14 +15,50 @@ func _on_realm_changed(new_realm: int) -> void:
 	if falling and new_realm == LevelBase.Realm.PHYSICAL:
 		_end_fall()
 
+# ---------- sprite ----------
+
+# Picks the strip from the facing direction; plays while moving, rests on frame 0.
+func _update_sprite(input: Vector2) -> void:
+	var anim := "walk_down"
+	if _facing_dir == Vector2i.UP:
+		anim = "walk_up"
+	elif _facing_dir == Vector2i.LEFT:
+		anim = "walk_left"
+	elif _facing_dir == Vector2i.RIGHT:
+		anim = "walk_right"
+	if input.length_squared() > 0.0:
+		if _sprite.animation != anim or not _sprite.is_playing():
+			_sprite.play(anim)
+	else:
+		_sprite.animation = anim
+		_sprite.stop()
+		_sprite.frame = 0
+
+# The dream-gap fall (spin, shrink, fade) now acts on the sprite instead of
+# the old drawn rectangle.
+func _apply_fall_visual() -> void:
+	if falling:
+		_sprite.rotation = draw_spin
+		var s := maxf(draw_scale, 0.001)  # a scale of exactly 0 can log transform errors
+		_sprite.scale = _base_scale * s
+		_sprite.modulate.a = draw_alpha
+	else:
+		_sprite.rotation = 0.0
+		_sprite.scale = _base_scale
+		_sprite.modulate.a = 1.0
+
+# ---------- update ----------
+
 func _physics_process(delta: float) -> void:
 	if level == null:
 		return
 	_update_interaction_hint(delta)
 	if level.gameplay_locked():
 		_nearby_interactable = null
+		_update_sprite(Vector2.ZERO)
 		return
 	_recover_stamina(delta)
+	_apply_fall_visual()
 
 	if falling:
 		_update_fall(delta)
@@ -40,6 +81,7 @@ func _physics_process(delta: float) -> void:
 		and (aiming or (push_target == null and not _pressing_into_pushable()))
 	):
 		if _update_bow():
+			_update_sprite(Vector2.ZERO)
 			queue_redraw()
 			return
 
@@ -49,6 +91,7 @@ func _physics_process(delta: float) -> void:
 			_facing_dir = Vector2i(int(signf(input.x)), 0)
 		else:
 			_facing_dir = Vector2i(0, int(signf(input.y)))
+	_update_sprite(input)
 	var step := input * SPEED * delta
 	var position_before_move := position
 
@@ -72,15 +115,10 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var half := SIZE / 2.0
-	var body := Color(0.35, 0.8, 1.0)
+	# The body is the AnimatedSprite2D now; only the overlays are drawn here.
 	if falling:
-		draw_set_transform(Vector2.ZERO, draw_spin, Vector2(draw_scale, draw_scale))
-		body.a = draw_alpha
-	draw_rect(Rect2(-half, -half, SIZE, SIZE), body)
-	if falling:
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
+	var half := SIZE / 2.0
 	if push_target != null:
 		var progress := clampf(push_timer / push_target.hold_time(), 0.0, 1.0)
 		draw_rect(Rect2(-half, -half - 8, SIZE * progress, 3), Color.WHITE)

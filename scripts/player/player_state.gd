@@ -1,11 +1,12 @@
 extends Node2D
 
 const SIZE := 24.0
+const HITBOX_SIZE := 18.0
 const SPEED := 96.0
 const MASH_GAIN := 0.12
 const MASH_DECAY := 0.5
 const MAX_STAMINA := 7.0
-const DREAM_STAMINA_REGEN := 0.8
+const DREAM_STAMINA_REGEN := 0.0
 const MOVING_STAMINA_REGEN_MULTIPLIER := 0.5
 const PHYSICAL_RETURN_STAMINA_FRACTION := 0.35
 
@@ -36,7 +37,7 @@ func _blocker_at(center: Vector2) -> Node:
 	return blocker
 
 func _blocker_in(center: Vector2, in_realm: int) -> Node:
-	var half := Vector2(SIZE, SIZE) / 2.0
+	var half := Vector2(HITBOX_SIZE, HITBOX_SIZE) / 2.0
 	var min_cell := Grid.pos_to_cell(center - half)
 	var max_cell := Grid.pos_to_cell(center + half - Vector2(0.01, 0.01))
 	for x in range(min_cell.x, max_cell.x + 1):

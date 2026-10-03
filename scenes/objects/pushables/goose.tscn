@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/objects/goose.gd" id="1_goose"]
+[ext_resource type="Script" uid="uid://c0w7tcm17td4n" path="res://scripts/objects/pushables/goose.gd" id="1_goose"]
 
 [node name="Goose" type="Node2D"]
 script = ExtResource("1_goose")

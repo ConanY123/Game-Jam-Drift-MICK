@@ -35,4 +35,4 @@ func _on_stamina_changed(fraction: float) -> void:
 		_fill.modulate = Color(1, 0.75, 0.85, 1.0)
 	else:
 		_fill.modulate = Color(1, 1, 1, 1.0)
-	_label.text = "STAMINA %d%%" % roundi(f * 100.0)
+	_label.text = "STAMINA"

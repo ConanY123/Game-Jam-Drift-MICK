@@ -98,6 +98,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		switch_realm()
 
 func switch_realm() -> void:
+	if (
+		realm == Realm.DREAM
+		and player != null
+		and not player.can_switch_to_physical()
+	):
+		return
 	realm = Realm.DREAM if realm == Realm.PHYSICAL else Realm.PHYSICAL
 	realm_changed.emit(realm)
 	queue_redraw()

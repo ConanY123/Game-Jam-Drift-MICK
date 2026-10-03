@@ -20,10 +20,11 @@ enum FallPhase { NONE, OUT, IN }
 const ARROW_SCENE := preload("res://scenes/objects/arrow.tscn")
 const SHOOT_COOLDOWN := 0.3  # min seconds between arrows
 
-# Stamina: spent on real-world (physical realm) push actions, scaled by the
-# object's weight. Drifting into the dream and refilling comes later; for now
-# this just drains. emitted as 0..1 fraction so the UI doesn't need the max.
-const MAX_STAMINA := 10.0  # total pushes-worth of a weight-1 object
+# Stamina is spent on physical-realm pushes, scaled by object weight, and
+# regenerates over time in the dream realm. The signal emits a 0..1 fraction.
+const MAX_STAMINA := 7.0  # total pushes-worth of a weight-1 object
+const DREAM_STAMINA_REGEN := 1.0  # stamina restored per second in the dream
+const PHYSICAL_RETURN_STAMINA_FRACTION := 0.25
 signal stamina_changed(fraction: float)
 
 var level: LevelBase
@@ -68,6 +69,7 @@ func _on_realm_changed(new_realm: int) -> void:
 func _physics_process(delta: float) -> void:
 	if level == null:
 		return
+	_recover_stamina(delta)
 
 	# Falling takes over everything: no walking, no pushing until we land.
 	if falling:
@@ -89,7 +91,7 @@ func _physics_process(delta: float) -> void:
 	# hand); otherwise holding interact draws the bow and aims (WASD steer),
 	# releasing fires. If we're mid-aim already, keep aiming until the key is
 	# released so a shot doesn't get cancelled by brushing a box.
-	if has_bow and (aiming or not _pressing_into_pushable()):
+	if has_bow and (aiming or (push_target == null and not _pressing_into_pushable())):
 		if _update_bow():
 			queue_redraw()
 			return
@@ -110,6 +112,9 @@ func _physics_process(delta: float) -> void:
 	if hit_y is Pushable:
 		target = hit_y
 		dir = Vector2i(0, int(sign(step.y)))
+	if target == null and input == Vector2.ZERO and push_target != null:
+		target = push_target
+		dir = push_dir
 	_update_push(target, dir, delta)
 	if position != position_before_move:
 		has_moved = true
@@ -176,9 +181,16 @@ func _move_axis(offset: Vector2) -> Node:
 	if offset == Vector2.ZERO:
 		return null
 	var blocker := _blocker_at(position + offset)
-	if blocker == null:
+	if blocker == null or _is_traversable_dream_block(blocker):
 		position += offset
 	return blocker
+
+func _is_traversable_dream_block(blocker: Node) -> bool:
+	return (
+		level.realm == LevelBase.Realm.DREAM
+		and blocker is Pushable
+		and blocker.realm == LevelBase.Realm.DREAM
+	)
 
 func _blocker_at(center: Vector2) -> Node:
 	# Current realm's objects first, then physical ones (they stay solid in the dream)
@@ -247,6 +259,17 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 func _spend_stamina(amount: float) -> void:
 	stamina = clampf(stamina - amount, 0.0, MAX_STAMINA)
 	stamina_changed.emit(stamina / MAX_STAMINA)
+	if is_zero_approx(stamina) and level.realm == LevelBase.Realm.PHYSICAL:
+		level.switch_realm()
+
+func _recover_stamina(delta: float) -> void:
+	if level.realm != LevelBase.Realm.DREAM or stamina >= MAX_STAMINA:
+		return
+	stamina = minf(stamina + DREAM_STAMINA_REGEN * delta, MAX_STAMINA)
+	stamina_changed.emit(stamina / MAX_STAMINA)
+
+func can_switch_to_physical() -> bool:
+	return stamina >= MAX_STAMINA * PHYSICAL_RETURN_STAMINA_FRACTION
 
 # True if a movement key is held and the player is pushing toward a pushable in
 # the current realm. Used to let pushing win over the bow when sharing the key.

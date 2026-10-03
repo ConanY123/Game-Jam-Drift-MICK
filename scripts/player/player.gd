@@ -109,6 +109,9 @@ func _physics_process(delta: float) -> void:
 	if target == null and input == Vector2.ZERO and push_target != null:
 		target = push_target
 		direction = push_dir
+	if target == null and _nearby_interactable is Door:
+		target = _nearby_interactable
+		direction = _nearby_interactable_dir
 	_update_push(target, direction, delta)
 	if position != position_before_move:
 		has_moved = true

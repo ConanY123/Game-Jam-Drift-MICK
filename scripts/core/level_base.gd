@@ -302,11 +302,23 @@ func add_roommate(route: Array[Vector2i]) -> Node2D:
 # ---------- debug drawing ----------
 
 func _draw() -> void:
-	if debug_path.size() < 2:
-		return
-	var points := PackedVector2Array()
-	for cell in debug_path:
-		points.append(Grid.cell_to_center(cell))
-	draw_polyline(points, Color(1.0, 1.0, 1.0, 0.8), 3.0, true)
-	for point in points:
-		draw_circle(point, 4.0, Color(1.0, 0.9, 0.3, 0.95))
+	if debug_grid:
+		var field_size := Vector2(
+			Grid.FIELD_COLS * Grid.CELL,
+			Grid.FIELD_ROWS * Grid.CELL
+		)
+		var grid_color := Color(1.0, 1.0, 1.0, 0.16)
+		for column in range(Grid.FIELD_COLS + 1):
+			var x := float(column * Grid.CELL)
+			draw_line(Vector2(x, 0.0), Vector2(x, field_size.y), grid_color)
+		for row in range(Grid.FIELD_ROWS + 1):
+			var y := float(row * Grid.CELL)
+			draw_line(Vector2(0.0, y), Vector2(field_size.x, y), grid_color)
+
+	if debug_path.size() >= 2:
+		var points := PackedVector2Array()
+		for cell in debug_path:
+			points.append(Grid.cell_to_center(cell))
+		draw_polyline(points, Color(1.0, 1.0, 1.0, 0.8), 3.0, true)
+		for point in points:
+			draw_circle(point, 4.0, Color(1.0, 0.9, 0.3, 0.95))

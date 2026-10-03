@@ -1,12 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://cre5u1t00001"]
+[gd_scene format=3 uid="uid://cre5u1t00001"]
 
-[ext_resource type="Script" path="res://scripts/ui/result_overlay.gd" id="1_result"]
+[ext_resource type="Script" uid="uid://c111xpin8pc4k" path="res://scripts/ui/result_overlay.gd" id="1_result"]
 
-[node name="ResultOverlay" type="CanvasLayer"]
+[node name="ResultOverlay" type="CanvasLayer" unique_id=151688171]
 layer = 10
 script = ExtResource("1_result")
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="." unique_id=916166152]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -14,18 +14,18 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Box" type="VBoxContainer" parent="Center"]
+[node name="Box" type="VBoxContainer" parent="Center" unique_id=810234640]
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="Title" type="Label" parent="Center/Box"]
+[node name="Title" type="Label" parent="Center/Box" unique_id=1733338216]
 layout_mode = 2
 theme_override_font_sizes/font_size = 48
 text = "RESULT"
 horizontal_alignment = 1
 
-[node name="Sub" type="Label" parent="Center/Box"]
+[node name="Sub" type="Label" parent="Center/Box" unique_id=1848997085]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Press R to retry"

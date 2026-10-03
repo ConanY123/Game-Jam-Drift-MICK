@@ -7,6 +7,7 @@ extends CanvasLayer
 @onready var _title: Label = $Center/Box/Title
 @onready var _sub: Label = $Center/Box/Sub
 
+
 func setup(level: LevelBase) -> void:
 	level.level_won.connect(_on_won)
 	level.level_lost.connect(_on_lost)
@@ -19,6 +20,7 @@ func _on_won() -> void:
 
 func _on_lost(reason: String) -> void:
 	_show("GAME OVER", "He %s. Press R to retry." % reason, Color(1.0, 0.5, 0.5))
+	AudioManager.play_game_over()
 
 func _show(title: String, subtitle: String, color: Color) -> void:
 	_title.text = title

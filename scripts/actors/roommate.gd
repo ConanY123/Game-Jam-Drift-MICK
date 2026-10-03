@@ -14,7 +14,7 @@ extends Node2D
 # Top-down 2D. Hazard detection is grid-based to match the rest of the project;
 # the body is a child node (BodyVisual) so art can be swapped in later.
 
-const SPEED := 48.0  # about half the player's 96 ("roommate is ~2x slower")
+const SPEED := 24.0  # slow sleepwalker pace; player (96) is ~4x faster
 const FALL_SPEED := 360.0  # how fast he drops into the void on a dream fail
 
 signal won

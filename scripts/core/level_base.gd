@@ -36,6 +36,11 @@ func add_dream_floor(rect: Rect2i) -> void:
 		for y in range(rect.position.y, rect.end.y):
 			dream_floor[Vector2i(x, y)] = true
 
+# Punch a single cell back out of the dream floor (e.g. a gap the player must
+# bridge). Note: this only clears authored floor, not bridge pushables.
+func remove_dream_floor(cell: Vector2i) -> void:
+	dream_floor.erase(cell)
+
 func closest_dream_floor(pos: Vector2) -> Vector2:
 	if dream_floor.is_empty():
 		return pos

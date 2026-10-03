@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cr0mmate00001"]
+
+[ext_resource type="Script" path="res://scripts/actors/roommate.gd" id="1_rmmate"]
+
+[node name="Roommate" type="Node2D"]
+script = ExtResource("1_rmmate")
+
+[node name="BodyVisual" type="Polygon2D" parent="."]
+color = Color(0.9, 0.85, 0.5, 1)
+polygon = PackedVector2Array(-10, -10, 10, -10, 10, 10, -10, 10)

@@ -44,3 +44,6 @@ func build() -> void:
 		bridge.is_floor = true
 
 	add_player(Vector2i(4, 3))
+
+	# The sleepwalker follows the authored route (same line drawn for debug).
+	add_roommate(debug_path)

@@ -11,8 +11,14 @@ enum Realm {
 	DREAM 
 }
 signal realm_changed(new_realm: Realm)
+signal level_won
+signal level_lost(reason: String)
+
+const ROOMMATE_SCENE := preload("res://scenes/actors/roommate.tscn")
+const RESULT_OVERLAY_SCENE := preload("res://scenes/ui/result_overlay.tscn")
 
 var realm := Realm.PHYSICAL
+var roommate: Roommate
 
 # Vector2i -> Node. The level itself is stored for static walls.
 var solids := {
@@ -61,6 +67,9 @@ func player_over_dream_gap() -> bool:
 
 func _ready() -> void:
 	build()
+	var overlay: ResultOverlay = RESULT_OVERLAY_SCENE.instantiate()
+	add_child(overlay)
+	overlay.setup(self)
 	queue_redraw()
 
 func build() -> void:
@@ -131,6 +140,16 @@ func add_player(cell: Vector2i) -> Player:
 	player = p
 	add_child(p)
 	return p
+
+# Instantiates the roommate scene on a route of cells and forwards his result.
+func add_roommate(route: Array[Vector2i]) -> Roommate:
+	var r: Roommate = ROOMMATE_SCENE.instantiate()
+	add_child(r)
+	r.setup(self, route)
+	r.won.connect(func(): level_won.emit())
+	r.lost.connect(func(reason: String): level_lost.emit(reason))
+	roommate = r
+	return r
 
 # ---------- debug drawing ----------
 

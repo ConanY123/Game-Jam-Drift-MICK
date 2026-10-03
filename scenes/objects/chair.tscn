@@ -1,13 +1,13 @@
 [gd_scene format=3 uid="uid://d31oy45evjsvb"]
 
 [ext_resource type="Script" uid="uid://b1m8t76ww5d14" path="res://scenes/objects/chair.gd" id="1_r1c1s"]
-[ext_resource type="Texture2D" uid="uid://cequ3dp8i8u8j" path="res://sprites/Sprite-0017.png" id="2_pmpg8"]
+[ext_resource type="Texture2D" uid="uid://bc80tkfbvanue" path="res://sprites/Table_Chair_Wall_Spritesheet.png" id="2_r1c1s"]
 
 [node name="Chair" type="Node2D" unique_id=225586257]
 script = ExtResource("1_r1c1s")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=942965648]
 position = Vector2(16, 16)
-texture = ExtResource("2_pmpg8")
+texture = ExtResource("2_r1c1s")
 region_enabled = true
-region_rect = Rect2(59, 4, 21, 28)
+region_rect = Rect2(118, 8, 42, 56)

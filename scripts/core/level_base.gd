@@ -171,7 +171,7 @@ func _update_layers() -> void:
 		dream_background.visible = realm == Realm.DREAM
 	var floor_layer := get_node_or_null("FloorLayer") as TileMapLayer
 	if floor_layer != null:
-		floor_layer.visible = realm == Realm.PHYSICAL
+		floor_layer.visible = realm == Realm.DREAM
 	var dream_layer := get_node_or_null("DreamFloorLayer") as TileMapLayer
 	if dream_layer != null:
 		dream_layer.visible = realm == Realm.DREAM

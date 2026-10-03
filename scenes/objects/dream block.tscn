@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cchwiswkl3wjn"]
+
+[ext_resource type="Script" uid="uid://b686esymdq0u6" path="res://scripts/objects/pushable.gd" id="1_afcru"]
+[ext_resource type="Texture2D" uid="uid://c8tbjxeqgryvx" path="res://sprites/tilesets/Tilemap-Dream.png" id="2_m61pi"]
+
+[node name="DreamBlock" type="Node2D" unique_id=117124088]
+script = ExtResource("1_afcru")
+is_floor = true
+realm = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1458158777]
+position = Vector2(16, 16)
+texture = ExtResource("2_m61pi")
+region_enabled = true
+region_rect = Rect2(224, 384, 32, 32)

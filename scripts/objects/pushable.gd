@@ -19,7 +19,28 @@ func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 	cell = p_cell
 	position = Grid.cell_to_pos(cell)
 	level.register(self, get_cells(cell), realm)
-	level.realm_changed.connect(func(_r): queue_redraw())
+	level.realm_changed.connect(func(_r): _refresh())
+	_refresh()
+
+func _ready() -> void:
+	# print("pushable ready: ", name, " parent: ", get_parent().name, " is level: ", get_parent() is LevelBase)
+	# Placed in the editor (or spawned by add_pushable): register with the parent level
+	if level == null and get_parent() is LevelBase:
+		setup(get_parent(), Grid.pos_to_cell(position))
+
+# Sprite follows the same realm rules as the drawn rectangle
+func _refresh() -> void:
+	var sprite := get_node_or_null("Sprite2D")
+	if sprite != null:
+		if level.realm == realm:
+			sprite.visible = true
+			sprite.modulate.a = 1.0
+		elif realm == LevelBase.Realm.PHYSICAL:
+			sprite.visible = true
+			sprite.modulate.a = 0.15  # physical object seen from the dream
+		else:
+			sprite.visible = false  # dream object seen from the physical realm
+	queue_redraw()
 
 # Swap this for a footprint array later if you want L-shaped desks.
 func get_cells(origin: Vector2i) -> Array[Vector2i]:
@@ -55,10 +76,11 @@ func _draw() -> void:
 	if level == null:
 		return
 	var rect := Rect2(Vector2(1, 1), Vector2(size * Grid.CELL) - Vector2(2, 2))
+	var has_sprite := get_node_or_null("Sprite2D") != null
 	if level.realm == realm:
-		draw_rect(rect, color)
+		if not has_sprite: 
+			draw_rect(rect, color)
 	elif realm == LevelBase.Realm.PHYSICAL:
 		# Physical object seen from the dream: still solid, but not touchable
 		draw_rect(rect, Color(color, 0.15))
 		draw_rect(rect, Color(color, 0.8), false, 2.0)
-	# Dream objects draw nothing while you are in the physical realm

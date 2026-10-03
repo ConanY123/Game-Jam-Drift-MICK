@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b763t5h6p6nul"
+path="res://.godot/imported/[TwoShot] LevelThree.mp3-5da13dcfbc9e4f1fda6a36de6a2e6096.mp3str"
+
+[deps]
+
+source_file="res://audio/music/[TwoShot] LevelThree.mp3"
+dest_files=["res://.godot/imported/[TwoShot] LevelThree.mp3-5da13dcfbc9e4f1fda6a36de6a2e6096.mp3str"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

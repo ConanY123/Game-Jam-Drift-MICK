@@ -18,6 +18,8 @@ texture = ExtResource("2_1rn6w")
 region_enabled = true
 region_rect = Rect2(120, 8, 80, 56)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=565169432]
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=565169432]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(20, 29)
 shape = SubResource("RectangleShape2D_1lxwa")

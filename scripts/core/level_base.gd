@@ -122,7 +122,7 @@ func switch_realm() -> void:
 		realm_switch_failed_low_stamina.emit()
 		return
 	var wipe_color := Color(0.9294, 0.2157, 0.7255, 1.0)
-	var edge_color := Color(0.9294, 0.2157, 0.7255, 1.0)
+	var edge_color := Color(1.0, 0.55, 0.85, 1.0)
 	if realm == Realm.DREAM:
 		wipe_color = Color(0.08, 0.16, 0.36, 1.0)
 		edge_color = Color(0.38, 0.7, 1.0, 1.0)
@@ -252,12 +252,12 @@ func add_slidable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color :
 	add_child(s)  # its _ready registers it with this level
 	return s
 
+const PLAYER_SCENE := preload("res://scenes/actors/player.tscn")
+
 func add_player(cell: Vector2i) -> Player:
-	var p := Player.new()
+	var p := PLAYER_SCENE.instantiate() as Player
 	p.level = self
 	p.position = Grid.cell_to_center(cell)
-	p.z_index = 10
-	p.z_as_relative = false
 	player = p
 	add_child(p)
 	return p
@@ -342,11 +342,23 @@ func add_roommate_from_path(path_node_name := "RoommatePath") -> Node2D:
 # ---------- debug drawing ----------
 
 func _draw() -> void:
-	if debug_path.size() < 2:
-		return
-	var points := PackedVector2Array()
-	for cell in debug_path:
-		points.append(Grid.cell_to_center(cell))
-	draw_polyline(points, Color(1.0, 1.0, 1.0, 0.8), 3.0, true)
-	for point in points:
-		draw_circle(point, 4.0, Color(1.0, 0.9, 0.3, 0.95))
+	if debug_grid:
+		var field_size := Vector2(
+			Grid.FIELD_COLS * Grid.CELL,
+			Grid.FIELD_ROWS * Grid.CELL
+		)
+		var grid_color := Color(1.0, 1.0, 1.0, 0.16)
+		for column in range(Grid.FIELD_COLS + 1):
+			var x := float(column * Grid.CELL)
+			draw_line(Vector2(x, 0.0), Vector2(x, field_size.y), grid_color)
+		for row in range(Grid.FIELD_ROWS + 1):
+			var y := float(row * Grid.CELL)
+			draw_line(Vector2(0.0, y), Vector2(field_size.x, y), grid_color)
+
+	if debug_path.size() >= 2:
+		var points := PackedVector2Array()
+		for cell in debug_path:
+			points.append(Grid.cell_to_center(cell))
+		draw_polyline(points, Color(1.0, 1.0, 1.0, 0.8), 3.0, true)
+		for point in points:
+			draw_circle(point, 4.0, Color(1.0, 0.9, 0.3, 0.95))

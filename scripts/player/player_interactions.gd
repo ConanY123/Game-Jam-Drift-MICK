@@ -10,22 +10,24 @@ var push_dir := Vector2i.ZERO
 var push_timer := 0.0
 var interact_locked := false
 var _nearby_interactable: Pushable
+var _nearby_interactable_dir := Vector2i.ZERO
 var _interaction_hint_time := 0.0
 var _facing_dir := Vector2i.DOWN
 var _interaction_hint_progress := 0.0
 var _interaction_hint_holdable := true
 
 func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
-	if (
-		target != null
-		and (target.realm != level.realm or not target.can_interact(dir))
-	):
-		target = null
 	if interact_locked:
-		push_target = null
 		push_timer = 0.0
 		return
 
+	if target != null and target.realm != level.realm:
+		target = null
+	if target != null and not target.can_interact(dir):
+		if target != push_target:
+			push_target = null
+		push_timer = 0.0
+		return
 	if target == null:
 		push_target = null
 		push_timer = 0.0
@@ -52,12 +54,18 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 			interact_locked = true
 			if level.realm == LevelBase.Realm.PHYSICAL:
 				_spend_stamina(target.weight)
+			elif target.realm == LevelBase.Realm.DREAM:
+				_restore_stamina(target.weight * 2.0)
 
 func _spend_stamina(amount: float) -> void:
 	stamina = clampf(stamina - amount, 0.0, MAX_STAMINA)
 	stamina_changed.emit(stamina / MAX_STAMINA)
 	if is_zero_approx(stamina) and level.realm == LevelBase.Realm.PHYSICAL:
 		level.switch_realm()
+
+func _restore_stamina(amount: float) -> void:
+	stamina = clampf(stamina + amount, 0.0, MAX_STAMINA)
+	stamina_changed.emit(stamina / MAX_STAMINA)
 
 func _recover_stamina(delta: float) -> void:
 	if level.realm != LevelBase.Realm.DREAM or stamina >= MAX_STAMINA:
@@ -96,6 +104,7 @@ func _pressing_into_pushable() -> bool:
 func _update_interaction_hint(delta: float) -> void:
 	_interaction_hint_time += delta
 	_nearby_interactable = null
+	_nearby_interactable_dir = Vector2i.ZERO
 	if not level.gameplay_locked() and not falling:
 		var reach := SIZE * 0.5 + 1.0
 		var facing := _facing_dir
@@ -116,6 +125,7 @@ func _update_interaction_hint(delta: float) -> void:
 					and candidate.can_interact(direction)
 				):
 					_nearby_interactable = candidate
+					_nearby_interactable_dir = direction
 					_interaction_hint_holdable = candidate.holdable
 				break
 			if (
@@ -124,6 +134,7 @@ func _update_interaction_hint(delta: float) -> void:
 				and candidate.can_interact(direction)
 			):
 				_nearby_interactable = candidate
+				_nearby_interactable_dir = direction
 				_interaction_hint_holdable = candidate.holdable
 				break
 

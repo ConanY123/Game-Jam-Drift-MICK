@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/objects/outputs/moving_platform.tscn" id="6_x2tw1"]
 [ext_resource type="PackedScene" uid="uid://or60rgjdpxpt" path="res://scenes/objects/signals/lever.tscn" id="7_5llcw"]
 [ext_resource type="PackedScene" path="res://scenes/objects/pushables/goose.tscn" id="7_i1e88"]
+[ext_resource type="PackedScene" uid="uid://2fh4n2427dab" path="res://scenes/objects/outputs/computer.tscn" id="8_5llcw"]
 
 [sub_resource type="Curve2D" id="Curve2D_orn5u"]
 _data = {
@@ -66,3 +67,13 @@ position = Vector2(352, 0)
 off_destination = Vector2i(10, 0)
 on_destination = Vector2i(15, 0)
 size = Vector2i(3, 1)
+
+[node name="test" type="Node" parent="." unique_id=461625980]
+
+[node name="Lever" parent="test" unique_id=237496887 instance=ExtResource("7_5llcw")]
+position = Vector2(288, 352)
+outputs = Array[NodePath]([NodePath("../Computer")])
+
+[node name="Computer" parent="test" unique_id=1958667487 instance=ExtResource("8_5llcw")]
+position = Vector2(384, 288)
+aura_rotation_degrees = 90

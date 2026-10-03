@@ -8,6 +8,7 @@ orientation = 0
 off_destination = Vector2i(0, 0)
 on_destination = Vector2i(0, 0)
 speed = 2.0
+can_be_pushed = false
 realm = 1
 is_floor = true
 color = Color(0.545098, 0.352941, 0.168627, 1)

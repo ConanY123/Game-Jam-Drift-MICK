@@ -20,7 +20,7 @@ colors = PackedColorArray(0.26, 0.56, 1, 1, 1, 0.42, 0.78, 1)
 
 [sub_resource type="GradientTexture2D" id="GradTex_fill"]
 gradient = SubResource("Gradient_fill")
-width = 200
+width = 168
 height = 20
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_edge"]
@@ -45,16 +45,17 @@ mouse_filter = 2
 anchors_preset = -1
 anchor_left = 0.75
 anchor_right = 1.0
+offset_left = 32.0
 offset_top = 32.0
 offset_right = -32.0
-offset_bottom = 102.0
+offset_bottom = 152.0
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
 [node name="Label" type="Label" parent="Panel" unique_id=1047913316]
 layout_mode = 0
 offset_left = 12.0
 offset_top = 8.0
-offset_right = 212.0
+offset_right = 180.0
 offset_bottom = 28.0
 theme_override_colors/font_color = Color(0.92, 0.88, 1, 1)
 theme_override_font_sizes/font_size = 14
@@ -65,22 +66,36 @@ clip_contents = true
 layout_mode = 0
 offset_left = 12.0
 offset_top = 36.0
-offset_right = 212.0
+offset_right = 180.0
 offset_bottom = 56.0
 color = Color(0.14, 0.12, 0.22, 1)
 
 [node name="Fill" type="TextureRect" parent="Panel/BarBG" unique_id=1816270553]
 layout_mode = 0
-offset_right = 200.0
+offset_right = 168.0
 offset_bottom = 20.0
 texture = SubResource("GradTex_fill")
 expand_mode = 1
 
 [node name="SpeedButton" type="Button" parent="." unique_id=1987125301]
-offset_left = 770.0
-offset_top = 96.0
-offset_right = 970.0
-offset_bottom = 132.0
-offset_transform_enabled = true
-offset_transform_position = Vector2(10, 10)
-text = "HOLD X FOR 2× SPEED"
+anchors_preset = -1
+anchor_left = 0.75
+anchor_right = 0.75
+offset_left = 32.0
+offset_top = 168.0
+offset_right = 120.0
+offset_bottom = 204.0
+theme_override_font_sizes/font_size = 12
+toggle_mode = true
+text = ">>"
+
+[node name="FastForwardButton" type="Button" parent="."]
+anchors_preset = -1
+anchor_left = 0.75
+anchor_right = 0.75
+offset_left = 128.0
+offset_top = 168.0
+offset_right = 216.0
+offset_bottom = 204.0
+theme_override_font_sizes/font_size = 12
+text = ">>>"

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://wmx2pl208rwt"]
+
+[ext_resource type="Script" path="res://scripts/objects/monster.gd" id="1_mons"]
+
+[node name="Monster" type="Node2D"]
+script = ExtResource("1_mons")

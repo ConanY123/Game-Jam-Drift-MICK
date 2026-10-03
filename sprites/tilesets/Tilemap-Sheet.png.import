@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bc80tkfbvanue"
-path="res://.godot/imported/Table_Chair_Wall_Spritesheet.png-c16823dd9952ee530fccdcdc956a07a4.ctex"
+uid="uid://x2x2f0bgpr5k"
+path="res://.godot/imported/Tilemap-Sheet.png-a6623ef6dbbde2c95d5ce7eb862bb6ec.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/Table_Chair_Wall_Spritesheet.png"
-dest_files=["res://.godot/imported/Table_Chair_Wall_Spritesheet.png-c16823dd9952ee530fccdcdc956a07a4.ctex"]
+source_file="res://sprites/tilesets/Tilemap-Sheet.png"
+dest_files=["res://.godot/imported/Tilemap-Sheet.png-a6623ef6dbbde2c95d5ce7eb862bb6ec.ctex"]
 
 [params]
 

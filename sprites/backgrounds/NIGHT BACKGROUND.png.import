@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x2x2f0bgpr5k"
-path="res://.godot/imported/Tilemap-Sheet.png-4272f8fefa18335f396c7c6c541a33b8.ctex"
+uid="uid://dly3parmmprc1"
+path="res://.godot/imported/NIGHT BACKGROUND.png-1bb8c0dd0393b15409af5e6a0a6a4067.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/Tilemap-Sheet.png"
-dest_files=["res://.godot/imported/Tilemap-Sheet.png-4272f8fefa18335f396c7c6c541a33b8.ctex"]
+source_file="res://sprites/backgrounds/NIGHT BACKGROUND.png"
+dest_files=["res://.godot/imported/NIGHT BACKGROUND.png-1bb8c0dd0393b15409af5e6a0a6a4067.ctex"]
 
 [params]
 

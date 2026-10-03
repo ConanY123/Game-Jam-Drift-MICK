@@ -2,7 +2,7 @@ extends LevelBase
 
 # Level geometry is authored in level-1.tscn's TileMapLayers.
 
-const DOOR_SCENE := preload("res://scenes/objects/door.tscn")
+const DOOR_SCENE := preload("res://scenes/objects/pushables/door.tscn")
 
 func build() -> void:
 	# The roommate follows this route through the authored level.

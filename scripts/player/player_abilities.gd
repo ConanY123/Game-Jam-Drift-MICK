@@ -4,7 +4,7 @@ const FALL_DROP_CELLS := 2.0
 const FALL_OUT_TIME := 0.35
 const FALL_IN_TIME := 0.45
 const FALL_SPIN := TAU * 2.0
-const ARROW_SCENE := preload("res://scenes/objects/arrow.tscn")
+const ARROW_SCENE := preload("res://scenes/objects/archery/arrow.tscn")
 const SHOOT_COOLDOWN := 0.3
 
 enum FallPhase { NONE, OUT, IN }

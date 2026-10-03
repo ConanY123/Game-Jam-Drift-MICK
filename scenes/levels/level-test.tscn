@@ -1,11 +1,12 @@
 [gd_scene format=4 uid="uid://df5xbmx7l1hlj"]
 
-[ext_resource type="Script" uid="uid://chki0ffaxfkkw" path="res://scripts/levels/level-3.gd" id="1_x5sbd"]
+[ext_resource type="Script" uid="uid://chki0ffaxfkkw" path="res://scripts/levels/level-test.gd" id="1_x2tw1"]
 [ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="2_odt7l"]
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="3_anfik"]
 [ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="4_7yn3j"]
-[ext_resource type="PackedScene" path="res://scenes/objects/energy_drink.tscn" id="6_tkmqy"]
-[ext_resource type="PackedScene" path="res://scenes/objects/goose.tscn" id="7_i1e88"]
+[ext_resource type="PackedScene" path="res://scenes/objects/outputs/moving_platform.tscn" id="6_x2tw1"]
+[ext_resource type="PackedScene" uid="uid://or60rgjdpxpt" path="res://scenes/objects/signals/lever.tscn" id="7_5llcw"]
+[ext_resource type="PackedScene" path="res://scenes/objects/pushables/goose.tscn" id="7_i1e88"]
 
 [sub_resource type="Curve2D" id="Curve2D_orn5u"]
 _data = {
@@ -13,8 +14,8 @@ _data = {
 }
 point_count = 12
 
-[node name="Level3" type="Node2D" unique_id=963386900]
-script = ExtResource("1_x5sbd")
+[node name="LevelTest" type="Node2D" unique_id=963386900]
+script = ExtResource("1_x2tw1")
 
 [node name="PhysicalBackground" type="Sprite2D" parent="." unique_id=225691900]
 z_index = -10
@@ -58,3 +59,20 @@ start_direction = 3
 [node name="Physical" type="Node" parent="." unique_id=1087518688]
 
 [node name="Dream" type="Node" parent="." unique_id=1213284921]
+
+[node name="Node" type="Node" parent="." unique_id=277228881]
+
+[node name="MovingPlatform" parent="Node" unique_id=582526093 instance=ExtResource("6_x2tw1")]
+on_destination = Vector2i(2, 0)
+size = Vector2i(3, 1)
+
+[node name="Lever" parent="Node" unique_id=873023911 instance=ExtResource("7_5llcw")]
+position = Vector2(160, 192)
+realm = 1
+outputs = Array[NodePath]([NodePath("../MovingPlatform"), NodePath("../MovingPlatform2")])
+
+[node name="MovingPlatform2" parent="Node" unique_id=1785203248 instance=ExtResource("6_x2tw1")]
+position = Vector2(352, 0)
+off_destination = Vector2i(10, 0)
+on_destination = Vector2i(15, 0)
+size = Vector2i(3, 1)

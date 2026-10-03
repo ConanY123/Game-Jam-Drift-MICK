@@ -46,8 +46,6 @@ func _blocker_in(center: Vector2, in_realm: int) -> Node:
 			var blocker := level.blocker_at(Vector2i(x, y), in_realm)
 			if blocker != null:
 				if blocker is Door:
-					if blocker.allows_player_escape(self):
-						continue
 					if not blocker.overlaps_player_hitbox(
 						center,
 						Vector2(HITBOX_SIZE, HITBOX_SIZE)

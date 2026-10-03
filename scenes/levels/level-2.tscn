@@ -4,8 +4,9 @@
 [ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="2_tiles"]
 [ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="3_physical_bg"]
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="4_dream_bg"]
-[ext_resource type="PackedScene" uid="uid://br1sss08ewpld" path="res://scenes/objects/sliding_cart.tscn" id="5_5d0y8"]
-[ext_resource type="PackedScene" uid="uid://bvcrtv0rt1cal" path="res://scenes/objects/sliding_cart_vertical.tscn" id="6_mr0nw"]
+[ext_resource type="PackedScene" uid="uid://br1sss08ewpld" path="res://scenes/objects/pushables/sliding_cart.tscn" id="5_5d0y8"]
+[ext_resource type="PackedScene" uid="uid://2fh4n2427dab" path="res://scenes/objects/outputs/computer.tscn" id="7_6akv6"]
+[ext_resource type="PackedScene" uid="uid://or60rgjdpxpt" path="res://scenes/objects/signals/lever.tscn" id="8_p8qr4"]
 
 [sub_resource type="Curve2D" id="Curve2D_route"]
 _data = {
@@ -63,11 +64,14 @@ position = Vector2(192, 480)
 [node name="SlidingCart4" parent="." unique_id=1967645826 instance=ExtResource("5_5d0y8")]
 position = Vector2(192, 512)
 
-[node name="SlidingCartVertical" parent="." unique_id=76579241 instance=ExtResource("6_mr0nw")]
+[node name="SlidingCartVertical" parent="." unique_id=76579241 instance=ExtResource("5_5d0y8")]
 position = Vector2(480, 480)
+orientation = 1
 
-[node name="SlidingCartVertical3" parent="." unique_id=927005708 instance=ExtResource("6_mr0nw")]
+[node name="SlidingCart2Vertical" parent="." unique_id=927005708 instance=ExtResource("5_5d0y8")]
 position = Vector2(416, 448)
+orientation = 1
 
-[node name="SlidingCartVertical2" parent="." unique_id=342531160 instance=ExtResource("6_mr0nw")]
+[node name="SlidingCart3Vertical" parent="." unique_id=342531160 instance=ExtResource("5_5d0y8")]
 position = Vector2(224, 416)
+orientation = 1

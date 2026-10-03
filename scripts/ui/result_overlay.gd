@@ -20,7 +20,7 @@ func _on_won() -> void:
 
 func _on_lost(reason: String) -> void:
 	_show("GAME OVER", "He %s. Press R to retry." % reason, Color(1.0, 0.5, 0.5))
-	AudioManager.play_game_over()
+	get_node("/root/AudioManager").call("play_game_over")
 
 func _show(title: String, subtitle: String, color: Color) -> void:
 	_title.text = title

@@ -1,15 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://dstam1nab4r00"]
+[gd_scene format=3 uid="uid://dstam1nab4r00"]
 
 [ext_resource type="Script" path="res://scripts/ui/stamina_bar.gd" id="1_stam"]
-
-[sub_resource type="Gradient" id="Gradient_fill"]
-offsets = PackedFloat32Array(0, 1)
-colors = PackedColorArray(0.26, 0.56, 1, 1, 1, 0.42, 0.78, 1)
-
-[sub_resource type="GradientTexture2D" id="GradTex_fill"]
-gradient = SubResource("Gradient_fill")
-width = 200
-height = 20
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.08, 0.07, 0.16, 0.85)
@@ -23,36 +14,51 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[node name="StaminaBar" type="CanvasLayer"]
+[sub_resource type="Gradient" id="Gradient_fill"]
+colors = PackedColorArray(0.26, 0.56, 1, 1, 1, 0.42, 0.78, 1)
+
+[sub_resource type="GradientTexture2D" id="GradTex_fill"]
+gradient = SubResource("Gradient_fill")
+width = 200
+height = 20
+
+[node name="StaminaBar" type="CanvasLayer" unique_id=1692323650]
 layer = 9
+offset = Vector2(-2, 0)
+transform = Transform2D(1, 0, 0, 1, -2, 0)
 script = ExtResource("1_stam")
 
-[node name="Panel" type="Panel" parent="."]
-offset_left = 760.0
-offset_top = 40.0
-offset_right = 984.0
-offset_bottom = 110.0
+[node name="Panel" type="Panel" parent="." unique_id=522200449]
+anchors_preset = -1
+anchor_left = 0.75
+anchor_right = 1.0
+offset_top = 32.0
+offset_right = -32.0
+offset_bottom = 102.0
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
-[node name="Label" type="Label" parent="Panel"]
+[node name="Label" type="Label" parent="Panel" unique_id=1047913316]
+layout_mode = 0
 offset_left = 12.0
 offset_top = 8.0
 offset_right = 212.0
 offset_bottom = 28.0
 theme_override_colors/font_color = Color(0.92, 0.88, 1, 1)
 theme_override_font_sizes/font_size = 14
-text = "STAMINA 100%"
+text = "STAMINA"
 
-[node name="BarBG" type="ColorRect" parent="Panel"]
+[node name="BarBG" type="ColorRect" parent="Panel" unique_id=617352902]
 clip_contents = true
+layout_mode = 0
 offset_left = 12.0
 offset_top = 36.0
 offset_right = 212.0
 offset_bottom = 56.0
 color = Color(0.14, 0.12, 0.22, 1)
 
-[node name="Fill" type="TextureRect" parent="Panel/BarBG"]
+[node name="Fill" type="TextureRect" parent="Panel/BarBG" unique_id=1816270553]
+layout_mode = 0
 offset_right = 200.0
 offset_bottom = 20.0
 texture = SubResource("GradTex_fill")
-stretch_mode = 3
+expand_mode = 1

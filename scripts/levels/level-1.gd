@@ -7,8 +7,9 @@ const DOOR_SCENE := preload("res://scenes/objects/door.tscn")
 func build() -> void:
 	# The roommate follows this route through the authored level.
 	debug_path = [
-		Vector2i(2, 2), Vector2i(12, 2), Vector2i(12, 8),
-		Vector2i(6, 8), Vector2i(6, 14), Vector2i(18, 14),
+		Vector2i(20, 7), Vector2i(17, 7), Vector2i(17, 3),
+		Vector2i(5, 3), Vector2i(5, 7), Vector2i(7, 7),
+		Vector2i(7, 13), Vector2i(16, 13), Vector2i(16, 16),
 	]
 
 	# Dream floor: lay a platform under the roommate's whole route so every cell
@@ -28,16 +29,16 @@ func build() -> void:
 		remove_dream_floor(Vector2i(8, 2))
 
 	# Interactive bridge pieces remain scene objects; tilemap tiles aren't pushable.
-	for x in [7, 8]:
-		var bridge := add_pushable(Vector2i(x, 4), Vector2i(1, 1), 1.0, Color(0.4, 0.85, 0.8), LevelBase.Realm.DREAM, true)
-		bridge.is_floor = true
+	# for x in [7, 8]:
+	# 	var bridge := add_pushable(Vector2i(x, 4), Vector2i(1, 1), 1.0, Color(0.4, 0.85, 0.8), LevelBase.Realm.DREAM, true)
+	# 	bridge.is_floor = true
 
 	# A physical door on the corridor the roommate walks down (12,2)->(12,8).
 	# It's solid (and lethal) while closed; press interact against it to open
 	# it before he arrives so he can pass. See scripts/objects/door.gd.
-	_add_door(Vector2i(12, 5))
+	# _add_door(Vector2i(12, 5))
 
-	add_player(Vector2i(4, 3))
+	add_player(Vector2i(22, 8))
 	# The sleepwalker follows the authored route (same line drawn for debug).
 	add_roommate(debug_path)
 

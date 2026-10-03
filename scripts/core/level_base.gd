@@ -92,12 +92,18 @@ func build() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
-		AudioManager.play_music(level_number)
+		get_node("/root/AudioManager").call("play_music", level_number)
 		get_tree().reload_current_scene()
 	elif event.is_action_pressed("switch_realm"):
 		switch_realm()
 
 func switch_realm() -> void:
+	if (
+		realm == Realm.DREAM
+		and player != null
+		and not player.can_switch_to_physical()
+	):
+		return
 	realm = Realm.DREAM if realm == Realm.PHYSICAL else Realm.PHYSICAL
 	realm_changed.emit(realm)
 	queue_redraw()
@@ -178,7 +184,7 @@ func _update_layers() -> void:
 		dream_background.visible = realm == Realm.DREAM
 	var floor_layer := get_node_or_null("FloorLayer") as TileMapLayer
 	if floor_layer != null:
-		floor_layer.visible = realm == Realm.PHYSICAL
+		floor_layer.visible = realm == Realm.DREAM
 	var dream_layer := get_node_or_null("DreamFloorLayer") as TileMapLayer
 	if dream_layer != null:
 		dream_layer.visible = realm == Realm.DREAM

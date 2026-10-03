@@ -81,6 +81,5 @@ func _draw() -> void:
 		if not has_sprite: 
 			draw_rect(rect, color)
 	elif realm == LevelBase.Realm.PHYSICAL:
-		# Physical object seen from the dream: still solid, but not touchable
+		# Physical object seen from the dream: faint, still solid, but not touchable.
 		draw_rect(rect, Color(color, 0.15))
-		draw_rect(rect, Color(color, 0.8), false, 2.0)

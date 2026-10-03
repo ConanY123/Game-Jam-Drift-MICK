@@ -11,8 +11,14 @@ enum Realm {
 	DREAM 
 }
 signal realm_changed(new_realm: Realm)
+signal level_won
+signal level_lost(reason: String)
+
+const ROOMMATE_SCENE := preload("res://scenes/actors/roommate.tscn")
+const RESULT_OVERLAY_SCENE := preload("res://scenes/ui/result_overlay.tscn")
 
 var realm := Realm.PHYSICAL
+var roommate: Roommate
 
 # Vector2i -> Node. The level itself is stored for static walls.
 var solids := {
@@ -29,6 +35,11 @@ func add_dream_floor(rect: Rect2i) -> void:
 	for x in range(rect.position.x, rect.end.x):
 		for y in range(rect.position.y, rect.end.y):
 			dream_floor[Vector2i(x, y)] = true
+
+# Punch a single cell back out of the dream floor (e.g. a gap the player must
+# bridge). Note: this only clears authored floor, not bridge pushables.
+func remove_dream_floor(cell: Vector2i) -> void:
+	dream_floor.erase(cell)
 
 func closest_dream_floor(pos: Vector2) -> Vector2:
 	if dream_floor.is_empty():
@@ -49,21 +60,24 @@ func is_dream_floor(cell: Vector2i) -> bool:
 	var b = solids[Realm.DREAM].get(cell)
 	return b is Pushable and b.is_floor
 
-func ensure_player_is_on_safe_dream_floor() -> void:
+# True when the player is standing over a dream gap (no floor) and should fall.
+# Only meaningful in the dream realm. In the physical realm the ground is solid.
+func player_over_dream_gap() -> bool:
 	if player == null or realm != Realm.DREAM:
-		return
+		return false
 	var cell := Grid.pos_to_cell(player.position)
 	if not Grid.in_bounds(cell):
-		player.position = closest_dream_floor(player.position)
-		return
-	if not is_dream_floor(cell):
-		player.position = closest_dream_floor(player.position)
+		return true
+	return not is_dream_floor(cell)
 
 func _ready() -> void:
 	_load_tilemaps()
 	build()
 	_update_layers()
 	realm_changed.connect(func(_r): _update_layers())
+	var overlay: ResultOverlay = RESULT_OVERLAY_SCENE.instantiate()
+	add_child(overlay)
+	overlay.setup(self)
 	queue_redraw()
 
 func build() -> void:
@@ -78,7 +92,6 @@ func _unhandled_input(event: InputEvent) -> void:
 func switch_realm() -> void:
 	realm = Realm.DREAM if realm == Realm.PHYSICAL else Realm.PHYSICAL
 	realm_changed.emit(realm)
-	ensure_player_is_on_safe_dream_floor()
 	queue_redraw()
 
 # ---------- occupancy ----------
@@ -134,10 +147,9 @@ func add_player(cell: Vector2i) -> Player:
 	p.position = Grid.cell_to_center(cell)
 	player = p
 	add_child(p)
-	ensure_player_is_on_safe_dream_floor()
 	return p
 
-# ---------- TILEMAS ----------
+# ---------- tilemaps ----------
 func _load_tilemaps() -> void:
 	var walls := get_node_or_null("WallLayer") as TileMapLayer
 	if walls != null:
@@ -156,6 +168,15 @@ func _update_layers() -> void:
 	var dream_layer := get_node_or_null("DreamFloorLayer") as TileMapLayer
 	if dream_layer != null:
 		dream_layer.visible = realm == Realm.DREAM
+# Instantiates the roommate scene on a route of cells and forwards his result.
+func add_roommate(route: Array[Vector2i]) -> Roommate:
+	var r: Roommate = ROOMMATE_SCENE.instantiate()
+	add_child(r)
+	r.setup(self, route)
+	r.won.connect(func(): level_won.emit())
+	r.lost.connect(func(reason: String): level_lost.emit(reason))
+	roommate = r
+	return r
 
 # ---------- debug drawing ----------
 

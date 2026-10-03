@@ -17,6 +17,7 @@ enum Realm {
 	DREAM 
 }
 signal realm_changed(new_realm: Realm)
+signal realm_switch_failed_low_stamina
 signal level_won
 signal level_lost(reason: String)
 
@@ -118,9 +119,10 @@ func switch_realm() -> void:
 		and player != null
 		and not player.can_switch_to_physical()
 	):
+		realm_switch_failed_low_stamina.emit()
 		return
-	var wipe_color := Color(0.52, 0.12, 0.38, 1.0)
-	var edge_color := Color(1.0, 0.35, 0.72, 1.0)
+	var wipe_color := Color(0.9294, 0.2157, 0.7255, 1.0)
+	var edge_color := Color(0.9294, 0.2157, 0.7255, 1.0)
 	if realm == Realm.DREAM:
 		wipe_color = Color(0.08, 0.16, 0.36, 1.0)
 		edge_color = Color(0.38, 0.7, 1.0, 1.0)
@@ -254,6 +256,8 @@ func add_player(cell: Vector2i) -> Player:
 	var p := Player.new()
 	p.level = self
 	p.position = Grid.cell_to_center(cell)
+	p.z_index = 10
+	p.z_as_relative = false
 	player = p
 	add_child(p)
 	return p
@@ -286,6 +290,8 @@ func _update_layers() -> void:
 # Instantiates the roommate scene on a route of cells and forwards his result.
 func add_roommate(route: Array[Vector2i]) -> Node2D:
 	var r := ROOMMATE_SCENE.instantiate()
+	r.z_index = 10
+	r.z_as_relative = false
 	add_child(r)
 	r.call("setup", self, route)
 	r.connect("won", func(): level_won.emit())

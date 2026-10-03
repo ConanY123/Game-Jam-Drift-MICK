@@ -23,10 +23,13 @@ func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 	_refresh()
 
 func _ready() -> void:
-	# print("pushable ready: ", name, " parent: ", get_parent().name, " is level: ", get_parent() is LevelBase)
-	# Placed in the editor (or spawned by add_pushable): register with the parent level
-	if level == null and get_parent() is LevelBase:
-		setup(get_parent(), Grid.pos_to_cell(position))
+	if level != null:
+		return
+	var node := get_parent()
+	while node != null and not node is LevelBase:
+		node = node.get_parent()
+	if node != null:
+		setup(node, Grid.pos_to_cell(node.to_local(global_position)))
 
 # Sprite follows the same realm rules as the drawn rectangle
 func _refresh() -> void:
@@ -54,14 +57,32 @@ func get_cells(origin: Vector2i) -> Array[Vector2i]:
 func hold_time() -> float:
 	return 0.25 * weight
 
+func is_supported_by_dream_floor() -> bool:
+	if realm != LevelBase.Realm.DREAM:
+		return true
+	if level == null:
+		return false
+	for c in get_cells(cell):
+		if level.dream_floor.has(c):
+			return true
+	return false
+
+func can_push(dir: Vector2i) -> bool:
+	if moving or dir == Vector2i.ZERO or level == null or not is_supported_by_dream_floor():
+		return false
+	for c in get_cells(cell + dir):
+		if not level.is_free(c, self, realm) or level.in_push_ban(c):
+			return false
+	return true
+
+func can_interact(dir: Vector2i) -> bool:
+	return can_push(dir)
+
 func try_push(dir: Vector2i) -> bool:
-	if moving:
+	if not can_push(dir):
 		return false
 	var target := cell + dir
 	var new_cells := get_cells(target)
-	for c in new_cells:
-		if not level.is_free(c, self, realm) or level.in_push_ban(c):
-			return false
 	# Claim the new cells right away; the tween is only visual.
 	level.unregister(self, realm)
 	cell = target

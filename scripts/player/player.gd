@@ -130,3 +130,6 @@ func _draw_interaction_hint(half: float) -> void:
 		13,
 		Color(1.0, 1.0, 1.0, _interaction_hint_progress)
 	)
+
+# tully
+# test

@@ -17,6 +17,7 @@ signal level_lost(reason: String)
 
 const ROOMMATE_SCENE := preload("res://scenes/actors/roommate.tscn")
 const RESULT_OVERLAY_SCENE := preload("res://scenes/ui/result_overlay.tscn")
+const STAMINA_BAR_SCENE := preload("res://scenes/ui/stamina_bar.tscn")
 
 var realm := Realm.PHYSICAL
 var roommate: Node2D
@@ -79,7 +80,10 @@ func _ready() -> void:
 	var overlay := RESULT_OVERLAY_SCENE.instantiate()
 	add_child(overlay)
 	overlay.call("setup", self)
-	get_node("/root/AudioManager").call("play_music", level_number)
+	var stamina_bar := STAMINA_BAR_SCENE.instantiate()
+	add_child(stamina_bar)
+	stamina_bar.call("setup", self)
+	AudioManager.play_music(level_number)   # start this level's track (runs on load + every retry)
 	level_won.connect(func(): get_node("/root/LevelManager").call_deferred("advance_level"))
 	queue_redraw()
 

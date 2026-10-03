@@ -41,6 +41,10 @@ func build() -> void:
 	# The sleepwalker follows the authored route (same line drawn for debug).
 	add_roommate(debug_path)
 
+	# The bow pickup and monster are placed by hand in level-1.tscn (instantiate
+	# the scenes under the Level1 root and drag them where you want). They wire
+	# themselves to this level in their own _ready().
+
 # Spawns a Door scene at a cell and lets its _ready register it with this level
 # (same pattern as a Pushable placed in the editor). Typed as Node2D so this
 # file never has a compile-time dependency on the Door class name.

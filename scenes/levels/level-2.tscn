@@ -1,0 +1,48 @@
+[gd_scene format=4 uid="uid://dcqsrqpth50wb"]
+
+[ext_resource type="Script" uid="uid://d2k7xqr8n4mfp" path="res://scripts/levels/level-2.gd" id="1_lvl2"]
+[ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="2_tiles"]
+[ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="3_physical_bg"]
+[ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="4_dream_bg"]
+
+[sub_resource type="Curve2D" id="Curve2D_route"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 144, 112, 0, 0, 0, 0, 688, 112, 0, 0, 0, 0, 688, 496, 0, 0, 0, 0, 144, 496)
+}
+point_count = 4
+
+[node name="Level2" type="Node2D"]
+script = ExtResource("1_lvl2")
+level_number = 2
+
+[node name="PhysicalBackground" type="Sprite2D" parent="."]
+z_index = -10
+position = Vector2(384, 288)
+scale = Vector2(0.355556, 0.355556)
+texture = ExtResource("3_physical_bg")
+
+[node name="DreamBackground" type="Sprite2D" parent="."]
+visible = false
+z_index = -10
+position = Vector2(384, 288)
+scale = Vector2(0.355556, 0.355556)
+texture = ExtResource("4_dream_bg")
+
+[node name="FloorLayer" type="TileMapLayer" parent="."]
+z_index = -1
+tile_set = ExtResource("2_tiles")
+
+[node name="DreamFloorLayer" type="TileMapLayer" parent="."]
+z_index = -1
+tile_set = ExtResource("2_tiles")
+
+[node name="WallLayer" type="TileMapLayer" parent="."]
+z_index = -1
+tile_set = ExtResource("2_tiles")
+
+[node name="RoommatePath" type="Path2D" parent="."]
+curve = SubResource("Curve2D_route")
+
+[node name="Physical" type="Node" parent="."]
+
+[node name="Dream" type="Node" parent="."]

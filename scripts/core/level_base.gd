@@ -49,15 +49,15 @@ func is_dream_floor(cell: Vector2i) -> bool:
 	var b = solids[Realm.DREAM].get(cell)
 	return b is Pushable and b.is_floor
 
-func ensure_player_is_on_safe_dream_floor() -> void:
+# True when the player is standing over a dream gap (no floor) and should fall.
+# Only meaningful in the dream realm. In the physical realm the ground is solid.
+func player_over_dream_gap() -> bool:
 	if player == null or realm != Realm.DREAM:
-		return
+		return false
 	var cell := Grid.pos_to_cell(player.position)
 	if not Grid.in_bounds(cell):
-		player.position = closest_dream_floor(player.position)
-		return
-	if not is_dream_floor(cell):
-		player.position = closest_dream_floor(player.position)
+		return true
+	return not is_dream_floor(cell)
 
 func _ready() -> void:
 	build()
@@ -75,7 +75,6 @@ func _unhandled_input(event: InputEvent) -> void:
 func switch_realm() -> void:
 	realm = Realm.DREAM if realm == Realm.PHYSICAL else Realm.PHYSICAL
 	realm_changed.emit(realm)
-	ensure_player_is_on_safe_dream_floor()
 	queue_redraw()
 
 # ---------- occupancy ----------
@@ -131,7 +130,6 @@ func add_player(cell: Vector2i) -> Player:
 	p.position = Grid.cell_to_center(cell)
 	player = p
 	add_child(p)
-	ensure_player_is_on_safe_dream_floor()
 	return p
 
 # ---------- debug drawing ----------

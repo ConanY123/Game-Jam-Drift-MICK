@@ -9,6 +9,13 @@ const SIZE := 24.0  # smaller than a cell so you can slip through 1-cell gaps
 const SPEED := 96.0  # 3 cells per second, about 2x the roommate
 const MASH_GAIN := 0.1  # seconds of progress per key press
 const MASH_DECAY := 0.5  # progress lost per second when not pressing
+const FALL_SPEED := 480.0  # how fast you drop while falling through a dream gap
+const FALL_DROP_CELLS := 2.0  # how far (in cells) the little drop-out travels
+const FALL_OUT_TIME := 0.35  # seconds for the spin-shrink-fade-out
+const FALL_IN_TIME := 0.45  # seconds for the drop back in from the top
+const FALL_SPIN := TAU * 2.0  # total rotation across each phase (2 turns)
+
+enum FallPhase { NONE, OUT, IN }
 
 var level: LevelBase
 var push_target: Pushable
@@ -16,10 +23,45 @@ var push_dir := Vector2i.ZERO
 var push_timer := 0.0
 var locked_to: Pushable  # box just pushed; key must be released before using another
 
+# Dream-gap fall: drop a little while spinning + fading out, then fall back in
+# from the top spinning + fading in, landing on the nearest floor.
+# This only wastes time for the player (unlike the roommate, who fails).
+var falling := false
+var fall_phase := FallPhase.NONE
+var fall_t := 0.0  # 0..1 progress within the current phase
+var fall_from := Vector2.ZERO  # phase start position
+var land_target := Vector2.ZERO  # where to land once we've wrapped around
+# Visual-only transform applied in _draw while falling.
+var draw_spin := 0.0
+var draw_scale := 1.0
+var draw_alpha := 1.0
+
 func _ready() -> void:
 	_setup_input()
+	if level != null:
+		# Leaving the dream mid-fall cancels it (no gaps in the physical world).
+		level.realm_changed.connect(_on_realm_changed)
+
+func _on_realm_changed(new_realm: int) -> void:
+	if falling and new_realm == LevelBase.Realm.PHYSICAL:
+		_end_fall()
 
 func _physics_process(delta: float) -> void:
+	if level == null:
+		return
+
+	# Falling takes over everything: no walking, no pushing until we land.
+	if falling:
+		_update_fall(delta)
+		queue_redraw()
+		return
+
+	# Standing over a dream gap? Start the fall this frame.
+	if level.player_over_dream_gap():
+		_begin_fall()
+		queue_redraw()
+		return
+
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var step := input * SPEED * delta
 
@@ -36,9 +78,63 @@ func _physics_process(delta: float) -> void:
 		target = hit_y
 		dir = Vector2i(0, int(sign(step.y)))
 	_update_push(target, dir, delta)
-	if level != null:
-		level.ensure_player_is_on_safe_dream_floor()
 	queue_redraw()
+
+# ---------- dream-gap fall ----------
+
+func _begin_fall() -> void:
+	falling = true
+	fall_phase = FallPhase.OUT
+	fall_t = 0.0
+	fall_from = position
+	# Lock in where we'll land: the nearest standable dream floor to here.
+	land_target = level.closest_dream_floor(position)
+	draw_spin = 0.0
+	draw_scale = 1.0
+	draw_alpha = 1.0
+	# Clear any push state so we don't resume shoving mid-fall.
+	push_target = null
+	push_timer = 0.0
+	locked_to = null
+
+func _end_fall() -> void:
+	falling = false
+	fall_phase = FallPhase.NONE
+	draw_spin = 0.0
+	draw_scale = 1.0
+	draw_alpha = 1.0
+
+func _update_fall(delta: float) -> void:
+	match fall_phase:
+		FallPhase.OUT:
+			fall_t += delta / FALL_OUT_TIME
+			var t := clampf(fall_t, 0.0, 1.0)
+			# Drop a few cells while spinning, shrinking and fading to nothing.
+			position.y = fall_from.y + FALL_DROP_CELLS * Grid.CELL * t
+			draw_spin = FALL_SPIN * t
+			draw_scale = 1.0 - t
+			draw_alpha = 1.0 - t
+			if t >= 1.0:
+				# Switch to re-entry: start above the top over the landing column.
+				fall_phase = FallPhase.IN
+				fall_t = 0.0
+				fall_from = Vector2(land_target.x, -SIZE)
+				position = fall_from
+		FallPhase.IN:
+			fall_t += delta / FALL_IN_TIME
+			var t := clampf(fall_t, 0.0, 1.0)
+			# Fall from above the top down to the landing floor, spinning,
+			# growing and fading back in as we arrive.
+			position.x = land_target.x
+			position.y = lerpf(fall_from.y, land_target.y, t)
+			draw_spin = FALL_SPIN * t
+			draw_scale = t
+			draw_alpha = t
+			if t >= 1.0:
+				position = land_target
+				_end_fall()
+		_:
+			_end_fall()
 
 # Moves if free. Returns null on success, or whatever blocked us.
 func _move_axis(offset: Vector2) -> Node:
@@ -128,7 +224,15 @@ func _setup_input() -> void:
 
 func _draw() -> void:
 	var half := SIZE / 2.0
-	draw_rect(Rect2(-half, -half, SIZE, SIZE), Color(0.35, 0.8, 1.0))
+	var body := Color(0.35, 0.8, 1.0)
+	if falling:
+		# Spin + shrink/grow + fade are all driven by the fall state.
+		draw_set_transform(Vector2.ZERO, draw_spin, Vector2(draw_scale, draw_scale))
+		body.a = draw_alpha
+	draw_rect(Rect2(-half, -half, SIZE, SIZE), body)
+	if falling:
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)  # reset for anything after
+		return
 	if push_target != null:  # little progress bar while you push
 		var t := clampf(push_timer / push_target.hold_time(), 0.0, 1.0)
 		draw_rect(Rect2(-half, -half - 8, SIZE * t, 3), Color.WHITE)

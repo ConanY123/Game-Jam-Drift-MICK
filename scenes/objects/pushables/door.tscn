@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cwd8r3n5tlaab"]
+
+[ext_resource type="Script" uid="uid://83cqpxiajt8e" path="res://scripts/objects/pushables/door.gd" id="1_ym8hq"]
+
+[node name="Door" type="Node2D" unique_id=351519647]
+script = ExtResource("1_ym8hq")
+color = Color(0.6, 0.4, 0.25, 1)

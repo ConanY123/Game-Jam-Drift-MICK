@@ -113,6 +113,14 @@ func _physics_process(delta: float) -> void:
 		target = _nearby_interactable
 		direction = _nearby_interactable_dir
 	_update_push(target, direction, delta)
+	if (
+		target == null
+		and _nearby_signal_source != null
+		and not interact_locked
+		and Input.is_action_just_pressed("interact")
+	):
+		_nearby_signal_source.call("toggle")
+		interact_locked = true
 	if position != position_before_move:
 		has_moved = true
 	queue_redraw()

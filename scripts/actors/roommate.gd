@@ -115,6 +115,9 @@ func _die(reason: String) -> void:
 	lost.emit(reason)
 	queue_redraw()
 
+func kill(reason: String) -> void:
+	_die(reason)
+
 # Dream fall is a loss, with a short drop-into-the-void animation first.
 func _begin_fall() -> void:
 	if dead or falling:

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bpuefjr1fcltd"]
 
-[ext_resource type="Script" uid="uid://b686esymdq0u6" path="res://scripts/objects/pushable.gd" id="1_7vqcc"]
+[ext_resource type="Script" uid="uid://b686esymdq0u6" path="res://scripts/objects/pushables/pushable.gd" id="1_7vqcc"]
 [ext_resource type="Texture2D" uid="uid://bc80tkfbvanue" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet.png" id="2_ltsr6"]
 
 [node name="Table" type="Node2D" unique_id=86256793]

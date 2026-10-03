@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://br1sss08ewpld"]
 
-[ext_resource type="Script" uid="uid://cs1dbl3qk7mx2" path="res://scripts/objects/slidable.gd" id="1_dsx0t"]
+[ext_resource type="Script" uid="uid://cs1dbl3qk7mx2" path="res://scripts/objects/pushables/slidable.gd" id="1_dsx0t"]
 [ext_resource type="Texture2D" uid="uid://dl8irc6glfi27" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet_Dream.png" id="2_1rn6w"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1lxwa"]

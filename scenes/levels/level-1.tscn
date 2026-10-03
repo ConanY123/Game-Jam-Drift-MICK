@@ -1,13 +1,13 @@
 [gd_scene format=4 uid="uid://bkn2ykjo5khnj"]
 
 [ext_resource type="Script" uid="uid://qgqypygsjtww" path="res://scripts/levels/level-1.gd" id="1_ktyk1"]
-[ext_resource type="PackedScene" uid="uid://d31oy45evjsvb" path="res://scenes/objects/chair.tscn" id="2_eeqru"]
+[ext_resource type="PackedScene" uid="uid://d31oy45evjsvb" path="res://scenes/objects/pushables/chair.tscn" id="2_eeqru"]
 [ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="2_gl321"]
 [ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="4_physical_bg"]
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="5_dream_bg"]
-[ext_resource type="PackedScene" uid="uid://bpuefjr1fcltd" path="res://scenes/objects/table.tscn" id="6_a1qmq"]
-[ext_resource type="PackedScene" uid="uid://cwd8r3n5tlaab" path="res://scenes/objects/door.tscn" id="7_wubvj"]
-[ext_resource type="PackedScene" uid="uid://cchwiswkl3wjn" path="res://scenes/objects/dream block.tscn" id="8_wejd8"]
+[ext_resource type="PackedScene" uid="uid://bpuefjr1fcltd" path="res://scenes/objects/pushables/table.tscn" id="6_a1qmq"]
+[ext_resource type="PackedScene" uid="uid://cwd8r3n5tlaab" path="res://scenes/objects/pushables/door.tscn" id="7_wubvj"]
+[ext_resource type="PackedScene" uid="uid://cchwiswkl3wjn" path="res://scenes/objects/pushables/dream block.tscn" id="8_wejd8"]
 
 [node name="Level1" type="Node2D" unique_id=402028665]
 script = ExtResource("1_ktyk1")

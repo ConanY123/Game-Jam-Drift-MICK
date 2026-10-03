@@ -1,31 +1,25 @@
 class_name Door
 extends Pushable
 
-# A door is a Pushable that opens (and can close) instead of sliding a cell.
-# It reuses the player's existing push pipeline: walking into it and holding /
-# mashing "interact" fills the same timer, and when that timer completes the
-# player calls try_push(dir) - which we override to toggle open/closed instead
-# of moving.
-#
-# The door stays registered in the occupancy map in both states, so its tile
-# remains blocked while the visual leaf swings open or closed.
+# A door uses the player's push interaction once to swing open. It becomes
+# inactive and non-blocking when the swing finishes.
 #
 # Default realm is Physical (the interact verb: close a door, pull a lever).
 # Self-contained: this adds no requirements to player.gd / level_base.gd.
 
-@export var open := false  # start closed by default; the puzzle is to open it
+@export var open := false  # the first interaction opens and deactivates it
 @export_range(0.0, 270.0, 90.0) var start_angle_degrees := 0.0
 @export_enum("Clockwise", "Counter-clockwise") var swing_direction := 0
 
 const LEAF_LENGTH := float(Grid.CELL - 2)
 const LEAF_THICKNESS := float(Grid.CELL) * 0.3
-const LEAF_COLLISION_THICKNESS := float(Grid.CELL) * 0.2
+const LEAF_COLLISION_THICKNESS := 2.0
 const SWING_ANGLE_DEGREES := 90.0
 const SWING_DURATION := 0.25
 
 var _leaf_angle := start_angle_degrees
 var _swing_tween: Tween
-var _escape_player: Player
+var inactive := false
 
 func _ready() -> void:
 	super._ready()  # keep Pushable's self-registration with the parent level
@@ -34,32 +28,31 @@ func _ready() -> void:
 		_leaf_angle = _open_angle()
 	if level != null:
 		level.unregister(self, realm)
-		level.register(self, _collision_cells(_leaf_angle), realm)
+		if not open:
+			level.register(self, _collision_cells(_leaf_angle), realm)
+		else:
+			inactive = true
 	_refresh()
 
 func can_interact(_dir: Vector2i) -> bool:
-	if moving or level == null:
+	if moving or inactive or open or level == null:
 		return false
-	var target_angle := start_angle_degrees if open else _open_angle()
-	for c in _collision_cells(target_angle):
+	for c in _collision_cells(_open_angle()):
 		if level.in_push_ban(c):
 			return false
 		if not level.is_free(c, self, realm):
 			return false
 	return true
 
-# The player calls this when the interact timer completes against us. Rather
-# than move a cell, flip the door state. Return true so the player's key-lock
-# triggers (one press = one toggle, no repeat until the key is released).
+# The player calls this when the interact timer completes against us. Return
+# true so the player's key-lock triggers (one press = one interaction).
 func try_push(dir: Vector2i) -> bool:
 	if not can_interact(dir):
 		return false
-	open = not open
-	_escape_player = null
+	open = true
 	_refresh()
-	var target_angle := _open_angle() if open else start_angle_degrees
 	level.unregister(self, realm)
-	_animate_swing(target_angle)
+	_animate_swing(_open_angle())
 	return true
 
 func _open_angle() -> float:
@@ -71,8 +64,8 @@ func _collision_cells(angle_degrees: float) -> Array[Vector2i]:
 	var corners := [
 		Vector2.ZERO,
 		Vector2(LEAF_LENGTH, 0.0),
-		Vector2(0.0, LEAF_THICKNESS),
-		Vector2(LEAF_LENGTH, LEAF_THICKNESS),
+		Vector2(0.0, LEAF_COLLISION_THICKNESS),
+		Vector2(LEAF_LENGTH, LEAF_COLLISION_THICKNESS),
 	]
 	var min_point := Vector2(INF, INF)
 	var max_point := Vector2(-INF, -INF)
@@ -94,21 +87,6 @@ func overlaps_player_hitbox(player_center: Vector2, hitbox_size: Vector2) -> boo
 		return false
 	return _overlaps_player_hitbox_at(player_center, hitbox_size, _leaf_angle)
 
-func allows_player_escape(player: Player) -> bool:
-	if _escape_player != player:
-		return false
-	var hitbox_size := Vector2(player.HITBOX_SIZE, player.HITBOX_SIZE)
-	if overlaps_player_hitbox(player.position, hitbox_size):
-		return true
-	_escape_player = null
-	return false
-
-func _player_overlaps_leaf(angle_degrees: float) -> bool:
-	if level.player == null:
-		return false
-	var hitbox_size := Vector2(level.player.HITBOX_SIZE, level.player.HITBOX_SIZE)
-	return _overlaps_player_hitbox_at(level.player.position, hitbox_size, angle_degrees)
-
 func _overlaps_player_hitbox_at(
 	player_center: Vector2,
 	hitbox_size: Vector2,
@@ -119,7 +97,7 @@ func _overlaps_player_hitbox_at(
 	var side := Vector2.DOWN.rotated(angle)
 	var leaf_center := Vector2(
 		LEAF_LENGTH * 0.5,
-		LEAF_THICKNESS * 0.5
+		LEAF_COLLISION_THICKNESS * 0.5
 	).rotated(angle)
 	var local_player_center := to_local(level.to_global(player_center))
 	var separation := local_player_center - leaf_center
@@ -155,16 +133,18 @@ func _animate_swing(target_angle: float) -> void:
 
 func _finish_swing(target_angle: float) -> void:
 	var target_cells := _collision_cells(target_angle)
-	var closing_on_player := _player_overlaps_leaf(target_angle)
-	for c in target_cells:
-		if not level.is_free(c, self, realm):
-			open = not open
-			_refresh()
-			_animate_swing(_open_angle() if open else start_angle_degrees)
-			return
-	if closing_on_player and not open and level.player != null:
-		_escape_player = level.player
-	level.register(self, target_cells, realm)
+	if open:
+		for c in target_cells:
+			if not level.is_free(c, self, realm):
+				open = false
+				_refresh()
+				level.register(self, _collision_cells(start_angle_degrees), realm)
+				_animate_swing(start_angle_degrees)
+				return
+		inactive = true
+		level.unregister(self, realm)
+	else:
+		level.register(self, target_cells, realm)
 	moving = false
 
 func _set_leaf_angle(angle: float) -> void:
@@ -175,6 +155,8 @@ func _draw() -> void:
 	if level == null:
 		return
 	var leaf_color := color
+	if inactive:
+		leaf_color = leaf_color.darkened(0.3)
 	if level.realm == realm:
 		leaf_color.a = 0.75 if open else 1.0
 	elif realm == LevelBase.Realm.PHYSICAL:

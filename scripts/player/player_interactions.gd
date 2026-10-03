@@ -11,6 +11,7 @@ var push_timer := 0.0
 var interact_locked := false
 var _nearby_interactable: Pushable
 var _nearby_interactable_dir := Vector2i.ZERO
+var _nearby_signal_source: Node
 var _interaction_hint_time := 0.0
 var _facing_dir := Vector2i.DOWN
 var _interaction_hint_progress := 0.0
@@ -105,16 +106,17 @@ func _update_interaction_hint(delta: float) -> void:
 	_interaction_hint_time += delta
 	_nearby_interactable = null
 	_nearby_interactable_dir = Vector2i.ZERO
+	_nearby_signal_source = null
+	var reach := SIZE * 0.5 + 1.0
+	var facing := _facing_dir
+	var clockwise := Vector2i(-facing.y, facing.x)
+	var directions: Array[Vector2i] = [
+		facing,
+		clockwise,
+		-clockwise,
+		-facing,
+	]
 	if not level.gameplay_locked() and not falling:
-		var reach := SIZE * 0.5 + 1.0
-		var facing := _facing_dir
-		var clockwise := Vector2i(-facing.y, facing.x)
-		var directions: Array[Vector2i] = [
-			facing,
-			clockwise,
-			-clockwise,
-			-facing,
-		]
 		for direction in directions:
 			var offset := Vector2(direction) * reach
 			var candidate := _blocker_in(position + offset, level.realm)
@@ -138,7 +140,30 @@ func _update_interaction_hint(delta: float) -> void:
 				_interaction_hint_holdable = candidate.holdable
 				break
 
-	var target_progress := 1.0 if _nearby_interactable != null else 0.0
+		if _nearby_interactable == null:
+			var player_cell := Grid.pos_to_cell(position)
+			for direction in directions:
+				var probe := position + Vector2(direction) * reach
+				if _blocker_in(probe, level.realm) != null:
+					continue
+				var adjacent_cell := player_cell + direction
+				for source: Node in get_tree().get_nodes_in_group("signal_sources"):
+					if (
+						source.get("manually_toggleable") == true
+						and bool(source.call("can_interact_in_realm", level.realm))
+						and Grid.pos_to_cell(level.to_local(source.global_position)) == adjacent_cell
+					):
+						_nearby_signal_source = source
+						_interaction_hint_holdable = false
+						break
+				if _nearby_signal_source != null:
+					break
+
+	var target_progress := (
+		1.0
+		if _nearby_interactable != null or _nearby_signal_source != null
+		else 0.0
+	)
 	var animation_speed := (
 		INTERACTION_HINT_IN_SPEED
 		if target_progress > _interaction_hint_progress

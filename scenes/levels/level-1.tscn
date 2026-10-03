@@ -5,6 +5,7 @@
 [ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="2_gl321"]
 [ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="4_physical_bg"]
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="5_dream_bg"]
+[ext_resource type="PackedScene" uid="uid://bpuefjr1fcltd" path="res://scenes/objects/table.tscn" id="6_a1qmq"]
 
 [node name="Level1" type="Node2D" unique_id=402028665]
 script = ExtResource("1_ktyk1")
@@ -40,3 +41,9 @@ tile_set = ExtResource("2_gl321")
 [node name="Chair" parent="." unique_id=225586257 instance=ExtResource("2_eeqru")]
 z_index = 10
 position = Vector2(128, 128)
+
+[node name="Table" parent="." unique_id=86256793 instance=ExtResource("6_a1qmq")]
+position = Vector2(162, 109)
+size = Vector2i(3, 3)
+weight = 3.0
+holdable = false

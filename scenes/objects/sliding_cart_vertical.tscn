@@ -1,22 +1,23 @@
-[gd_scene format=3 uid="uid://br1sss08ewpld"]
+[gd_scene format=3 uid="uid://bvcrtv0rt1cal"]
 
 [ext_resource type="Script" uid="uid://cs1dbl3qk7mx2" path="res://scripts/objects/slidable.gd" id="1_dsx0t"]
 [ext_resource type="Texture2D" uid="uid://dl8irc6glfi27" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet_Dream.png" id="2_1rn6w"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1lxwa"]
-size = Vector2(58, 28)
+size = Vector2(38, 56)
 
-[node name="SlidingCart" type="Node2D" unique_id=1983659059]
+[node name="SlidingCartVertical" type="Node2D" unique_id=927005708]
 script = ExtResource("1_dsx0t")
-size = Vector2i(2, 1)
+size = Vector2i(1, 2)
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2140872601]
-position = Vector2(32, 16)
-scale = Vector2(0.75, 0.5357143)
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2077649024]
+position = Vector2(20.056534, 28.792099)
+rotation = 1.5707964
+scale = Vector2(0.7198025, 0.71630484)
 texture = ExtResource("2_1rn6w")
 region_enabled = true
 region_rect = Rect2(120, 8, 80, 56)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1472402165]
-position = Vector2(32, 16)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=565169432]
+position = Vector2(20, 29)
 shape = SubResource("RectangleShape2D_1lxwa")

@@ -14,7 +14,7 @@ func build() -> void:
 		add_dream_floor(Rect2i(2, 2, 20, 14))
 
 	# Where the player starts. Move this cell as the layout takes shape.
-	add_player(Vector2i(4, 3))
+	add_player(Vector2i(2, 14))
 
 	# Spawn the sleepwalker on the route drawn on the RoommatePath node. If the
 	# path is missing or too short, no roommate spawns (a warning is pushed so

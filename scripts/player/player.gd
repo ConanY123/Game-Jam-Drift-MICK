@@ -238,3 +238,4 @@ func _draw() -> void:
 	if push_target != null:  # little progress bar while you push
 		var t := clampf(push_timer / push_target.hold_time(), 0.0, 1.0)
 		draw_rect(Rect2(-half, -half - 8, SIZE * t, 3), Color.WHITE)
+		

@@ -1,0 +1,58 @@
+[gd_scene load_steps=5 format=3 uid="uid://dstam1nab4r00"]
+
+[ext_resource type="Script" path="res://scripts/ui/stamina_bar.gd" id="1_stam"]
+
+[sub_resource type="Gradient" id="Gradient_fill"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.26, 0.56, 1, 1, 1, 0.42, 0.78, 1)
+
+[sub_resource type="GradientTexture2D" id="GradTex_fill"]
+gradient = SubResource("Gradient_fill")
+width = 200
+height = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
+bg_color = Color(0.08, 0.07, 0.16, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.5, 0.95, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="StaminaBar" type="CanvasLayer"]
+layer = 9
+script = ExtResource("1_stam")
+
+[node name="Panel" type="Panel" parent="."]
+offset_left = 760.0
+offset_top = 40.0
+offset_right = 984.0
+offset_bottom = 110.0
+theme_override_styles/panel = SubResource("StyleBox_panel")
+
+[node name="Label" type="Label" parent="Panel"]
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 212.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.92, 0.88, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "STAMINA 100%"
+
+[node name="BarBG" type="ColorRect" parent="Panel"]
+clip_contents = true
+offset_left = 12.0
+offset_top = 36.0
+offset_right = 212.0
+offset_bottom = 56.0
+color = Color(0.14, 0.12, 0.22, 1)
+
+[node name="Fill" type="TextureRect" parent="Panel/BarBG"]
+offset_right = 200.0
+offset_bottom = 20.0
+texture = SubResource("GradTex_fill")
+stretch_mode = 3

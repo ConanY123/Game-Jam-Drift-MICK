@@ -57,11 +57,13 @@ seconds_per_cell = 0.5
 end_pause = 1.0
 
 [node name="Goose2" parent="Physical/Geese" unique_id=1824326809 instance=ExtResource("5_l56ll")]
+position = Vector2(32, 256)
+start_direction = 1
 
 [node name="Goose3" parent="Physical/Geese" unique_id=328499756 instance=ExtResource("5_l56ll")]
 position = Vector2(320, 256)
 start_direction = 1
-patrol_length = 3
+patrol_length = 4
 seconds_per_cell = 1.0
 end_pause = 0.05
 
@@ -82,6 +84,12 @@ end_pause = 0.25
 position = Vector2(576, 512)
 start_direction = 2
 patrol_length = 4
+end_pause = 1.0
+
+[node name="Goose7" parent="Physical/Geese" unique_id=832893757 instance=ExtResource("5_l56ll")]
+position = Vector2(224, 160)
+start_direction = 1
+push_pause = 1.25
 end_pause = 1.0
 
 [node name="Dream" type="Node" parent="." unique_id=1140878289]

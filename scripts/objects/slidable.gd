@@ -20,9 +20,21 @@ func _footprint_free(origin: Vector2i) -> bool:
 			return false
 	return true
 
+func can_push(dir: Vector2i) -> bool:
+	if moving or dir == Vector2i.ZERO or level == null or not is_supported_by_dream_floor():
+		return false
+	var target := cell
+	var steps := 0
+	while steps < max_slide_cells:
+		target += dir
+		if not _footprint_free(target):
+			return steps > 0
+		steps += 1
+	return steps > 0
+
 # Override: instead of moving a single cell, roll until blocked.
 func try_push(dir: Vector2i) -> bool:
-	if moving:
+	if not can_push(dir):
 		return false
 	# Walk forward one cell at a time to find how far we can slide before being
 	# blocked. We stop at the last free cell (just short of the obstacle).

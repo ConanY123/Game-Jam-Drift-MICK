@@ -24,23 +24,27 @@ func _ready() -> void:
 		level.unregister(self, realm)
 	_refresh()
 
+func can_interact(_dir: Vector2i) -> bool:
+	if moving or level == null:
+		return false
+	for c in get_cells(cell):
+		if level.in_push_ban(c):
+			return false
+		if open and not level.is_free(c, self, realm):
+			return false
+	return true
+
 # The player calls this when the interact timer completes against us. Rather
 # than move a cell, flip the door state. Return true so the player's key-lock
 # triggers (one press = one toggle, no repeat until the key is released).
 func try_push(dir: Vector2i) -> bool:
-	# Honour the same no-interact-near-the-roommate rule push uses.
-	for c in get_cells(cell):
-		if level.in_push_ban(c):
-			return false
+	if not can_interact(dir):
+		return false
 	open = not open
 	if open:
 		level.unregister(self, realm)
 	else:
 		# Only re-close if every cell is clear (nobody standing in the doorway).
-		for c in get_cells(cell):
-			if not level.is_free(c, self, realm):
-				open = true  # stayed open; closing was blocked
-				return false
 		level.register(self, get_cells(cell), realm)
 	_refresh()
 	queue_redraw()

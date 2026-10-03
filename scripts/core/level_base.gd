@@ -256,6 +256,8 @@ func add_player(cell: Vector2i) -> Player:
 	var p := Player.new()
 	p.level = self
 	p.position = Grid.cell_to_center(cell)
+	p.z_index = 10
+	p.z_as_relative = false
 	player = p
 	add_child(p)
 	return p
@@ -288,6 +290,8 @@ func _update_layers() -> void:
 # Instantiates the roommate scene on a route of cells and forwards his result.
 func add_roommate(route: Array[Vector2i]) -> Node2D:
 	var r := ROOMMATE_SCENE.instantiate()
+	r.z_index = 10
+	r.z_as_relative = false
 	add_child(r)
 	r.call("setup", self, route)
 	r.connect("won", func(): level_won.emit())

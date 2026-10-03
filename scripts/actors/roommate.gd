@@ -53,6 +53,8 @@ func _rebuild_waypoints() -> void:
 func _physics_process(delta: float) -> void:
 	if level == null:
 		return
+	if level.player == null or not level.player.has_moved:
+		return
 	if falling:
 		_update_fall(delta)
 		return

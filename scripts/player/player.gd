@@ -7,7 +7,7 @@ extends Node2D
 
 const SIZE := 24.0  # smaller than a cell so you can slip through 1-cell gaps
 const SPEED := 96.0  # 3 cells per second, about 2x the roommate
-const MASH_GAIN := 0.1  # seconds of progress per key press
+const MASH_GAIN := 0.12  # seconds of progress per key press
 const MASH_DECAY := 0.5  # progress lost per second when not pressing
 const FALL_SPEED := 480.0  # how fast you drop while falling through a dream gap
 const FALL_DROP_CELLS := 2.0  # how far (in cells) the little drop-out travels
@@ -18,6 +18,7 @@ const FALL_SPIN := TAU * 2.0  # total rotation across each phase (2 turns)
 enum FallPhase { NONE, OUT, IN }
 
 var level: LevelBase
+var has_moved := false
 var push_target: Pushable
 var push_dir := Vector2i.ZERO
 var push_timer := 0.0
@@ -64,6 +65,7 @@ func _physics_process(delta: float) -> void:
 
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var step := input * SPEED * delta
+	var position_before_move := position
 
 	# Axes move separately so you slide along walls.
 	var hit_x := _move_axis(Vector2(step.x, 0))
@@ -78,6 +80,8 @@ func _physics_process(delta: float) -> void:
 		target = hit_y
 		dir = Vector2i(0, int(sign(step.y)))
 	_update_push(target, dir, delta)
+	if position != position_before_move:
+		has_moved = true
 	queue_redraw()
 
 # ---------- dream-gap fall ----------
@@ -198,7 +202,7 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 		if Input.is_action_just_pressed("interact"):
 			push_timer += MASH_GAIN
 		else:
-			var proportinal = (push_timer / target.hold_time())
+			var proportinal = min((push_timer / target.hold_time()), 0.9)
 			push_timer = maxf(push_timer - delta * MASH_DECAY * proportinal, 0.0)
 
 	if push_timer >= target.hold_time():

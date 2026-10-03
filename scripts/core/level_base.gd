@@ -80,6 +80,7 @@ func _ready() -> void:
 	add_child(overlay)
 	overlay.call("setup", self)
 	AudioManager.play_music(level_number)   # start this level's track (runs on load + every retry)
+	level_won.connect(func(): get_node("/root/LevelManager").call_deferred("advance_level"))
 	queue_redraw()
 
 func build() -> void:
@@ -165,6 +166,12 @@ func _load_tilemaps() -> void:
 			dream_floor[c] = true
 
 func _update_layers() -> void:
+	var physical_background := get_node_or_null("PhysicalBackground") as CanvasItem
+	if physical_background != null:
+		physical_background.visible = realm == Realm.PHYSICAL
+	var dream_background := get_node_or_null("DreamBackground") as CanvasItem
+	if dream_background != null:
+		dream_background.visible = realm == Realm.DREAM
 	var floor_layer := get_node_or_null("FloorLayer") as TileMapLayer
 	if floor_layer != null:
 		floor_layer.visible = realm == Realm.PHYSICAL

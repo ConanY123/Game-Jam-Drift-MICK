@@ -155,6 +155,17 @@ func add_pushable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color :
 	add_child(p)  # its _ready registers it with this level
 	return p
 
+func add_slidable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color := Color(0.4, 0.7, 0.85), in_realm: int = Realm.PHYSICAL, holdable := false) -> Slidable:
+	var s := Slidable.new()
+	s.size = size
+	s.weight = weight
+	s.color = color
+	s.realm = in_realm
+	s.holdable = holdable
+	s.position = Grid.cell_to_pos(cell)
+	add_child(s)  # its _ready registers it with this level
+	return s
+
 func add_player(cell: Vector2i) -> Player:
 	var p := Player.new()
 	p.level = self

@@ -23,7 +23,6 @@ scale = Vector2(0.355556, 0.355556)
 texture = ExtResource("3_physical_bg")
 
 [node name="DreamBackground" type="Sprite2D" parent="." unique_id=200000003]
-visible = false
 z_index = -10
 position = Vector2(384, 288)
 scale = Vector2(0.355556, 0.355556)

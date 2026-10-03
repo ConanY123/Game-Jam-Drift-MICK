@@ -16,6 +16,7 @@ signal level_lost(reason: String)
 
 const ROOMMATE_SCENE := preload("res://scenes/actors/roommate.tscn")
 const RESULT_OVERLAY_SCENE := preload("res://scenes/ui/result_overlay.tscn")
+const DOOR_SCENE := preload("res://scenes/objects/door.tscn")
 
 var realm := Realm.PHYSICAL
 var roommate: Roommate
@@ -137,6 +138,15 @@ func add_pushable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color :
 	add_child(p)
 	p.setup(self, cell)
 	return p
+
+func add_door(cell: Vector2i, size := Vector2i(1, 1), start_open := false, color := Color(0.55, 0.4, 0.3), in_realm: int = Realm.PHYSICAL) -> Door:
+	var d: Door = DOOR_SCENE.instantiate()
+	d.size = size
+	d.color = color
+	d.realm = in_realm
+	add_child(d)
+	d.setup(self, cell, start_open)
+	return d
 
 func add_player(cell: Vector2i) -> Player:
 	var p := Player.new()

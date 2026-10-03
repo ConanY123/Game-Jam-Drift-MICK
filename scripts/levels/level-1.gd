@@ -21,6 +21,10 @@ func build() -> void:
 		Vector2i(6, 8), Vector2i(6, 14), Vector2i(18, 14),
 	]
 
+	# Door test: a door on the row-2 corridor. Walk up to it and press interact
+	# to open/close it. Starts open so you can test closing it.
+	add_door(Vector2i(8, 2), Vector2i(1, 1), true)
+
 	# Beat 1: a chair on the path, push it aside (holdable)
 	add_pushable(Vector2i(12, 5), Vector2i(1, 1), 1.0, Color(0.85, 0.65, 0.3), LevelBase.Realm.PHYSICAL, true)
 

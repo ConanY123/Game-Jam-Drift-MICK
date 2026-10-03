@@ -26,6 +26,7 @@ var locked_to: Pushable  # box just pushed; key must be released before using an
 # Dream-gap fall: drop a little while spinning + fading out, then fall back in
 # from the top spinning + fading in, landing on the nearest floor.
 # This only wastes time for the player (unlike the roommate, who fails).
+var facing := Vector2i(0, 1)  # last movement direction, for door interaction
 var falling := false
 var fall_phase := FallPhase.NONE
 var fall_t := 0.0  # 0..1 progress within the current phase
@@ -65,6 +66,10 @@ func _physics_process(delta: float) -> void:
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var step := input * SPEED * delta
 
+	# Remember facing so we know which door to use when standing still.
+	if input != Vector2.ZERO:
+		facing = Vector2i(roundi(input.x), roundi(input.y))
+
 	# Axes move separately so you slide along walls.
 	var hit_x := _move_axis(Vector2(step.x, 0))
 	var hit_y := _move_axis(Vector2(0, step.y))
@@ -77,8 +82,52 @@ func _physics_process(delta: float) -> void:
 	if hit_y is Pushable:
 		target = hit_y
 		dir = Vector2i(0, int(sign(step.y)))
+
+	# Door toggle takes priority over pushing when you tap interact next to one,
+	# so bumping a closed door opens it instead of trying to "push" it.
+	if Input.is_action_just_pressed("interact") and _try_toggle_door(hit_x, hit_y):
+		push_target = null
+		push_timer = 0.0
+		queue_redraw()
+		return
+
 	_update_push(target, dir, delta)
 	queue_redraw()
+
+# Toggle a door we're bumping into, or the one in the cell we're facing.
+# Returns true if a door was toggled.
+func _try_toggle_door(hit_x: Node, hit_y: Node) -> bool:
+	# A closed door we just walked into shows up as a blocker.
+	var bumped: Door = null
+	if hit_x is Door:
+		bumped = hit_x
+	elif hit_y is Door:
+		bumped = hit_y
+	if bumped != null and bumped.realm == level.realm:
+		bumped.toggle()
+		return true
+
+	# Otherwise look at the cell we're facing (needed to close an open door,
+	# which isn't solid and so never blocks us).
+	var here := Grid.pos_to_cell(position)
+	for probe in [here + facing, here]:
+		var d := level.blocker_at(probe, level.realm)
+		if d is Door:
+			d.toggle()
+			return true
+		# Open doors aren't in the solids map, so scan children for one here.
+		var open_door := _open_door_at(probe)
+		if open_door != null:
+			open_door.toggle()
+			return true
+	return false
+
+func _open_door_at(cell: Vector2i) -> Door:
+	for child in level.get_children():
+		if child is Door and child.is_open and child.realm == level.realm:
+			if child.get_cells().has(cell):
+				return child
+	return null
 
 # ---------- dream-gap fall ----------
 

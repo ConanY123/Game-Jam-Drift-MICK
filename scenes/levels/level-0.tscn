@@ -9,23 +9,22 @@
 [node name="Level0" type="Node2D" unique_id=154351776]
 script = ExtResource("1_pet1o")
 
-[node name="FloorLayer" type="TileMapLayer" parent="." unique_id=883194868]
-z_index = -1
-tile_map_data = PackedByteArray("AAAHAAYAAQAFAAkAAAAKAAYAAQABAAgAAAANAAYAAQACAAgAAAAQAAYAAQAEAAkAAAAOAAYAAQAFAAkAAAAJAAYAAQAEAAkAAAAIAAYAAQADAAgAAAAPAAYAAQADAAgAAAALAAYAAQAAAAgAAAAMAAYAAQAAAAgAAAAHAAsAAQAFAAkAAAAOAAsAAQAFAAkAAAAJAAsAAQAEAAkAAAAQAAsAAQAEAAkAAAAPAAsAAQADAAgAAAAIAAsAAQADAAgAAAAKAAsAAQABAAgAAAANAAsAAQACAAgAAAAMAAsAAQAAAAgAAAALAAsAAQAAAAgAAAA=")
-tile_set = ExtResource("2_yyv8b")
-
-[node name="PhysicalBackground" type="Sprite2D" parent="FloorLayer" unique_id=399650428]
+[node name="PhysicalBackground" type="Sprite2D" parent="." unique_id=399650428]
 z_index = -10
 position = Vector2(384, 288)
 scale = Vector2(0.355556, 0.355556)
 texture = ExtResource("3_vn0ko")
 
-[node name="DreamBackground" type="Sprite2D" parent="FloorLayer" unique_id=1203359959]
-visible = false
+[node name="DreamBackground" type="Sprite2D" parent="." unique_id=1203359959]
 z_index = -10
 position = Vector2(384, 288)
 scale = Vector2(0.355556, 0.355556)
 texture = ExtResource("4_n4s7l")
+
+[node name="FloorLayer" type="TileMapLayer" parent="." unique_id=883194868]
+z_index = -1
+tile_map_data = PackedByteArray("AAAHAAYAAQAFAAkAAAAKAAYAAQABAAgAAAANAAYAAQACAAgAAAAQAAYAAQAEAAkAAAAOAAYAAQAFAAkAAAAJAAYAAQAEAAkAAAAIAAYAAQADAAgAAAAPAAYAAQADAAgAAAALAAYAAQAAAAgAAAAMAAYAAQAAAAgAAAAHAAsAAQAFAAkAAAAOAAsAAQAFAAkAAAAJAAsAAQAEAAkAAAAQAAsAAQAEAAkAAAAPAAsAAQADAAgAAAAIAAsAAQADAAgAAAAKAAsAAQABAAgAAAANAAsAAQACAAgAAAAMAAsAAQAAAAgAAAALAAsAAQAAAAgAAAA=")
+tile_set = ExtResource("2_yyv8b")
 
 [node name="DreamFloorLayer" type="TileMapLayer" parent="." unique_id=1209246003]
 z_index = -1

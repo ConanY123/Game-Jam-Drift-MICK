@@ -59,7 +59,16 @@ func _spend_stamina(amount: float) -> void:
 func _recover_stamina(delta: float) -> void:
 	if level.realm != LevelBase.Realm.DREAM or stamina >= MAX_STAMINA:
 		return
-	stamina = minf(stamina + DREAM_STAMINA_REGEN * delta, MAX_STAMINA)
+	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var recovery_multiplier := (
+		MOVING_STAMINA_REGEN_MULTIPLIER
+		if movement.length_squared() > 0.0
+		else 1.0
+	)
+	stamina = minf(
+		stamina + DREAM_STAMINA_REGEN * recovery_multiplier * delta,
+		MAX_STAMINA
+	)
 	stamina_changed.emit(stamina / MAX_STAMINA)
 
 func can_switch_to_physical() -> bool:

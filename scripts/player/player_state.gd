@@ -6,6 +6,7 @@ const MASH_GAIN := 0.12
 const MASH_DECAY := 0.5
 const MAX_STAMINA := 7.0
 const DREAM_STAMINA_REGEN := 1.0
+const MOVING_STAMINA_REGEN_MULTIPLIER := 0.5
 const PHYSICAL_RETURN_STAMINA_FRACTION := 0.25
 
 var level: LevelBase

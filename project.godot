@@ -11,19 +11,19 @@ config_version=5
 [application]
 
 config/name="Drift game jam"
+run/main_scene="uid://samvf1hiaebk"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
-run/main_scene="res://scenes/levels/level-1.tscn"
+
+[audio]
+
+buses/default_bus_layout="uid://dr3s14e4ubl6x"
 
 [autoload]
 
 AudioManager="*res://scenes/levels/audio_manager.tscn"
 LevelManager="*res://scripts/core/level_manager.gd"
 TransitionManager="*res://scripts/core/transition_manager.gd"
-
-[audio]
-
-buses/default_bus_layout="uid://dr3s14e4ubl6x"
 
 [display]
 

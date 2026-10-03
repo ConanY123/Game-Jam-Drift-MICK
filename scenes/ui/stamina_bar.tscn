@@ -62,3 +62,12 @@ offset_right = 200.0
 offset_bottom = 20.0
 texture = SubResource("GradTex_fill")
 expand_mode = 1
+
+[node name="SpeedButton" type="Button" parent="." unique_id=1987125301]
+anchors_preset = -1
+layout_mode = 0
+offset_left = 780.0
+offset_top = 192.0
+offset_right = 980.0
+offset_bottom = 228.0
+text = "HOLD X FOR 2× SPEED"

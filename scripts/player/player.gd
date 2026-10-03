@@ -18,6 +18,7 @@ const FALL_SPIN := TAU * 2.0  # total rotation across each phase (2 turns)
 enum FallPhase { NONE, OUT, IN }
 
 var level: LevelBase
+var has_moved := false
 var push_target: Pushable
 var push_dir := Vector2i.ZERO
 var push_timer := 0.0
@@ -64,6 +65,7 @@ func _physics_process(delta: float) -> void:
 
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var step := input * SPEED * delta
+	var position_before_move := position
 
 	# Axes move separately so you slide along walls.
 	var hit_x := _move_axis(Vector2(step.x, 0))
@@ -78,6 +80,8 @@ func _physics_process(delta: float) -> void:
 		target = hit_y
 		dir = Vector2i(0, int(sign(step.y)))
 	_update_push(target, dir, delta)
+	if position != position_before_move:
+		has_moved = true
 	queue_redraw()
 
 # ---------- dream-gap fall ----------

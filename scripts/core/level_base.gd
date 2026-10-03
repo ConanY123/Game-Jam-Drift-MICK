@@ -5,6 +5,7 @@ extends Node2D
 # A level script extends this and overrides build().
 
 @export var debug_grid := true
+@export var level_number: int = 1
 
 enum Realm { 
 	PHYSICAL, 
@@ -78,6 +79,7 @@ func _ready() -> void:
 	var overlay := RESULT_OVERLAY_SCENE.instantiate()
 	add_child(overlay)
 	overlay.call("setup", self)
+	AudioManager.play_music(level_number)   # start this level's track (runs on load + every retry)
 	queue_redraw()
 
 func build() -> void:
@@ -85,7 +87,7 @@ func build() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
-		AudioManager.play_level_music()
+		AudioManager.play_music(level_number)
 		get_tree().reload_current_scene()
 	elif event.is_action_pressed("switch_realm"):
 		switch_realm()

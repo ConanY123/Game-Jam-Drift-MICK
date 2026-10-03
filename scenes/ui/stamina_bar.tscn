@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dstam1nab4r00"]
 
-[ext_resource type="Script" path="res://scripts/ui/stamina_bar.gd" id="1_stam"]
+[ext_resource type="Script" uid="uid://orhg6wx81jr5" path="res://scripts/ui/stamina_bar.gd" id="1_stam"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.08, 0.07, 0.16, 0.85)
@@ -62,3 +62,12 @@ offset_right = 200.0
 offset_bottom = 20.0
 texture = SubResource("GradTex_fill")
 expand_mode = 1
+
+[node name="SpeedButton" type="Button" parent="." unique_id=1987125301]
+offset_left = 770.0
+offset_top = 96.0
+offset_right = 970.0
+offset_bottom = 132.0
+offset_transform_enabled = true
+offset_transform_position = Vector2(10, 10)
+text = "HOLD X FOR 2× SPEED"

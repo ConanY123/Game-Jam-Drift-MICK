@@ -1,65 +1,9 @@
 class_name Player
-extends Node2D
-
-# Free movement, solid against walls and objects (all read from the grid).
-# Walking into a Pushable and pressing interact shoves it one cell.
-# holdable objects: hold the key. Non-holdable objects: mash the key.
-
-const SIZE := 24.0  # smaller than a cell so you can slip through 1-cell gaps
-const SPEED := 96.0  # 3 cells per second, about 2x the roommate
-const MASH_GAIN := 0.12  # seconds of progress per key press
-const MASH_DECAY := 0.5  # progress lost per second when not pressing
-const FALL_SPEED := 480.0  # how fast you drop while falling through a dream gap
-const FALL_DROP_CELLS := 2.0  # how far (in cells) the little drop-out travels
-const FALL_OUT_TIME := 0.35  # seconds for the spin-shrink-fade-out
-const FALL_IN_TIME := 0.45  # seconds for the drop back in from the top
-const FALL_SPIN := TAU * 2.0  # total rotation across each phase (2 turns)
-
-enum FallPhase { NONE, OUT, IN }
-
-const ARROW_SCENE := preload("res://scenes/objects/arrow.tscn")
-const SHOOT_COOLDOWN := 0.3  # min seconds between arrows
-
-# Stamina is spent on physical-realm pushes, scaled by object weight, and
-# regenerates over time in the dream realm. The signal emits a 0..1 fraction.
-const MAX_STAMINA := 7.0  # total pushes-worth of a weight-1 object
-const DREAM_STAMINA_REGEN := 1.0  # stamina restored per second in the dream
-const PHYSICAL_RETURN_STAMINA_FRACTION := 0.25
-signal stamina_changed(fraction: float)
-
-var level: LevelBase
-var stamina := MAX_STAMINA
-var has_moved := false
-var push_target: Pushable
-var push_dir := Vector2i.ZERO
-var push_timer := 0.0
-var locked_to: Pushable  # box just pushed; key must be released before using another
-
-# Bow: picked up from a BowPickup. While held, holding interact draws the bow
-# (aim with WASD/arrows, you stand still and don't push), releasing fires an
-# arrow in the aimed direction.
-var has_bow := false
-var aiming := false
-var aim_dir := Vector2.RIGHT  # last aimed direction (persists between shots)
-var shoot_cd := 0.0
-
-# Dream-gap fall: drop a little while spinning + fading out, then fall back in
-# from the top spinning + fading in, landing on the nearest floor.
-# This only wastes time for the player (unlike the roommate, who fails).
-var falling := false
-var fall_phase := FallPhase.NONE
-var fall_t := 0.0  # 0..1 progress within the current phase
-var fall_from := Vector2.ZERO  # phase start position
-var land_target := Vector2.ZERO  # where to land once we've wrapped around
-# Visual-only transform applied in _draw while falling.
-var draw_spin := 0.0
-var draw_scale := 1.0
-var draw_alpha := 1.0
+extends "res://scripts/player/player_abilities.gd"
 
 func _ready() -> void:
 	_setup_input()
 	if level != null:
-		# Leaving the dream mid-fall cancels it (no gaps in the physical world).
 		level.realm_changed.connect(_on_realm_changed)
 
 func _on_realm_changed(new_realm: int) -> void:
@@ -69,15 +13,17 @@ func _on_realm_changed(new_realm: int) -> void:
 func _physics_process(delta: float) -> void:
 	if level == null:
 		return
+	_update_interaction_hint(delta)
+	if level.gameplay_locked():
+		_nearby_interactable = null
+		return
 	_recover_stamina(delta)
 
-	# Falling takes over everything: no walking, no pushing until we land.
 	if falling:
 		_update_fall(delta)
 		queue_redraw()
 		return
 
-	# Standing over a dream gap? Start the fall this frame.
 	if level.player_over_dream_gap():
 		_begin_fall()
 		queue_redraw()
@@ -85,281 +31,102 @@ func _physics_process(delta: float) -> void:
 
 	if shoot_cd > 0.0:
 		shoot_cd -= delta
+	if interact_locked and not Input.is_action_pressed("interact"):
+		interact_locked = false
 
-	# Bow + interact key is shared with pushing. Pushing wins when you're pressing
-	# into a pushable box (so you can still clear the real world with the bow in
-	# hand); otherwise holding interact draws the bow and aims (WASD steer),
-	# releasing fires. If we're mid-aim already, keep aiming until the key is
-	# released so a shot doesn't get cancelled by brushing a box.
-	if has_bow and (aiming or (push_target == null and not _pressing_into_pushable())):
+	if (
+		not interact_locked
+		and has_bow
+		and (aiming or (push_target == null and not _pressing_into_pushable()))
+	):
 		if _update_bow():
 			queue_redraw()
 			return
 
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	if input.length_squared() > 0.0:
+		if absf(input.x) > absf(input.y):
+			_facing_dir = Vector2i(int(signf(input.x)), 0)
+		else:
+			_facing_dir = Vector2i(0, int(signf(input.y)))
 	var step := input * SPEED * delta
 	var position_before_move := position
 
-	# Axes move separately so you slide along walls.
 	var hit_x := _move_axis(Vector2(step.x, 0))
 	var hit_y := _move_axis(Vector2(0, step.y))
 
-	var target: Pushable = null
-	var dir := Vector2i.ZERO
+	var target: Pushable
+	var direction := Vector2i.ZERO
 	if hit_x is Pushable:
 		target = hit_x
-		dir = Vector2i(int(sign(step.x)), 0)
+		direction = Vector2i(int(signf(step.x)), 0)
 	if hit_y is Pushable:
 		target = hit_y
-		dir = Vector2i(0, int(sign(step.y)))
+		direction = Vector2i(0, int(signf(step.y)))
 	if target == null and input == Vector2.ZERO and push_target != null:
 		target = push_target
-		dir = push_dir
-	_update_push(target, dir, delta)
+		direction = push_dir
+	_update_push(target, direction, delta)
 	if position != position_before_move:
 		has_moved = true
 	queue_redraw()
-
-# ---------- dream-gap fall ----------
-
-func _begin_fall() -> void:
-	falling = true
-	fall_phase = FallPhase.OUT
-	fall_t = 0.0
-	fall_from = position
-	# Lock in where we'll land: the nearest standable dream floor to here.
-	land_target = level.closest_dream_floor(position)
-	draw_spin = 0.0
-	draw_scale = 1.0
-	draw_alpha = 1.0
-	# Clear any push state so we don't resume shoving mid-fall.
-	push_target = null
-	push_timer = 0.0
-	locked_to = null
-
-func _end_fall() -> void:
-	falling = false
-	fall_phase = FallPhase.NONE
-	draw_spin = 0.0
-	draw_scale = 1.0
-	draw_alpha = 1.0
-
-func _update_fall(delta: float) -> void:
-	match fall_phase:
-		FallPhase.OUT:
-			fall_t += delta / FALL_OUT_TIME
-			var t := clampf(fall_t, 0.0, 1.0)
-			# Drop a few cells while spinning, shrinking and fading to nothing.
-			position.y = fall_from.y + FALL_DROP_CELLS * Grid.CELL * t
-			draw_spin = FALL_SPIN * t
-			draw_scale = 1.0 - t
-			draw_alpha = 1.0 - t
-			if t >= 1.0:
-				# Switch to re-entry: start above the top over the landing column.
-				fall_phase = FallPhase.IN
-				fall_t = 0.0
-				fall_from = Vector2(land_target.x, -SIZE)
-				position = fall_from
-		FallPhase.IN:
-			fall_t += delta / FALL_IN_TIME
-			var t := clampf(fall_t, 0.0, 1.0)
-			# Fall from above the top down to the landing floor, spinning,
-			# growing and fading back in as we arrive.
-			position.x = land_target.x
-			position.y = lerpf(fall_from.y, land_target.y, t)
-			draw_spin = FALL_SPIN * t
-			draw_scale = t
-			draw_alpha = t
-			if t >= 1.0:
-				position = land_target
-				_end_fall()
-		_:
-			_end_fall()
-
-# Moves if free. Returns null on success, or whatever blocked us.
-func _move_axis(offset: Vector2) -> Node:
-	if offset == Vector2.ZERO:
-		return null
-	var blocker := _blocker_at(position + offset)
-	if blocker == null or _is_traversable_dream_block(blocker):
-		position += offset
-	return blocker
-
-func _is_traversable_dream_block(blocker: Node) -> bool:
-	return (
-		level.realm == LevelBase.Realm.DREAM
-		and blocker is Pushable
-		and blocker.realm == LevelBase.Realm.DREAM
-	)
-
-func _blocker_at(center: Vector2) -> Node:
-	# Current realm's objects first, then physical ones (they stay solid in the dream)
-	var b: Node = _blocker_in(center, level.realm)
-	if b == null and level.realm == LevelBase.Realm.DREAM:
-		b = _blocker_in(center, LevelBase.Realm.PHYSICAL)
-	return b
-
-func _blocker_in(center: Vector2, in_realm: int) -> Node:
-	var half := Vector2(SIZE, SIZE) / 2.0
-	var min_cell := Grid.pos_to_cell(center - half)
-	var max_cell := Grid.pos_to_cell(center + half - Vector2(0.01, 0.01))
-	for x in range(min_cell.x, max_cell.x + 1):
-		for y in range(min_cell.y, max_cell.y + 1):
-			var b := level.blocker_at(Vector2i(x, y), in_realm)
-			if b != null:
-				return b
-	return null
-
-# True if the player would be standing inside something solid in that realm.
-func is_overlapping(in_realm: int) -> bool:
-	return _blocker_in(position, in_realm) != null
-
-func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
-	# You can only push objects that belong to the realm you're currently in.
-	# (A physical object is still solid in the dream, but intangible - can't be
-	# shoved there; likewise dream objects can only be pushed from the dream.)
-	if target != null and target.realm != level.realm:
-		target = null
-	# Releasing the key clears the lock.
-	if not Input.is_action_pressed("interact"):
-		locked_to = null
-	# Key is still held from the last push, so other boxes are ignored.
-	if target != null and locked_to != null and target != locked_to:
-		target = null
-
-	if target == null:
-		push_target = null
-		push_timer = 0.0
-		return
-	if target != push_target or dir != push_dir:
-		push_target = target
-		push_dir = dir
-		push_timer = 0.0
-
-	if target.holdable:
-		if not Input.is_action_pressed("interact"):
-			push_timer = 0.0
-			return
-		push_timer += delta
-	else:
-		if Input.is_action_just_pressed("interact"):
-			push_timer += MASH_GAIN
-		else:
-			var proportinal = min((push_timer / target.hold_time()), 0.9)
-			push_timer = maxf(push_timer - delta * MASH_DECAY * proportinal, 0.0)
-
-	if push_timer >= target.hold_time():
-		push_timer = 0.0
-		if target.try_push(dir):
-			locked_to = target
-			# Pushing in the real world costs stamina, scaled by weight.
-			if level.realm == LevelBase.Realm.PHYSICAL:
-				_spend_stamina(target.weight)
-
-func _spend_stamina(amount: float) -> void:
-	stamina = clampf(stamina - amount, 0.0, MAX_STAMINA)
-	stamina_changed.emit(stamina / MAX_STAMINA)
-	if is_zero_approx(stamina) and level.realm == LevelBase.Realm.PHYSICAL:
-		level.switch_realm()
-
-func _recover_stamina(delta: float) -> void:
-	if level.realm != LevelBase.Realm.DREAM or stamina >= MAX_STAMINA:
-		return
-	stamina = minf(stamina + DREAM_STAMINA_REGEN * delta, MAX_STAMINA)
-	stamina_changed.emit(stamina / MAX_STAMINA)
-
-func can_switch_to_physical() -> bool:
-	return stamina >= MAX_STAMINA * PHYSICAL_RETURN_STAMINA_FRACTION
-
-# True if a movement key is held and the player is pushing toward a pushable in
-# the current realm. Used to let pushing win over the bow when sharing the key.
-func _pressing_into_pushable() -> bool:
-	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	if input.length() < 0.1:
-		return false
-	# Probe a short step ahead on each axis for a Pushable in this realm.
-	var probe := SPEED * 0.05  # a fraction of a second of movement
-	for off in [Vector2(signf(input.x) * probe, 0), Vector2(0, signf(input.y) * probe)]:
-		if off == Vector2.ZERO:
-			continue
-		var b := _blocker_in(position + off, level.realm)
-		if b is Pushable and b.realm == level.realm:
-			return true
-	return false
-
-# Returns true while the bow is drawn (so the caller skips walking/pushing).
-# Holding interact draws + aims with the direction keys; releasing fires.
-func _update_bow() -> bool:
-	if Input.is_action_pressed("interact"):
-		# Steer the aim with the movement keys. Keep the last aim if no key is
-		# held, so you can draw and then pick a direction, or hold a direction.
-		var steer := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-		if steer.length() > 0.1:
-			# Snap to 4 directions so arrows fly along the grid, matching the
-			# rest of the game's cardinal movement.
-			if absf(steer.x) >= absf(steer.y):
-				aim_dir = Vector2(signf(steer.x), 0)
-			else:
-				aim_dir = Vector2(0, signf(steer.y))
-		aiming = true
-		# Clear any push state so releasing the key doesn't trigger a shove.
-		push_target = null
-		push_timer = 0.0
-		locked_to = null
-		return true
-	# Key released: if we were drawing, loose an arrow.
-	if aiming:
-		aiming = false
-		if shoot_cd <= 0.0:
-			_fire_arrow()
-			shoot_cd = SHOOT_COOLDOWN
-		return true  # consume this frame so the release doesn't do anything else
-	return false
-
-func _fire_arrow() -> void:
-	var arrow := ARROW_SCENE.instantiate()
-	# Start a little ahead of the player so it doesn't instantly self-collide.
-	arrow.position = position + aim_dir * (SIZE * 0.5 + 2.0)
-	level.add_child(arrow)
-	arrow.call("setup", level, aim_dir)
-
-func _setup_input() -> void:
-	var map := {
-		"move_left": [KEY_A, KEY_LEFT],
-		"move_right": [KEY_D, KEY_RIGHT],
-		"move_up": [KEY_W, KEY_UP],
-		"move_down": [KEY_S, KEY_DOWN],
-		"interact": [KEY_Z, KEY_SPACE],
-		"switch_realm": [KEY_C],
-	}
-	for action in map:
-		if InputMap.has_action(action):
-			continue  # already added (scene reload)
-		InputMap.add_action(action)
-		for key in map[action]:
-			var ev := InputEventKey.new()
-			ev.physical_keycode = key
-			InputMap.action_add_event(action, ev)
 
 func _draw() -> void:
 	var half := SIZE / 2.0
 	var body := Color(0.35, 0.8, 1.0)
 	if falling:
-		# Spin + shrink/grow + fade are all driven by the fall state.
 		draw_set_transform(Vector2.ZERO, draw_spin, Vector2(draw_scale, draw_scale))
 		body.a = draw_alpha
 	draw_rect(Rect2(-half, -half, SIZE, SIZE), body)
 	if falling:
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)  # reset for anything after
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
-	if push_target != null:  # little progress bar while you push
-		var t := clampf(push_timer / push_target.hold_time(), 0.0, 1.0)
-		draw_rect(Rect2(-half, -half - 8, SIZE * t, 3), Color.WHITE)
+	if push_target != null:
+		var progress := clampf(push_timer / push_target.hold_time(), 0.0, 1.0)
+		draw_rect(Rect2(-half, -half - 8, SIZE * progress, 3), Color.WHITE)
+
+	if _interaction_hint_progress > 0.0:
+		_draw_interaction_hint(half)
 
 	if has_bow:
-		# A small aim marker so you can see the current/last aim direction.
 		var reach := SIZE * 0.9
 		var tip := aim_dir * reach
-		var col := Color(0.95, 0.9, 0.6, 1.0 if aiming else 0.4)
-		draw_line(Vector2.ZERO, tip, col, 2.0 if aiming else 1.0)
-		draw_circle(tip, 2.5, col)
+		var color := Color(0.95, 0.9, 0.6, 1.0 if aiming else 0.4)
+		draw_line(Vector2.ZERO, tip, color, 2.0 if aiming else 1.0)
+		draw_circle(tip, 2.5, color)
+
+func _draw_interaction_hint(half: float) -> void:
+	var pressed := (
+		not _interaction_hint_holdable
+		and fposmod(_interaction_hint_time, 0.3) < 0.06
+	)
+	var center_y := -half - 27.0
+	center_y += lerpf(9.0, 0.0, _interaction_hint_progress)
+	if pressed:
+		center_y += 2.5
+	var center := Vector2(0.0, center_y)
+	var radius := 10.0
+	draw_circle(
+		center,
+		radius,
+		Color(0.08, 0.07, 0.13, 0.94 * _interaction_hint_progress)
+	)
+	draw_arc(
+		center,
+		radius,
+		0.0,
+		TAU,
+		32,
+		Color(1.0, 1.0, 1.0, 0.95 * _interaction_hint_progress),
+		1.5,
+		true
+	)
+	draw_string(
+		ThemeDB.fallback_font,
+		Vector2(-radius, center.y + 5.0),
+		"Z",
+		HORIZONTAL_ALIGNMENT_CENTER,
+		radius * 2.0,
+		13,
+		Color(1.0, 1.0, 1.0, _interaction_hint_progress)
+	)

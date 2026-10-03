@@ -10,10 +10,36 @@ extends CanvasLayer
 
 @onready var _fill: TextureRect = $Panel/BarBG/Fill
 @onready var _label: Label = $Panel/Label
+@onready var _speed_button: Button = $SpeedButton
 
 const FULL_WIDTH := 200.0  # px width of the bar at 100% (matches the scene)
 const BAR_HEIGHT := 20.0  # bar fill height (matches the scene)
 const LOW_FRACTION := 0.25  # design doc warns around 25%
+const NORMAL_TIME_SCALE := 1.0
+const FAST_TIME_SCALE := 2.0
+
+var _speed_button_held := false
+var _speed_key_held := false
+
+func _ready() -> void:
+	_speed_button.button_down.connect(_on_speed_button_down)
+	_speed_button.button_up.connect(_on_speed_button_up)
+
+func _exit_tree() -> void:
+	_speed_button_held = false
+	_speed_key_held = false
+	_update_speed_state()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_speed_button_held = false
+		_speed_key_held = false
+		_update_speed_state()
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.keycode == KEY_X:
+		_speed_key_held = event.pressed
+		_update_speed_state()
 
 func setup(level: LevelBase) -> void:
 	# build() runs before the level instantiates this, so the player exists.
@@ -36,3 +62,20 @@ func _on_stamina_changed(fraction: float) -> void:
 	else:
 		_fill.modulate = Color(1, 1, 1, 1.0)
 	_label.text = "STAMINA"
+
+func _on_speed_button_down() -> void:
+	_speed_button_held = true
+	_update_speed_state()
+
+func _on_speed_button_up() -> void:
+	_speed_button_held = false
+	_update_speed_state()
+
+func _update_speed_state() -> void:
+	var speed_up := _speed_button_held or _speed_key_held
+	Engine.time_scale = FAST_TIME_SCALE if speed_up else NORMAL_TIME_SCALE
+	_speed_button.text = (
+		"2× SPEED ACTIVE (X)"
+		if speed_up
+		else "HOLD X FOR 2× SPEED"
+	)

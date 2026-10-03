@@ -11,6 +11,8 @@ script = ExtResource("1_5mdwd")
 stream = ExtResource("2_ybwj1")
 bus = &"Music"
 
+[node name="LevelTwo" type="AudioStreamPlayer2D" parent="." unique_id=1101595501]
+
 [node name="SFX" type="Node" parent="." unique_id=1219820001]
 
 [node name="GameOver" type="AudioStreamPlayer2D" parent="SFX" unique_id=389997892]

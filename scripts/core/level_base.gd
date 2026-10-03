@@ -85,6 +85,7 @@ func build() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
+		AudioManager.play_level_music()
 		get_tree().reload_current_scene()
 	elif event.is_action_pressed("switch_realm"):
 		switch_realm()

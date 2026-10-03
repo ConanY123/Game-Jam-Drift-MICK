@@ -78,6 +78,7 @@ func _ready() -> void:
 	var overlay := RESULT_OVERLAY_SCENE.instantiate()
 	add_child(overlay)
 	overlay.call("setup", self)
+	level_won.connect(func(): get_node("/root/LevelManager").call_deferred("advance_level"))
 	queue_redraw()
 
 func build() -> void:

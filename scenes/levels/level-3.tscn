@@ -44,6 +44,14 @@ curve = SubResource("Curve2D_orn5u")
 [node name="Goose" parent="." unique_id=1134621013 instance=ExtResource("7_i1e88")]
 position = Vector2(608, 320)
 
+[node name="Goose2" parent="." unique_id=1075646463 instance=ExtResource("7_i1e88")]
+position = Vector2(384, 320)
+start_direction = 1
+
+[node name="Goose3" parent="." unique_id=1962412394 instance=ExtResource("7_i1e88")]
+position = Vector2(480, 128)
+start_direction = 3
+
 [node name="Physical" type="Node" parent="." unique_id=1087518688]
 
 [node name="Dream" type="Node" parent="." unique_id=1213284921]

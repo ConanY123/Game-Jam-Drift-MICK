@@ -2,6 +2,8 @@ extends LevelBase
 
 # Level geometry is authored in level-1.tscn's TileMapLayers.
 
+const DOOR_SCENE := preload("res://scenes/objects/door.tscn")
+
 func build() -> void:
 	# The roommate follows this route through the authored level.
 	debug_path = [
@@ -30,6 +32,20 @@ func build() -> void:
 		var bridge := add_pushable(Vector2i(x, 4), Vector2i(1, 1), 1.0, Color(0.4, 0.85, 0.8), LevelBase.Realm.DREAM, true)
 		bridge.is_floor = true
 
+	# A physical door on the corridor the roommate walks down (12,2)->(12,8).
+	# It's solid (and lethal) while closed; press interact against it to open
+	# it before he arrives so he can pass. See scripts/objects/door.gd.
+	_add_door(Vector2i(12, 5))
+
 	add_player(Vector2i(4, 3))
 	# The sleepwalker follows the authored route (same line drawn for debug).
 	add_roommate(debug_path)
+
+# Spawns a Door scene at a cell and lets its _ready register it with this level
+# (same pattern as a Pushable placed in the editor). Typed as Node2D so this
+# file never has a compile-time dependency on the Door class name.
+func _add_door(cell: Vector2i) -> Node2D:
+	var d: Node2D = DOOR_SCENE.instantiate()
+	d.position = Grid.cell_to_pos(cell)
+	add_child(d)
+	return d

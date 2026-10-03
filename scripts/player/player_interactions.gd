@@ -16,7 +16,10 @@ var _interaction_hint_progress := 0.0
 var _interaction_hint_holdable := true
 
 func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
-	if target != null and target.realm != level.realm:
+	if (
+		target != null
+		and (target.realm != level.realm or not target.can_interact(dir))
+	):
 		target = null
 	if interact_locked:
 		push_target = null
@@ -106,7 +109,20 @@ func _update_interaction_hint(delta: float) -> void:
 		for direction in directions:
 			var offset := Vector2(direction) * reach
 			var candidate := _blocker_in(position + offset, level.realm)
-			if candidate is Pushable and candidate.realm == level.realm:
+			if direction == facing and candidate != null:
+				if (
+					candidate is Pushable
+					and candidate.realm == level.realm
+					and candidate.can_interact(direction)
+				):
+					_nearby_interactable = candidate
+					_interaction_hint_holdable = candidate.holdable
+				break
+			if (
+				candidate is Pushable
+				and candidate.realm == level.realm
+				and candidate.can_interact(direction)
+			):
 				_nearby_interactable = candidate
 				_interaction_hint_holdable = candidate.holdable
 				break

@@ -52,7 +52,7 @@ func _refresh() -> void:
 		return
 	var current_realm := int(level.get("realm"))
 	visible = current_realm == realm or realm == 0
-	modulate.a = 1.0 if current_realm == realm else 0.15
+	modulate.a = 1.0 if current_realm == realm else 0.35
 	queue_redraw()
 
 func _publish_initial_state() -> void:

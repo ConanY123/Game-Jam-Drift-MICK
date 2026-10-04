@@ -40,7 +40,7 @@ func _refresh() -> void:
 			sprite.modulate.a = 1.0
 		elif realm == LevelBase.Realm.PHYSICAL:
 			sprite.visible = true
-			sprite.modulate.a = 0.15  # physical object seen from the dream
+			sprite.modulate.a = 0.35  # physical object seen from the dream
 		else:
 			sprite.visible = false  # dream object seen from the physical realm
 	queue_redraw()
@@ -103,4 +103,4 @@ func _draw() -> void:
 			draw_rect(rect, color)
 	elif realm == LevelBase.Realm.PHYSICAL:
 		# Physical object seen from the dream: faint, still solid, but not touchable.
-		draw_rect(rect, Color(color, 0.15))
+		draw_rect(rect, Color(color, 0.35))

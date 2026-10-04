@@ -77,7 +77,7 @@ position = Vector2(224, 416)
 position = Vector2(96, 192)
 
 [node name="Table" parent="Pushables" unique_id=86256793 instance=ExtResource("7_apx21")]
-position = Vector2(128, 160)
+position = Vector2(128, 128)
 
 [node name="Chair4" parent="Pushables" unique_id=1137359490 instance=ExtResource("6_2jqb1")]
 position = Vector2(160, 256)

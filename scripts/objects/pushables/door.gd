@@ -20,6 +20,7 @@ const SWING_DURATION := 0.25
 var _leaf_angle := start_angle_degrees
 var _swing_tween: Tween
 var inactive := false
+@onready var _open_sfx: AudioStreamPlayer2D = $OpenSfx
 
 func _ready() -> void:
 	super._ready()  # keep Pushable's self-registration with the parent level
@@ -43,6 +44,7 @@ func try_push(dir: Vector2i) -> bool:
 	if not can_interact(dir):
 		return false
 	open = true
+	_open_sfx.play()
 	_refresh()
 	level.unregister(self, realm)
 	_animate_swing(_open_angle())

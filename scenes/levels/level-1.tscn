@@ -11,6 +11,9 @@
 
 [node name="Level1" type="Node2D" unique_id=402028665]
 script = ExtResource("1_ktyk1")
+caption_title = "Chapter One"
+caption_subtitle = "Keep him safe through the night"
+caption_hold = 2.0
 
 [node name="PhysicalBackground" type="Sprite2D" parent="." unique_id=226564945]
 z_index = -20

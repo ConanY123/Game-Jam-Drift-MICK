@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://orhg6wx81jr5" path="res://scripts/ui/stamina_bar.gd" id="1_stam"]
 [ext_resource type="Shader" path="res://shaders/stamina_edge_effect.gdshader" id="2_edge"]
+[ext_resource type="Script" path="res://scripts/ui/realm_minimap.gd" id="3_minimap"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.08, 0.07, 0.16, 0.85)
@@ -32,6 +33,19 @@ offset = Vector2(0, 0)
 transform = Transform2D(1, 0, 0, 1, 0, 0)
 script = ExtResource("1_stam")
 
+[node name="RealmMinimap" type="Control" parent="." unique_id=1692323651]
+layout_mode = 0
+anchor_left = 0.75
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 176.0
+offset_right = -16.0
+offset_bottom = 304.0
+mouse_filter = 2
+visible = false
+process_mode = 4
+script = ExtResource("3_minimap")
+
 [node name="EdgeEffect" type="ColorRect" parent="." unique_id=1946388274]
 material = SubResource("ShaderMaterial_edge")
 anchors_preset = 15
@@ -46,9 +60,9 @@ anchors_preset = -1
 anchor_left = 0.75
 anchor_right = 1.0
 offset_left = 32.0
-offset_top = 32.0
+offset_top = 468.0
 offset_right = -32.0
-offset_bottom = 152.0
+offset_bottom = 544.0
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
 [node name="Label" type="Label" parent="Panel" unique_id=1047913316]
@@ -82,9 +96,9 @@ anchors_preset = -1
 anchor_left = 0.75
 anchor_right = 0.75
 offset_left = 36.0
-offset_top = 168.0
+offset_top = 424.0
 offset_right = 124.0
-offset_bottom = 204.0
+offset_bottom = 460.0
 theme_override_font_sizes/font_size = 12
 toggle_mode = true
 text = ">>"
@@ -94,8 +108,8 @@ anchors_preset = -1
 anchor_left = 0.75
 anchor_right = 0.75
 offset_left = 132.0
-offset_top = 168.0
+offset_top = 424.0
 offset_right = 220.0
-offset_bottom = 204.0
+offset_bottom = 460.0
 theme_override_font_sizes/font_size = 12
 text = ">>>"

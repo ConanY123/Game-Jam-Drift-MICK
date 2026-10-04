@@ -3,10 +3,28 @@ extends Slidable
 
 @export_enum("Horizontal", "Vertical") var orientation := 0
 
+@onready var _cart_sfx: AudioStreamPlayer2D = $CartSfx
+@onready var _wall_hit_sfx: AudioStreamPlayer2D = $WallHitSfx
 
 func _ready() -> void:
 	_update_orientation()
 	super._ready()
+	var cart_stream := _cart_sfx.stream as AudioStreamMP3
+	if cart_stream == null:
+		push_error("SlidingCart CartSfx must use an MP3 stream.")
+	else:
+		cart_stream.loop = true
+
+
+func _on_slide_started() -> void:
+	_wall_hit_sfx.stop()
+	_cart_sfx.play()
+
+
+func _on_slide_finished(hit_obstacle: bool) -> void:
+	_cart_sfx.stop()
+	if hit_obstacle:
+		_wall_hit_sfx.play()
 
 
 func _update_orientation() -> void:

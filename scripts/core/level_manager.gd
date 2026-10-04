@@ -5,6 +5,12 @@ const LEVEL_SCENES: Array[String] = [
 	"res://scenes/levels/level-0.tscn",
 	"res://scenes/levels/level-1.tscn",
 	"res://scenes/levels/level-2.tscn",
+	"res://scenes/levels/level-3.tscn",
+	"res://scenes/levels/level-4.tscn",
+	"res://scenes/levels/level-5.tscn",
+	"res://scenes/levels/level-6.tscn",
+	"res://scenes/levels/level-7.tscn",
+	"res://scenes/levels/level-8.tscn",
 ]
 
 signal all_levels_completed

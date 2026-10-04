@@ -17,6 +17,9 @@ var moving := false
 func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 	level = p_level
 	cell = p_cell
+	# Floor objects sit below the roommate route overlay. Other pushables keep
+	# the normal layer so they can obscure the route when they overlap it.
+	z_index = -2 if is_floor else 0
 	position = Grid.cell_to_pos(cell)
 	level.register(self, get_cells(cell), realm)
 	level.realm_changed.connect(func(_r): _refresh())
@@ -33,7 +36,7 @@ func _ready() -> void:
 
 # Sprite follows the same realm rules as the drawn rectangle
 func _refresh() -> void:
-	var sprite := get_node_or_null("Sprite2D")
+	var sprite := _get_sprite_visual()
 	if sprite != null:
 		if level.realm == realm:
 			sprite.visible = true
@@ -44,6 +47,12 @@ func _refresh() -> void:
 		else:
 			sprite.visible = false  # dream object seen from the physical realm
 	queue_redraw()
+
+func _get_sprite_visual() -> CanvasItem:
+	var sprite := get_node_or_null("Sprite2D") as CanvasItem
+	if sprite == null:
+		sprite = get_node_or_null("AnimatedSprite2D") as CanvasItem
+	return sprite
 
 # Swap this for a footprint array later if you want L-shaped desks.
 func get_cells(origin: Vector2i) -> Array[Vector2i]:
@@ -78,9 +87,17 @@ func can_push(dir: Vector2i) -> bool:
 func can_interact(dir: Vector2i) -> bool:
 	return can_push(dir)
 
+# When true, the player can interact with this object even while viewing the
+# other realm. Default: only in its own realm. Overridden by e.g. the treadmill.
+func interactable_in_any_realm() -> bool:
+	return false
+
 func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
 		return false
+	var push_sfx := get_node_or_null("PushSfx") as AudioStreamPlayer2D
+	if push_sfx != null:
+		push_sfx.play()
 	var target := cell + dir
 	var new_cells := get_cells(target)
 	# Claim the new cells right away; the tween is only visual.
@@ -97,7 +114,7 @@ func _draw() -> void:
 	if level == null:
 		return
 	var rect := Rect2(Vector2(1, 1), Vector2(size * Grid.CELL) - Vector2(2, 2))
-	var has_sprite := get_node_or_null("Sprite2D") != null
+	var has_sprite := _get_sprite_visual() != null
 	if level.realm == realm:
 		if not has_sprite: 
 			draw_rect(rect, color)

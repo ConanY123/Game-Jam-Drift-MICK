@@ -13,6 +13,7 @@ extends CanvasLayer
 @onready var _fast_forward_button: Button = $FastForwardButton
 @onready var _edge_effect: ColorRect = $EdgeEffect
 @onready var _edge_material: ShaderMaterial = $EdgeEffect.material
+@onready var _minimap: RealmMinimap = $RealmMinimap
 
 const FULL_WIDTH := 168.0  # six-cell panel width minus its 12px side margins
 const BAR_HEIGHT := 20.0  # bar fill height (matches the scene)
@@ -66,6 +67,14 @@ func _notification(what: int) -> void:
 		_update_speed_state()
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.keycode == KEY_P:
+		if event.pressed and not event.echo:
+			_fast_forward_held = true
+		elif not event.pressed:
+			_fast_forward_held = false
+		_update_speed_state()
+		get_viewport().set_input_as_handled()
+		return
 	if (
 		not _speed_effects_disabled
 		and
@@ -84,9 +93,11 @@ func setup(level: LevelBase) -> void:
 	_player = level.player
 	if _player == null:
 		return
+	# Temporarily disabled while the minimap presentation is being revised.
 	_player.stamina_changed.connect(_on_stamina_changed)
 	level.realm_changed.connect(_on_realm_changed)
 	level.realm_switch_failed_low_stamina.connect(_on_realm_switch_attempted)
+	level.level_won.connect(_on_level_won)
 	level.level_lost.connect(_on_level_lost)
 	# Start showing the current value (full at level start).
 	_on_stamina_changed(_player.stamina / Player.MAX_STAMINA)
@@ -214,6 +225,16 @@ func _on_fast_forward_button_up() -> void:
 	_update_speed_state()
 
 func _on_level_lost(_reason: String) -> void:
+	_speed_effects_disabled = true
+	_fast_forward_held = false
+	_two_x_enabled = false
+	_speed_button.set_pressed_no_signal(false)
+	_fast_forward_button.set_pressed_no_signal(false)
+	_speed_button.disabled = true
+	_fast_forward_button.disabled = true
+	Engine.time_scale = NORMAL_TIME_SCALE
+
+func _on_level_won() -> void:
 	_speed_effects_disabled = true
 	_fast_forward_held = false
 	_two_x_enabled = false

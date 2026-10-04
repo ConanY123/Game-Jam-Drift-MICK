@@ -22,7 +22,11 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 		push_timer = 0.0
 		return
 
-	if target != null and target.realm != level.realm:
+	if (
+		target != null
+		and target.realm != level.realm
+		and not target.interactable_in_any_realm()
+	):
 		target = null
 	if target != null and not target.can_interact(dir):
 		if target != push_target:
@@ -63,6 +67,11 @@ func _spend_stamina(amount: float) -> void:
 	stamina_changed.emit(stamina / MAX_STAMINA)
 	if is_zero_approx(stamina) and level.realm == LevelBase.Realm.PHYSICAL:
 		level.switch_realm()
+
+func drain_stamina(amount: float) -> void:
+	if is_zero_approx(stamina):
+		return
+	_spend_stamina(amount)
 
 func _restore_stamina(amount: float) -> void:
 	stamina = clampf(stamina + amount, 0.0, MAX_STAMINA)
@@ -108,6 +117,7 @@ func _update_interaction_hint(delta: float) -> void:
 	_nearby_interactable_dir = Vector2i.ZERO
 	_nearby_signal_source = null
 	var reach := SIZE * 0.5 + 1.0
+	var player_cell := Grid.pos_to_cell(position)
 	var facing := _facing_dir
 	var clockwise := Vector2i(-facing.y, facing.x)
 	var directions: Array[Vector2i] = [
@@ -141,7 +151,17 @@ func _update_interaction_hint(delta: float) -> void:
 				break
 
 		if _nearby_interactable == null:
-			var player_cell := Grid.pos_to_cell(position)
+			for source: Node in get_tree().get_nodes_in_group("signal_sources"):
+				if (
+					source.get("manually_toggleable") == true
+					and bool(source.call("can_interact_in_realm", level.realm))
+					and Grid.pos_to_cell(level.to_local(source.global_position)) == player_cell
+				):
+					_nearby_signal_source = source
+					_interaction_hint_holdable = false
+					break
+
+		if _nearby_signal_source == null and _nearby_interactable == null:
 			for direction in directions:
 				var probe := position + Vector2(direction) * reach
 				if _blocker_in(probe, level.realm) != null:

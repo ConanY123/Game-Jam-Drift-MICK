@@ -11,4 +11,4 @@ speed = 2.0
 can_be_pushed = false
 realm = 1
 is_floor = true
-color = Color(0.545098, 0.352941, 0.168627, 1)
+color = Color(1, 0.356863, 0.741176, 1)

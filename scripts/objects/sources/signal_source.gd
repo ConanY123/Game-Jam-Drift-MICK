@@ -3,6 +3,8 @@ extends Node2D
 
 signal turned_on
 signal turned_off
+signal toggled
+signal initial_state_published(is_on: bool)
 
 @export_enum("Physical", "Dream") var realm := 0
 @export var initially_on := false
@@ -33,7 +35,16 @@ func _ready() -> void:
 		):
 			push_error("SignalSource output path does not point to a signal output: %s" % output_path)
 			continue
-		if output_node.get("invert_signal") == true:
+		if output_node.get("toggle_on_source_toggle") == true:
+			if not (
+				output_node.has_method("toggle_power")
+				and output_node.has_method("apply_initial_signal")
+			):
+				push_error("SignalSource toggle output does not support toggle behavior: %s" % output_path)
+				continue
+			toggled.connect(Callable(output_node, "toggle_power"))
+			initial_state_published.connect(Callable(output_node, "apply_initial_signal"))
+		elif output_node.get("invert_signal") == true:
 			turned_on.connect(Callable(output_node, "turn_off"))
 			turned_off.connect(Callable(output_node, "turn_on"))
 		else:
@@ -56,6 +67,7 @@ func _refresh() -> void:
 	queue_redraw()
 
 func _publish_initial_state() -> void:
+	initial_state_published.emit(is_on)
 	if is_on:
 		turned_on.emit()
 	else:
@@ -70,6 +82,7 @@ func set_off() -> void:
 
 func toggle() -> void:
 	_set_state(not is_on)
+	toggled.emit()
 
 func _set_state(new_state: bool) -> void:
 	if is_on == new_state:

@@ -46,6 +46,10 @@ func _build_ui() -> void:
 		_pause_button.add_child(pause_bar)
 	_pause_button.pressed.connect(_toggle_pause)
 	_pause_button.position = Vector2(24, 24)
+	# The on-screen pause icon is hidden; pausing is done with the Escape key
+	# (see _input). The node stays in the tree so lookups by name still work.
+	_pause_button.visible = false
+	_pause_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_pause_button)
 
 	_dark_overlay = ColorRect.new()

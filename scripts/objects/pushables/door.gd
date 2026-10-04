@@ -20,6 +20,7 @@ const SWING_DURATION := 0.25
 var _leaf_angle := start_angle_degrees
 var _swing_tween: Tween
 var inactive := false
+@onready var _open_sfx: AudioStreamPlayer2D = $OpenSfx
 
 func _ready() -> void:
 	super._ready()  # keep Pushable's self-registration with the parent level
@@ -43,6 +44,7 @@ func try_push(dir: Vector2i) -> bool:
 	if not can_interact(dir):
 		return false
 	open = true
+	_open_sfx.play()
 	_refresh()
 	level.unregister(self, realm)
 	_animate_swing(_open_angle())
@@ -75,40 +77,30 @@ func _collision_cells(angle_degrees: float) -> Array[Vector2i]:
 			cells.append(cell + Vector2i(x, y))
 	return cells
 
-func overlaps_player_hitbox(player_center: Vector2, hitbox_size: Vector2) -> bool:
+func overlaps_player_circle(player_center: Vector2, player_radius: float) -> bool:
 	if moving:
 		return false
-	return _overlaps_player_hitbox_at(player_center, hitbox_size, _leaf_angle)
+	return _overlaps_player_circle_at(player_center, player_radius, _leaf_angle)
 
-func _overlaps_player_hitbox_at(
+func _overlaps_player_circle_at(
 	player_center: Vector2,
-	hitbox_size: Vector2,
+	player_radius: float,
 	angle_degrees: float
 ) -> bool:
 	var angle := deg_to_rad(-angle_degrees)
 	var forward := Vector2.RIGHT.rotated(angle)
-	var side := Vector2.DOWN.rotated(angle)
-	var leaf_center := Vector2(
-		LEAF_LENGTH * 0.5,
-		LEAF_COLLISION_THICKNESS * 0.5
-	).rotated(angle)
 	var local_player_center := to_local(level.to_global(player_center))
-	var separation := local_player_center - leaf_center
-	var player_half := hitbox_size * 0.5
-	var leaf_half := Vector2(LEAF_LENGTH, LEAF_COLLISION_THICKNESS) * 0.5
-
-	for axis in [Vector2.RIGHT, Vector2.DOWN, forward, side]:
-		var player_radius := (
-			player_half.x * absf(axis.x)
-			+ player_half.y * absf(axis.y)
-		)
-		var leaf_radius := (
-			leaf_half.x * absf(axis.dot(forward))
-			+ leaf_half.y * absf(axis.dot(side))
-		)
-		if absf(separation.dot(axis)) >= player_radius + leaf_radius:
-			return false
-	return true
+	var closest_distance := clampf(
+		local_player_center.dot(forward),
+		0.0,
+		LEAF_LENGTH
+	)
+	var closest_point := forward * closest_distance
+	var combined_radius := player_radius + LEAF_COLLISION_THICKNESS * 0.5
+	return (
+		local_player_center.distance_squared_to(closest_point)
+		< combined_radius * combined_radius
+	)
 
 func _animate_swing(target_angle: float) -> void:
 	if _swing_tween != null and _swing_tween.is_running():

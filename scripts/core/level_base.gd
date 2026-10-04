@@ -37,6 +37,7 @@ const ROOMMATE_SCENE := preload("res://scenes/actors/roommate.tscn")
 const RESULT_OVERLAY_SCENE := preload("res://scenes/ui/result_overlay.tscn")
 const STAMINA_BAR_SCENE := preload("res://scenes/ui/stamina_bar.tscn")
 const LEVEL_CAPTION_SCENE := preload("res://scenes/ui/level_caption.tscn")
+const ROOMMATE_PATH_OVERLAY_SCRIPT := preload("res://scripts/core/roommate_path_overlay.gd")
 
 var realm := Realm.PHYSICAL
 var roommate: Node2D
@@ -51,6 +52,7 @@ var debug_path: Array[Vector2i] = []  # placeholder until the roommate exists
 
 var dream_floor := {}  # Vector2i -> true
 var player: Player
+var roommate_path_overlay: RoommatePathOverlay
 var result_overlay: Node
 var _level_ended := false
 
@@ -80,6 +82,11 @@ func closest_dream_floor(pos: Vector2) -> Vector2:
 func is_dream_floor(cell: Vector2i) -> bool:
 	if dream_floor.has(cell):
 		return true
+	for platform in get_tree().get_nodes_in_group("moving_platforms"):
+		if not platform is MovingPlatform:
+			continue
+		if platform.level == self and platform.supports_cell(cell):
+			return true
 	var b = solids[Realm.DREAM].get(cell)
 	return b is Pushable and b.is_floor
 
@@ -95,9 +102,16 @@ func player_over_dream_gap() -> bool:
 
 func _ready() -> void:
 	_load_tilemaps()
+	roommate_path_overlay = ROOMMATE_PATH_OVERLAY_SCRIPT.new()
+	# Keep the route above floor objects, but below ordinary obstacles.
+	roommate_path_overlay.z_index = -1
+	roommate_path_overlay.z_as_relative = false
+	add_child(roommate_path_overlay)
 	build()
 	_update_layers()
 	realm_changed.connect(func(_r): _update_layers())
+	AudioManager.set_dream_reverb(realm == Realm.DREAM, 0.0)
+	AudioManager.set_dream_music_quieter(realm == Realm.DREAM, 0.0)
 	var overlay := RESULT_OVERLAY_SCENE.instantiate()
 	add_child(overlay)
 	result_overlay = overlay
@@ -120,7 +134,22 @@ func _show_intro_caption() -> void:
 		return
 	var caption := LEVEL_CAPTION_SCENE.instantiate()
 	add_child(caption)
-	caption.call("show_caption", caption_title, "", caption_hold)
+	caption.call(
+		"show_caption",
+		caption_title,
+		"",
+		caption_hold,
+		_level_time_label()
+	)
+
+func _level_time_label() -> String:
+	var level_manager := get_node("/root/LevelManager")
+	var level_index: int = level_manager.current_level
+	var hour := posmod(level_index, 12)
+	if hour == 0:
+		hour = 12
+	var period := "AM" if level_index < 12 else "PM"
+	return "%d:00 %s" % [hour, period]
 
 func gameplay_locked() -> bool:
 	var transitions := get_node_or_null("/root/TransitionManager")
@@ -159,6 +188,14 @@ func switch_realm() -> void:
 func _apply_realm_switch() -> void:
 	realm = Realm.DREAM if realm == Realm.PHYSICAL else Realm.PHYSICAL
 	realm_changed.emit(realm)
+	AudioManager.set_dream_reverb(
+		realm == Realm.DREAM,
+		realm_transition_duration * 0.5
+	)
+	AudioManager.set_dream_music_quieter(
+		realm == Realm.DREAM,
+		realm_transition_duration * 0.5
+	)
 	queue_redraw()
 
 func _reset_level() -> bool:
@@ -275,10 +312,21 @@ func add_slidable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color :
 	add_child(s)  # its _ready registers it with this level
 	return s
 
-const PLAYER_SCENE := preload("res://scenes/actors/player.tscn")
+const PLAYER_SCENE_PATH := "res://scenes/actors/player.tscn"
 
 func add_player(cell: Vector2i) -> Player:
-	var p := PLAYER_SCENE.instantiate() as Player
+	var player_scene := ResourceLoader.load(
+		PLAYER_SCENE_PATH,
+		"PackedScene",
+		ResourceLoader.CACHE_MODE_IGNORE_DEEP
+	) as PackedScene
+	if player_scene == null or not player_scene.can_instantiate():
+		push_error("Could not load a valid player scene from %s." % PLAYER_SCENE_PATH)
+		return null
+	var p := player_scene.instantiate() as Player
+	if p == null:
+		push_error("The player scene did not instantiate a Player node.")
+		return null
 	p.level = self
 	p.position = Grid.cell_to_center(cell)
 	player = p
@@ -336,6 +384,9 @@ func _update_layers() -> void:
 
 # Instantiates the roommate scene on a route of cells and forwards his result.
 func add_roommate(route: Array[Vector2i]) -> Node2D:
+	debug_path = route
+	if roommate_path_overlay != null:
+		roommate_path_overlay.set_cells(route)
 	var r := ROOMMATE_SCENE.instantiate()
 	r.z_index = 10
 	r.z_as_relative = false
@@ -381,6 +432,8 @@ func route_from_path2d(path_node_name := "RoommatePath") -> Array[Vector2i]:
 func add_roommate_from_path(path_node_name := "RoommatePath") -> Node2D:
 	var cells := route_from_path2d(path_node_name)
 	debug_path = cells
+	if roommate_path_overlay != null:
+		roommate_path_overlay.set_cells(cells)
 	queue_redraw()
 	if cells.size() < 2:
 		return null
@@ -401,11 +454,3 @@ func _draw() -> void:
 		for row in range(Grid.FIELD_ROWS + 1):
 			var y := float(row * Grid.CELL)
 			draw_line(Vector2(0.0, y), Vector2(field_size.x, y), grid_color)
-
-	if debug_path.size() >= 2:
-		var points := PackedVector2Array()
-		for cell in debug_path:
-			points.append(Grid.cell_to_center(cell))
-		draw_polyline(points, Color(1.0, 1.0, 1.0, 0.55), 3.0, true)
-		for point in points:
-			draw_circle(point, 4.0, Color(1.0, 1.0, 1.0, 0.55))

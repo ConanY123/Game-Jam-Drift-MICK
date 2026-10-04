@@ -1,7 +1,12 @@
 [gd_scene format=3 uid="uid://cwd8r3n5tlaab"]
 
 [ext_resource type="Script" uid="uid://83cqpxiajt8e" path="res://scripts/objects/pushables/door.gd" id="1_ym8hq"]
+[ext_resource type="AudioStream" path="res://audio/SFX/Door.mp3" id="2_door_sfx"]
 
 [node name="Door" type="Node2D" unique_id=351519647]
 script = ExtResource("1_ym8hq")
-color = Color(0.6, 0.4, 0.25, 1)
+color = Color(0.02745098, 0.16470589, 0.32156864, 1)
+
+[node name="OpenSfx" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_door_sfx")
+bus = &"CleanSFX"

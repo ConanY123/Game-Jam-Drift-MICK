@@ -44,6 +44,7 @@ var _facing_anim := "walk_down"  # last direction he was heading
 var _anim_base_scale := Vector2.ONE
 var _sleep_z_timer := 0.25
 var _sleep_z_particles: Array[Label] = []
+var _showing_wake := false
 
 # Finds the AnimatedSprite2D automatically: a child named "AnimatedSprite2D" or
 # "BodyVisual" first, otherwise any AnimatedSprite2D child.
@@ -191,6 +192,8 @@ func _is_walking() -> bool:
 func _update_animation() -> void:
 	if _anim == null or _anim.sprite_frames == null:
 		return
+	if _showing_wake:
+		return
 	if index < waypoints.size():
 		var d := waypoints[index] - position
 		if d.length() > 0.01:
@@ -219,7 +222,7 @@ func _check_hazards() -> void:
 	# Walls shouldn't be authored onto the route, so only Pushables count.
 	var phys := level.blocker_at(cell, LevelBase.Realm.PHYSICAL)
 	if phys is Pushable:
-		_die("hit an obstacle in the real world")
+		_die("hit an obstacle in the real world", true)
 		return
 
 	# No standable floor beneath him in the dream = failed platform puzzle.
@@ -230,17 +233,20 @@ func _check_hazards() -> void:
 	# A deadly solid object sitting in the dream (non-floor) also kills.
 	var dream_obj := level.blocker_at(cell, LevelBase.Realm.DREAM)
 	if dream_obj is Pushable and not dream_obj.is_floor:
-		_die("hit something in the dream")
+		_die("hit something in the dream", true)
 
 func _finish() -> void:
 	finished = true
 	won.emit()
 	queue_redraw()
 
-func _die(reason: String) -> void:
+func _die(reason: String, show_wake := false) -> void:
 	if dead or falling:
 		return
 	dead = true
+	if show_wake and _anim != null and _anim.sprite_frames.has_animation("wake"):
+		_showing_wake = true
+		_anim.play("wake")
 	lost.emit(reason)
 	queue_redraw()
 

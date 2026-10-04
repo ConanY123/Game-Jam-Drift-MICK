@@ -35,6 +35,7 @@ var _fill_tween: Tween
 var _edge_effect_tween: Tween
 var _realm_attempt_tween: Tween
 var _stamina_display_initialized := false
+var _speed_effects_disabled := false
 
 func _ready() -> void:
 	_speed_button.toggled.connect(_on_speed_button_toggled)
@@ -66,6 +67,8 @@ func _notification(what: int) -> void:
 
 func _input(event: InputEvent) -> void:
 	if (
+		not _speed_effects_disabled
+		and
 		event is InputEventKey
 		and event.keycode == KEY_X
 		and event.pressed
@@ -84,6 +87,7 @@ func setup(level: LevelBase) -> void:
 	_player.stamina_changed.connect(_on_stamina_changed)
 	level.realm_changed.connect(_on_realm_changed)
 	level.realm_switch_failed_low_stamina.connect(_on_realm_switch_attempted)
+	level.level_lost.connect(_on_level_lost)
 	# Start showing the current value (full at level start).
 	_on_stamina_changed(_player.stamina / Player.MAX_STAMINA)
 	_update_world_effect()
@@ -193,10 +197,15 @@ func _animate_edge_strength(target_strength: float) -> void:
 	)
 
 func _on_speed_button_toggled(enabled: bool) -> void:
+	if _speed_effects_disabled:
+		_speed_button.set_pressed_no_signal(false)
+		return
 	_two_x_enabled = enabled
 	_update_speed_state()
 
 func _on_fast_forward_button_down() -> void:
+	if _speed_effects_disabled:
+		return
 	_fast_forward_held = true
 	_update_speed_state()
 
@@ -204,7 +213,20 @@ func _on_fast_forward_button_up() -> void:
 	_fast_forward_held = false
 	_update_speed_state()
 
+func _on_level_lost(_reason: String) -> void:
+	_speed_effects_disabled = true
+	_fast_forward_held = false
+	_two_x_enabled = false
+	_speed_button.set_pressed_no_signal(false)
+	_fast_forward_button.set_pressed_no_signal(false)
+	_speed_button.disabled = true
+	_fast_forward_button.disabled = true
+	Engine.time_scale = NORMAL_TIME_SCALE
+
 func _update_speed_state() -> void:
+	if _speed_effects_disabled:
+		Engine.time_scale = NORMAL_TIME_SCALE
+		return
 	if _fast_forward_held:
 		Engine.time_scale = FAST_FORWARD_TIME_SCALE
 	else:

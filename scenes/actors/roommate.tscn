@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://cyse5erv1j2jt" path="res://sprites/sleeper/Sleeper_Left.png" id="3_m0deh"]
 [ext_resource type="Texture2D" uid="uid://bg2gja2ycwnph" path="res://sprites/sleeper/Sleeper_Right.png" id="4_afb6s"]
 [ext_resource type="Texture2D" uid="uid://cf8j0l5l4easy" path="res://sprites/sleeper/Sleeper_Back.png" id="5_f4u87"]
+[ext_resource type="Texture2D" path="res://sprites/sleeper/Sleeper_Wake.png" id="6_wake"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_scuve"]
 atlas = ExtResource("2_ykoob")
@@ -69,6 +70,10 @@ region = Rect2(64, 0, 32, 32)
 [sub_resource type="AtlasTexture" id="AtlasTexture_qg1jo"]
 atlas = ExtResource("5_f4u87")
 region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wake"]
+atlas = ExtResource("6_wake")
+region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_o6c6a"]
 animations = [{
@@ -139,6 +144,14 @@ animations = [{
 "loop": 1,
 "name": &"walk_up",
 "speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wake")
+}],
+"loop": false,
+"name": &"wake",
+"speed": 1.0
 }]
 
 [node name="Roommate" type="Node2D" unique_id=596539193]

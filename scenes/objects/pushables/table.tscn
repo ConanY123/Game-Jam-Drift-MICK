@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b686esymdq0u6" path="res://scripts/objects/pushables/pushable.gd" id="1_7vqcc"]
 [ext_resource type="Texture2D" uid="uid://bc80tkfbvanue" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet.png" id="2_ltsr6"]
+[ext_resource type="AudioStream" path="res://audio/SFX/Chair SFX.mp3" id="3_chair_sfx"]
 
 [node name="Table" type="Node2D" unique_id=86256793]
 script = ExtResource("1_7vqcc")
@@ -16,3 +17,8 @@ texture = ExtResource("2_ltsr6")
 offset = Vector2(48, 48)
 region_enabled = true
 region_rect = Rect2(0, 0, 96, 118)
+
+[node name="PushSfx" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_chair_sfx")
+volume_db = 6.0
+bus = &"CleanSFX"

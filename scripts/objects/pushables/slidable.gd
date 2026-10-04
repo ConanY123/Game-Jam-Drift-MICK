@@ -32,6 +32,12 @@ func can_push(dir: Vector2i) -> bool:
 		steps += 1
 	return steps > 0
 
+func _on_slide_started() -> void:
+	pass
+
+func _on_slide_finished(_hit_obstacle: bool) -> void:
+	pass
+
 # Override: instead of moving a single cell, roll until blocked.
 func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
@@ -40,9 +46,11 @@ func try_push(dir: Vector2i) -> bool:
 	# blocked. We stop at the last free cell (just short of the obstacle).
 	var target := cell
 	var steps := 0
+	var hit_obstacle := false
 	while steps < max_slide_cells:
 		var next := target + dir
 		if not _footprint_free(next):
+			hit_obstacle = true
 			break
 		target = next
 		steps += 1
@@ -55,6 +63,7 @@ func try_push(dir: Vector2i) -> bool:
 	cell = target
 	level.register(self, get_cells(cell), realm)
 	moving = true
+	_on_slide_started()
 
 	# Tween across the whole slide at a constant speed, so a long roll takes
 	# longer than a short one.
@@ -62,5 +71,8 @@ func try_push(dir: Vector2i) -> bool:
 	var duration := maxf(float(steps) / slide_speed, 0.05)
 	var tween := create_tween()
 	tween.tween_property(self, "position", dest, duration)
-	tween.tween_callback(func(): moving = false)
+	tween.tween_callback(func():
+		moving = false
+		_on_slide_finished(hit_obstacle)
+	)
 	return true

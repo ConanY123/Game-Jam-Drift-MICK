@@ -80,6 +80,11 @@ func closest_dream_floor(pos: Vector2) -> Vector2:
 func is_dream_floor(cell: Vector2i) -> bool:
 	if dream_floor.has(cell):
 		return true
+	for platform in get_tree().get_nodes_in_group("moving_platforms"):
+		if not platform is MovingPlatform:
+			continue
+		if platform.level == self and platform.supports_cell(cell):
+			return true
 	var b = solids[Realm.DREAM].get(cell)
 	return b is Pushable and b.is_floor
 

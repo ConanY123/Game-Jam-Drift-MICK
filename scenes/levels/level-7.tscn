@@ -1,110 +1,110 @@
 [gd_scene format=4 uid="uid://q71r0onrva6j"]
 
-[ext_resource type="Script" uid="uid://3rdtojis3vqv" path="res://scripts/levels/level-8.gd" id="1_level8"]
-[ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="2_l2byv"]
-[ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="3_ostc2"]
-[ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="4_jhmwl"]
-[ext_resource type="PackedScene" uid="uid://br1sss08ewpld" path="res://scenes/objects/pushables/sliding_cart.tscn" id="5_81gh4"]
-[ext_resource type="PackedScene" uid="uid://col3tgbgnyr4y" path="res://scenes/objects/pushables/energy_drink.tscn" id="5_ostc2"]
-[ext_resource type="PackedScene" uid="uid://d31oy45evjsvb" path="res://scenes/objects/pushables/chair.tscn" id="6_do7uq"]
-[ext_resource type="PackedScene" uid="uid://bpuefjr1fcltd" path="res://scenes/objects/pushables/table.tscn" id="8_jhmwl"]
-[ext_resource type="PackedScene" path="res://scenes/objects/outputs/moving_platform.tscn" id="9_do7uq"]
-[ext_resource type="PackedScene" uid="uid://or60rgjdpxpt" path="res://scenes/objects/signals/lever.tscn" id="10_nrybq"]
-[ext_resource type="PackedScene" uid="uid://cchwiswkl3wjn" path="res://scenes/objects/pushables/dream block.tscn" id="11_nrybq"]
-[ext_resource type="PackedScene" uid="uid://2fh4n2427dab" path="res://scenes/objects/outputs/computer.tscn" id="12_cfybs"]
+[ext_resource type="Script" uid="uid://3rdtojis3vqv" path="res://scripts/levels/level-7.gd" id="1_ooo0l"]
+[ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="2_c3bbj"]
+[ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="3_5gwfx"]
+[ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="4_gbxo7"]
+[ext_resource type="PackedScene" uid="uid://col3tgbgnyr4y" path="res://scenes/objects/pushables/energy_drink.tscn" id="5_8smqf"]
+[ext_resource type="PackedScene" uid="uid://br1sss08ewpld" path="res://scenes/objects/pushables/sliding_cart.tscn" id="6_wjkmk"]
+[ext_resource type="PackedScene" uid="uid://d31oy45evjsvb" path="res://scenes/objects/pushables/chair.tscn" id="7_t06ar"]
+[ext_resource type="PackedScene" uid="uid://bpuefjr1fcltd" path="res://scenes/objects/pushables/table.tscn" id="8_360ww"]
+[ext_resource type="PackedScene" uid="uid://cchwiswkl3wjn" path="res://scenes/objects/pushables/dream block.tscn" id="9_i5je8"]
+[ext_resource type="PackedScene" path="res://scenes/objects/outputs/moving_platform.tscn" id="10_8st50"]
+[ext_resource type="PackedScene" uid="uid://or60rgjdpxpt" path="res://scenes/objects/signals/lever.tscn" id="11_2xxx8"]
+[ext_resource type="PackedScene" uid="uid://2fh4n2427dab" path="res://scenes/objects/outputs/computer.tscn" id="12_qqnuc"]
 
 [sub_resource type="Curve2D" id="Curve2D_81gh4"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 32, 32, 0, 0, 0, 0, 64, 32, 0, 0, 0, 0, 64, 128, 0, 0, 0, 0, 96, 128, 0, 0, 0, 0, 96, 32, 0, 0, 0, 0, 192, 32, 0, 0, 0, 0, 192, 160, 0, 0, 0, 0, 224, 160, 0, 0, 0, 0, 224, 224, 0, 0, 0, 0, 384, 224, 0, 0, 0, 0, 384, 64, 0, 0, 0, 0, 704, 64, 0, 0, 0, 0, 704, 128, 0, 0, 0, 0, 320, 128, 0, 0, 0, 0, 320, 480, 0, 0, 0, 0, 608, 480, 0, 0, 0, 0, 608, 320, 0, 0, 0, 0, 480, 320, 0, 0, 0, 0, 480, 224, 0, 0, 0, 0, 704, 224)
+"points": PackedVector2Array(0, 0, 0, 0, 32, 32, 0, 0, 0, 0, 64, 32, 0, 0, 0, 0, 64, 128, 0, 0, 0, 0, 96, 128, 0, 0, 0, 0, 96, 32, 0, 0, 0, 0, 192, 32, 0, 0, 0, 0, 192, 160, 0, 0, 0, 0, 224, 160, 0, 0, 0, 0, 224, 224, 0, 0, 0, 0, 384, 224, 0, 0, 0, 0, 384, 64, 0, 0, 0, 0, 704, 64, 0, 0, 0, 0, 704, 128, 0, 0, 0, 0, 320, 128, 0, 0, 0, 0, 320, 480, 0, 0, 0, 0, 608, 480, 0, 0, 0, 0, 608, 320, 0, 0, 0, 0, 480, 320, 0, 0, 0, 0, 480, 224, 0, 0, 0, 0, 672, 224)
 }
 point_count = 20
 
 [node name="Level8" type="Node2D" unique_id=2033317672]
-script = ExtResource("1_level8")
+script = ExtResource("1_ooo0l")
 level_number = 8
 
 [node name="PhysicalBackground" type="Sprite2D" parent="." unique_id=1967078890]
 z_index = -20
 position = Vector2(384, 288)
 scale = Vector2(0.354, 0.354)
-texture = ExtResource("2_l2byv")
+texture = ExtResource("2_c3bbj")
 
 [node name="DreamBackground" type="Sprite2D" parent="." unique_id=1623652722]
 visible = false
 z_index = -20
 position = Vector2(384, 288)
 scale = Vector2(0.354, 0.354)
-texture = ExtResource("3_ostc2")
+texture = ExtResource("3_5gwfx")
 
 [node name="FloorLayer" type="TileMapLayer" parent="." unique_id=1995369414]
 z_index = -1
-tile_set = ExtResource("4_jhmwl")
+tile_set = ExtResource("4_gbxo7")
 
 [node name="DreamFloorLayer" type="TileMapLayer" parent="." unique_id=2030776571]
 z_index = -1
 tile_map_data = PackedByteArray("AAABAAEABAAGAAEAAAABAAIABAAGAAEAAAABAAMABAAGAAEAAAABAAQABAAGAAEAAAABAAUABAAGAAEAAAABAAYABAAGAAEAAAABAAcABAAGAAEAAAABAAgABAAGAAEAAAABAAkABAAGAAEAAAABAAoABAAGAAEAAAABAAsABAAGAAEAAAABAAwABAAGAAEAAAACAAEABAAGAAEAAAACAAIABAAGAAEAAAACAAMABAAGAAEAAAACAAQABAAGAAEAAAACAAUABAAGAAEAAAACAAYABAAGAAEAAAACAAcABAAGAAEAAAACAAgABAAGAAEAAAACAAkABAAGAAEAAAACAAoABAAGAAEAAAACAAsABAAGAAEAAAACAAwABAAGAAEAAAADAAEABAAGAAEAAAADAAIABAAGAAEAAAADAAMABAAGAAEAAAADAAQABAAGAAEAAAADAAUABAAGAAEAAAADAAYABAAGAAEAAAADAAcABAAGAAEAAAADAAgABAAGAAEAAAADAAoABAAGAAEAAAADAAsABAAGAAEAAAADAAwABAAGAAEAAAAEAAEABAAGAAEAAAAEAAIABAAGAAEAAAAEAAMABAAGAAEAAAAEAAQABAAGAAEAAAAEAAUABAAGAAEAAAAEAAYABAAGAAEAAAAEAAcABAAGAAEAAAAEAAgABAAGAAEAAAAEAAkABAAGAAEAAAAEAAoABAAGAAEAAAAEAAsABAAGAAEAAAAEAAwABAAGAAEAAAAFAAEABAAGAAEAAAAFAAIABAAGAAEAAAAFAAMABAAGAAEAAAAFAAQABAAGAAEAAAAFAAUABAAGAAEAAAAFAAYABAAGAAEAAAAFAAcABAAGAAEAAAAFAAgABAAGAAEAAAAFAAkABAAGAAEAAAAFAAoABAAGAAEAAAAFAAsABAAGAAEAAAAFAAwABAAGAAEAAAAGAAEABAAGAAEAAAAGAAIABAAGAAEAAAAGAAMABAAGAAEAAAAGAAQABAAGAAEAAAAGAAUABAAGAAEAAAAGAAYABAAGAAEAAAAGAAgABAAGAAEAAAAGAAkABAAGAAEAAAAGAAoABAAGAAEAAAAGAAsABAAGAAEAAAAGAAwABAAGAAEAAAAGAA0ABAAGAAEAAAAGAA4ABAAGAAEAAAAHAAEABAAGAAEAAAAHAAIABAAGAAEAAAAHAAMABAAGAAEAAAAHAAQABAAGAAEAAAAHAAUABAAGAAEAAAAHAAkABAAGAAEAAAAHAAoABAAGAAEAAAAHAAsABAAGAAEAAAAHAAwABAAGAAEAAAAHAA0ABAAGAAEAAAAHAA4ABAAGAAEAAAAIAAEABAAGAAEAAAAIAAIABAAGAAEAAAAIAAMABAAGAAEAAAAIAAQABAAGAAEAAAAIAAUABAAGAAEAAAAIAAkABAAGAAEAAAAIAAoABAAGAAEAAAAIAAsABAAGAAEAAAAIAAwABAAGAAEAAAAIAA0ABAAGAAEAAAAIAA4ABAAGAAEAAAAJAAEABAAGAAEAAAAJAAIABAAGAAEAAAAJAAMABAAGAAEAAAAJAAQABAAGAAEAAAAJAAUABAAGAAEAAAAJAAYABAAGAAEAAAAJAAkABAAGAAEAAAAJAAoABAAGAAEAAAAJAAsABAAGAAEAAAAJAAwABAAGAAEAAAAJAA0ABAAGAAEAAAAJAA4ABAAGAAEAAAAKAAMABAAGAAEAAAAKAAQABAAGAAEAAAAKAAUABAAGAAEAAAAKAAYABAAGAAEAAAAKAAcABAAGAAEAAAALAAMABAAGAAEAAAALAAQABAAGAAEAAAALAAUABAAGAAEAAAALAAYABAAGAAEAAAALAAcABAAGAAEAAAAMAAMABAAGAAEAAAAMAAQABAAGAAEAAAAMAAUABAAGAAEAAAANAAEABAAGAAEAAAANAAIABAAGAAEAAAANAAMABAAGAAEAAAANAAQABAAGAAEAAAANAAUABAAGAAEAAAAOAAEABAAGAAEAAAAOAAIABAAGAAEAAAAOAAMABAAGAAEAAAAOAAQABAAGAAEAAAAOAAUABAAGAAEAAAAPAAEABAAGAAEAAAAPAAIABAAGAAEAAAAPAAMABAAGAAEAAAAPAAQABAAGAAEAAAAPAAUABAAGAAEAAAAQAAEABAAGAAEAAAAQAAIABAAGAAEAAAAQAAMABAAGAAEAAAAQAAQABAAGAAEAAAAQAAUABAAGAAEAAAARAAEABAAGAAEAAAARAAIABAAGAAEAAAARAAUABAAGAAEAAAASAAEABAAGAAEAAAASAAIABAAGAAEAAAASAAUABAAGAAEAAAATAAEABAAGAAEAAAATAAIABAAGAAEAAAATAAUABAAGAAEAAAAUAAEABAAGAAEAAAAUAAIABAAGAAEAAAAUAAMABAAGAAEAAAAUAAQABAAGAAEAAAAUAAUABAAGAAEAAAAVAAEABAAGAAEAAAAVAAIABAAGAAEAAAAVAAMABAAGAAEAAAAVAAQABAAGAAEAAAAVAAUABAAGAAEAAAAWAAEABAAGAAEAAAAWAAIABAAGAAEAAAAWAAMABAAGAAEAAAAWAAQABAAGAAEAAAAWAAUABAAGAAEAAAADAAkABAAGAAEAAAAKAAgABgAGAAEAAAAHAA8ABgAGAAEAAAAIAA8ABgAGAAEAAAAJAA8ABgAGAAEAAAALAA8ABgAGAAEAAAALAA4ABgAGAAEAAAALAA0ABAAGAAEAAAAMAA0ABAAGAAEAAAAMAA4ABAAGAAEAAAAMAAwABAAGAAEAAAAMAA8ABAAGAAEAAAANAA8ABAAGAAEAAAANAA4ABAAGAAEAAAANAA0ABAAGAAEAAAANAAwABAAGAAEAAAANAAsABAAGAAEAAAAOAAsABAAGAAEAAAAOAAwABAAGAAEAAAAOAA0ABAAGAAEAAAAOAA4ABAAGAAEAAAAOAA8ABAAGAAEAAAAPAA8ABAAGAAEAAAAQAA8ABAAGAAEAAAARAA8ABAAGAAEAAAARAA4ABAAGAAEAAAASAA4ABAAGAAEAAAATAA4ABAAGAAEAAAATAA8ABAAGAAEAAAASAA8ABAAGAAEAAAAQAA4ABAAGAAEAAAAQAA0ABAAGAAEAAAAQAAwABAAGAAEAAAAPAAwABAAGAAEAAAAPAA0ABAAGAAEAAAAPAA4ABAAGAAEAAAARAA0ABAAGAAEAAAARAAwABAAGAAEAAAAPAAsABAAGAAEAAAAQAAsABAAGAAEAAAASAAwABAAGAAEAAAATAAwABAAGAAEAAAATAAsABAAGAAEAAAASAAsABAAGAAEAAAARAAsABAAGAAEAAAASAA0ABAAGAAEAAAATAA0ABAAGAAEAAAATAAoABAAGAAEAAAAUAAoABAAGAAEAAAAUAAsABAAGAAEAAAAUAAwABAAGAAEAAAAUAA0ABAAGAAEAAAAUAA4ABAAGAAEAAAAUAA8ABAAGAAEAAAAVAA8ABAAGAAEAAAAVAA4ABAAGAAEAAAAVAA0ABAAGAAEAAAAVAAwABAAGAAEAAAAVAAsABAAGAAEAAAAVAAoABAAGAAEAAAASAAoABAAGAAEAAAARAAoABAAGAAEAAAAQAAoABAAGAAEAAAAPAAoABAAGAAEAAAAPAAcABAAGAAEAAAAQAAcABAAGAAEAAAARAAcABAAGAAEAAAASAAcABAAGAAEAAAATAAcABAAGAAEAAAAUAAcABAAGAAEAAAAVAAcABAAGAAEAAAAPAAgABAAGAAEAAAAPAAkABAAGAAEAAAA=")
-tile_set = ExtResource("4_jhmwl")
+tile_set = ExtResource("4_gbxo7")
 
 [node name="WallLayer" type="TileMapLayer" parent="." unique_id=1448652213]
 z_index = -1
 tile_map_data = PackedByteArray("AAAAAAEAAgACAAYAAAAAAAIAAgACAAYAAAAAAAMAAgACAAYAAAAAAAQAAgACAAYAAAAAAAUAAgACAAYAAAAAAAYAAgACAAYAAAAAAAcAAgACAAYAAAAAAAgAAgACAAYAAAAAAAkAAgACAAYAAAAAAAoAAgACAAYAAAAAAAsAAgACAAYAAAAAAAwAAgACAAYAAAAAAA0AAgACAAYAAAAAAA4AAgACAAYAAAAAAA8AAgACAAYAAAAAABAAAgACAAYAAAABABEAAgACAAYAAAACABEAAgACAAYAAAADABEAAgACAAYAAAAEABEAAgACAAYAAAAFABEAAgACAAYAAAAGABEAAgACAAYAAAAHABEAAgACAAYAAAAIABEAAgACAAYAAAAJABEAAgACAAYAAAAKABEAAgACAAYAAAALABEAAgACAAYAAAAMABEAAgACAAYAAAANABEAAgACAAYAAAAOABEAAgACAAYAAAAPABEAAgACAAYAAAAQABEAAgACAAYAAAARABEAAgACAAYAAAASABEAAgACAAYAAAATABEAAgACAAYAAAAUABEAAgACAAYAAAAVABEAAgACAAYAAAAWABEAAgACAAYAAAAXABEAAgACAAYAAAABAAAAAgACAAYAAAACAAAAAgACAAYAAAADAAAAAgACAAYAAAAEAAAAAgACAAYAAAAFAAAAAgACAAYAAAAGAAAAAgACAAYAAAAHAAAAAgACAAYAAAAIAAAAAgACAAYAAAAJAAAAAgACAAYAAAAKAAAAAgACAAYAAAALAAAAAgACAAYAAAAMAAAAAgACAAYAAAANAAAAAgACAAYAAAAOAAAAAgACAAYAAAAPAAAAAgACAAYAAAAQAAAAAgACAAYAAAARAAAAAgACAAYAAAASAAAAAgACAAYAAAATAAAAAgACAAYAAAAUAAAAAgACAAYAAAAVAAAAAgACAAYAAAAWAAAAAgACAAYAAAAXAAAAAgACAAYAAAAAAAAAAgACAAYAAAAAABEAAgACAAYAAAAXAAEAAgACAAYAAAAXAAIAAgACAAYAAAAXAAMAAgACAAYAAAAXAAQAAgACAAYAAAAXAAUAAgACAAYAAAAXAAYAAgACAAYAAAAXAAcAAgACAAYAAAAXAAgAAgACAAYAAAAXAAkAAgACAAYAAAAXAAoAAgACAAYAAAAXAAsAAgACAAYAAAAXAAwAAgACAAYAAAAXAA0AAgACAAYAAAAXAA4AAgACAAYAAAAXAA8AAgACAAYAAAAXABAAAgACAAYAAAABAAUAAAARAAUAAAAEAAUAAAARAAUAAAAFAAUAAAARAAUAAAABAAwAAAARAAUAAAAEAAwAAAARAAUAAAAFAAwAAAARAAUAAAACAAwAAAARAAUAAAADAAwAAAARAAUAAAACAAUAAAARAAUAAAADAAUAAAARAAUAAAAGAAsAAAARAAUAAAAGAAYAAAARAAUAAAAGAAgAAAARAAUAAAAGAAkAAAARAAUAAAAFAAsAAAARAAUAAAAFAAYAAAARAAUAAAAJAAEAAAARAAUAAAAJAAIAAAARAAUAAAAJAAMAAAARAAUAAAAJAAQAAAARAAUAAAAJAAUAAAARAAUAAAAJAAkAAAARAAUAAAAJAAoAAAARAAUAAAAJAAsAAAARAAUAAAAJAAwAAAARAAUAAAAJAA0AAAARAAUAAAAJAA4AAAARAAUAAAADAAcAAAAEAAwAAAADAAoAAAAEAAwAAAAGAAoAAAARAAYAAAAEAAsAAAAEAAwAAAAKAAUAAAAAAAoAAAALAAUAAAAQAAYAAAAMAAUAAAAAAAoAAAANAAUAAAAQAAYAAAAOAAUAAAAQAAYAAAAPAAUAAAAQAAYAAAAQAAUAAAAQAAYAAAARAAUAAAAQAAYAAAASAAUAAAAQAAYAAAATAAUAAAAQAAYAAAAUAAUAAAAQAAYAAAAVAAUAAAAQAAYAAAAWAAUAAAAQAAYAAAAOAAcAAAAEAAwAAAAOAAkAAAAEAAwAAAANAAcAAAARAAUAAAANAAgAAAARAAUAAAANAAkAAAARAAUAAAA=")
-tile_set = ExtResource("4_jhmwl")
+tile_set = ExtResource("4_gbxo7")
 
 [node name="BORDER" type="TileMapLayer" parent="." unique_id=1007482573]
 z_index = -1
 tile_map_data = PackedByteArray("AAABABEAAQALAAcAAAACABEAAQALAAcAAAADABEAAQALAAcAAAAEABEAAQALAAcAAAAFABEAAQALAAcAAAAGABEAAQALAAcAAAAHABEAAQALAAcAAAAIABEAAQALAAcAAAAJABEAAQALAAcAAAAKABEAAQALAAcAAAALABEAAQALAAcAAAAMABEAAQALAAcAAAANABEAAQALAAcAAAAOABEAAQALAAcAAAAPABEAAQALAAcAAAAQABEAAQALAAcAAAARABEAAQALAAcAAAASABEAAQALAAcAAAATABEAAQALAAcAAAAUABEAAQALAAcAAAAVABEAAQALAAcAAAAWABEAAQALAAcAAAAXABEAAQAMAAcAAAAYABEAAgADAAQAADAZABEAAgABAAQAADAaABEAAgABAAQAADAbABEAAgABAAQAADAcABEAAgABAAQAADAdABEAAgABAAQAADAeABEAAgABAAQAADAfABAAAgADAAYAAAAfAA8AAgADAAUAAAAfAA4AAgADAAYAAAAfAA0AAgADAAUAAAAfAAwAAgADAAYAAAAfAAsAAgADAAUAAAAfAAoAAgADAAYAAAAfAAkAAgADAAUAAAAfAAgAAgADAAYAAAAfAAcAAgADAAUAAAAfAAYAAgADAAYAAAAfAAUAAgADAAUAAAAfAAQAAgADAAYAAAAfAAMAAgADAAUAAAAfAAIAAgADAAYAAAAfAAEAAgADAAUAAAABAAAAAQALAAUAAAACAAAAAQALAAUAAAADAAAAAQALAAUAAAAEAAAAAQALAAUAAAAFAAAAAQALAAUAAAAGAAAAAQALAAUAAAAHAAAAAQALAAUAAAAIAAAAAQALAAUAAAAJAAAAAQALAAUAAAAKAAAAAQALAAUAAAALAAAAAQALAAUAAAAMAAAAAQALAAUAAAANAAAAAQALAAUAAAAOAAAAAQALAAUAAAAPAAAAAQALAAUAAAAQAAAAAQALAAUAAAARAAAAAQALAAUAAAASAAAAAQALAAUAAAATAAAAAQALAAUAAAAUAAAAAQALAAUAAAAVAAAAAQALAAUAAAAWAAAAAQALAAUAAAAXAAAAAQAMAAUAAAAYAAAAAgAAAAQAAAAZAAAAAgABAAQAAAAaAAAAAgABAAQAAAAbAAAAAgABAAQAAAAcAAAAAgABAAQAAAAdAAAAAgABAAQAAAAeAAAAAgABAAQAAAAfAAAAAgADAAQAAAAAAAAAAQAKAAUAAAAAABEAAQAKAAcAAAAfABEAAgAAAAQAADAXAAEAAQAMAAYAAAAXAAIAAQAMAAYAAAAXAAMAAQAMAAYAAAAXAAQAAQAMAAYAAAAXAAUAAQAMAAYAAAAXAAYAAQAMAAYAAAAXAAcAAQAMAAYAAAAXAAgAAQAMAAYAAAAXAAkAAQAMAAYAAAAXAAoAAQAMAAYAAAAXAAsAAQAMAAYAAAAXAAwAAQAMAAYAAAAXAA0AAQAMAAYAAAAXAA4AAQAMAAYAAAAXAA8AAQAMAAYAAAAXABAAAQAMAAYAAAAcAAYAAQAOAAcAAAAcAAUAAQAOAAcAAAAcAAQAAQAOAAcAAAAcAAMAAQAOAAcAAAAcAAIAAQAOAAcAAAAcAAEAAQAOAAcAAAAbAAEAAQAOAAcAAAAaAAEAAQAOAAcAAAAZAAEAAQAOAAcAAAAYAAEAAgAAAAUAAAAYAAIAAgAAAAUAAAAYAAMAAgAAAAUAAAAYAAQAAgAAAAUAAAAYAAUAAgAAAAUAAAAYAAYAAgAAAAUAAAAYAAcAAgAAAAUAAAAYAAgAAgAAAAUAAAAYAAkAAgAAAAUAAAAYAAoAAgAAAAUAAAAYAAsAAgAAAAUAAAAYAAwAAgAAAAUAAAAYAA0AAgAAAAUAAAAYAA4AAgAAAAUAAAAYAA8AAgAAAAUAAAAYABAAAgAAAAUAAAAZABAAAQAOAAcAAAAZAA8AAQAOAAcAAAAZAA4AAQAOAAcAAAAZAA0AAQAOAAcAAAAZAAwAAQAOAAcAAAAZAAsAAQAOAAcAAAAZAAoAAQAOAAcAAAAZAAkAAQAOAAcAAAAZAAgAAQAOAAcAAAAZAAcAAQAOAAcAAAAZAAYAAQAOAAcAAAAZAAUAAQAOAAcAAAAZAAQAAQAOAAcAAAAZAAMAAQAOAAcAAAAZAAIAAQAOAAcAAAAaAAIAAQAOAAcAAAAaAAMAAQAOAAcAAAAaAAQAAQAOAAcAAAAaAAUAAQAOAAcAAAAaAAYAAQAOAAcAAAAaAAcAAQAOAAcAAAAaAAgAAQAOAAcAAAAaAAkAAQAOAAcAAAAaAAoAAQAOAAcAAAAaAAsAAQAOAAcAAAAaAAwAAQAOAAcAAAAaAA0AAQAOAAcAAAAaAA4AAQAOAAcAAAAaAA8AAQAOAAcAAAAaABAAAQAOAAcAAAAbABAAAQAOAAcAAAAbAA8AAQAOAAcAAAAbAA4AAQAOAAcAAAAbAA0AAQAOAAcAAAAbAAwAAQAOAAcAAAAbAAsAAQAOAAcAAAAbAAoAAQAOAAcAAAAbAAkAAQAOAAcAAAAbAAgAAQAOAAcAAAAbAAcAAQAOAAcAAAAbAAYAAQAOAAcAAAAbAAUAAQAOAAcAAAAbAAQAAQAOAAcAAAAbAAMAAQAOAAcAAAAbAAIAAQAOAAcAAAAcAAcAAQAOAAcAAAAcAAgAAQAOAAcAAAAcAAkAAQAOAAcAAAAcAAoAAQAOAAcAAAAcAAsAAQAOAAcAAAAcAAwAAQAOAAcAAAAcAA0AAQAOAAcAAAAcAA4AAQAOAAcAAAAcAA8AAQAOAAcAAAAcABAAAQAOAAcAAAAdABAAAQAOAAcAAAAdAA8AAQAOAAcAAAAdAA4AAQAOAAcAAAAdAA0AAQAOAAcAAAAdAAwAAQAOAAcAAAAdAAsAAQAOAAcAAAAdAAoAAQAOAAcAAAAdAAkAAQAOAAcAAAAdAAgAAQAOAAcAAAAdAAcAAQAOAAcAAAAdAAYAAQAOAAcAAAAdAAUAAQAOAAcAAAAdAAQAAQAOAAcAAAAdAAMAAQAOAAcAAAAdAAIAAQAOAAcAAAAdAAEAAQAOAAcAAAAeAAEAAQAOAAcAAAAeAAIAAQAOAAcAAAAeAAMAAQAOAAcAAAAeAAQAAQAOAAcAAAAeAAUAAQAOAAcAAAAeAAYAAQAOAAcAAAAeAAcAAQAOAAcAAAAeAAgAAQAOAAcAAAAeAAkAAQAOAAcAAAAeAAoAAQAOAAcAAAAeAAsAAQAOAAcAAAAeAAwAAQAOAAcAAAAeAA0AAQAOAAcAAAAeAA4AAQAOAAcAAAAeAA8AAQAOAAcAAAAeABAAAQAOAAcAAAAAABAAAQAKAAYAAAAAAA8AAQAKAAYAAAAAAA4AAQAKAAYAAAAAAA0AAQAKAAYAAAAAAAwAAQAKAAYAAAAAAAsAAQAKAAYAAAAAAAoAAQAKAAYAAAAAAAkAAQAKAAYAAAAAAAgAAQAKAAYAAAAAAAcAAQAKAAYAAAAAAAYAAQAKAAYAAAAAAAUAAQAKAAYAAAAAAAQAAQAKAAYAAAAAAAMAAQAKAAYAAAAAAAIAAQAKAAYAAAAAAAEAAQAKAAYAAAA=")
-tile_set = ExtResource("4_jhmwl")
+tile_set = ExtResource("4_gbxo7")
 
 [node name="Escape room" type="Node" parent="." unique_id=940069704]
 
-[node name="EnergyDrink" parent="Escape room" unique_id=448676819 instance=ExtResource("5_ostc2")]
+[node name="EnergyDrink" parent="Escape room" unique_id=448676819 instance=ExtResource("5_8smqf")]
 position = Vector2(32, 352)
 fixed_position = true
 
-[node name="SlidingCart" parent="Escape room" unique_id=1983659059 instance=ExtResource("5_81gh4")]
+[node name="SlidingCart" parent="Escape room" unique_id=1983659059 instance=ExtResource("6_wjkmk")]
 position = Vector2(128, 224)
 size = Vector2i(2, 1)
 weight = 2.0
 
-[node name="Chair" parent="Escape room" unique_id=225586257 instance=ExtResource("6_do7uq")]
+[node name="Chair" parent="Escape room" unique_id=225586257 instance=ExtResource("7_t06ar")]
 position = Vector2(64, 288)
 weight = 2.0
 
-[node name="Chair2" parent="Escape room" unique_id=13052155 instance=ExtResource("6_do7uq")]
+[node name="Chair2" parent="Escape room" unique_id=13052155 instance=ExtResource("7_t06ar")]
 position = Vector2(96, 256)
 weight = 2.0
 
 [node name="Sprite2D" parent="Escape room/Chair2" index="0" unique_id=942965648]
 flip_h = true
 
-[node name="Chair3" parent="Escape room" unique_id=998646016 instance=ExtResource("6_do7uq")]
+[node name="Chair3" parent="Escape room" unique_id=998646016 instance=ExtResource("7_t06ar")]
 position = Vector2(64, 224)
 weight = 2.0
 
-[node name="Table" parent="Escape room" unique_id=86256793 instance=ExtResource("8_jhmwl")]
+[node name="Table" parent="Escape room" unique_id=86256793 instance=ExtResource("8_360ww")]
 position = Vector2(128, 64)
 
-[node name="Chair4" parent="Escape room" unique_id=248635433 instance=ExtResource("6_do7uq")]
+[node name="Chair4" parent="Escape room" unique_id=248635433 instance=ExtResource("7_t06ar")]
 position = Vector2(224, 128)
 weight = 2.0
 
-[node name="Chair5" parent="Escape room" unique_id=1283063873 instance=ExtResource("6_do7uq")]
+[node name="Chair5" parent="Escape room" unique_id=1283063873 instance=ExtResource("7_t06ar")]
 position = Vector2(256, 128)
 weight = 2.0
 
-[node name="DreamBlock" parent="Escape room" unique_id=117124088 instance=ExtResource("11_nrybq")]
+[node name="DreamBlock" parent="Escape room" unique_id=117124088 instance=ExtResource("9_i5je8")]
 position = Vector2(224, 160)
 weight = 0.25
 
-[node name="DreamBlock2" parent="Escape room" unique_id=717150106 instance=ExtResource("11_nrybq")]
+[node name="DreamBlock2" parent="Escape room" unique_id=717150106 instance=ExtResource("9_i5je8")]
 position = Vector2(256, 160)
 weight = 0.25
 
-[node name="DreamBlock3" parent="Escape room" unique_id=564118271 instance=ExtResource("11_nrybq")]
+[node name="DreamBlock3" parent="Escape room" unique_id=564118271 instance=ExtResource("9_i5je8")]
 position = Vector2(352, 192)
 weight = 0.25
 
-[node name="DreamBlock4" parent="Escape room" unique_id=1598131603 instance=ExtResource("11_nrybq")]
+[node name="DreamBlock4" parent="Escape room" unique_id=1598131603 instance=ExtResource("9_i5je8")]
 position = Vector2(352, 224)
 weight = 0.25
 
@@ -113,41 +113,41 @@ curve = SubResource("Curve2D_81gh4")
 
 [node name="Moving platform" type="Node" parent="." unique_id=763237023]
 
-[node name="MovingPlatform" parent="Moving platform" unique_id=896694939 instance=ExtResource("9_do7uq")]
+[node name="MovingPlatform" parent="Moving platform" unique_id=896694939 instance=ExtResource("10_8st50")]
 position = Vector2(224, 256)
 off_destination = Vector2i(8, 8)
 on_destination = Vector2i(8, 7)
 speed = 10.2
 color = Color(1, 0.35686275, 0.7411765, 1)
 
-[node name="Lever" parent="Moving platform" unique_id=873023911 instance=ExtResource("10_nrybq")]
+[node name="Lever" parent="Moving platform" unique_id=873023911 instance=ExtResource("11_2xxx8")]
 position = Vector2(256, 32)
 realm = 1
 outputs = Array[NodePath]([NodePath("../MovingPlatform")])
 
 [node name="Lever console" type="Node" parent="." unique_id=1245274152]
 
-[node name="Lever" parent="Lever console" unique_id=611992242 instance=ExtResource("10_nrybq")]
+[node name="Lever" parent="Lever console" unique_id=611992242 instance=ExtResource("11_2xxx8")]
 position = Vector2(256, 320)
 realm = 1
 outputs = Array[NodePath]([NodePath("../MovingPlatform"), NodePath("../MovingPlatform2"), NodePath("../MovingPlatform3")])
 
-[node name="Lever2" parent="Lever console" unique_id=560768319 instance=ExtResource("10_nrybq")]
+[node name="Lever2" parent="Lever console" unique_id=560768319 instance=ExtResource("11_2xxx8")]
 position = Vector2(256, 416)
 realm = 1
 outputs = Array[NodePath]([NodePath("../Computer"), NodePath("../Computer3"), NodePath("../Computer2"), NodePath("../Computer5")])
 
-[node name="MovingPlatform" parent="Lever console" unique_id=774922119 instance=ExtResource("9_do7uq")]
+[node name="MovingPlatform" parent="Lever console" unique_id=774922119 instance=ExtResource("10_8st50")]
 position = Vector2(320, 32)
 off_destination = Vector2i(11, 1)
 on_destination = Vector2i(11, 2)
 
-[node name="MovingPlatform2" parent="Lever console" unique_id=1489108590 instance=ExtResource("9_do7uq")]
+[node name="MovingPlatform2" parent="Lever console" unique_id=1489108590 instance=ExtResource("10_8st50")]
 position = Vector2(544, 128)
 off_destination = Vector2i(18, 4)
 on_destination = Vector2i(18, 3)
 
-[node name="MovingPlatform3" parent="Lever console" unique_id=1202625177 instance=ExtResource("9_do7uq")]
+[node name="MovingPlatform3" parent="Lever console" unique_id=1202625177 instance=ExtResource("10_8st50")]
 position = Vector2(320, 288)
 orientation = 1
 footprint = Vector2i(1, 3)
@@ -155,52 +155,52 @@ off_destination = Vector2i(10, 10)
 on_destination = Vector2i(10, 14)
 speed = 0.7
 
-[node name="EnergyDrink" parent="Lever console" unique_id=939762851 instance=ExtResource("5_ostc2")]
+[node name="EnergyDrink" parent="Lever console" unique_id=939762851 instance=ExtResource("5_8smqf")]
 position = Vector2(352, 448)
 fixed_position = true
 
-[node name="Computer" parent="Lever console" unique_id=1958667487 instance=ExtResource("12_cfybs")]
+[node name="Computer" parent="Lever console" unique_id=1958667487 instance=ExtResource("12_qqnuc")]
 position = Vector2(448, 96)
 aura_rotation_degrees = 90
 
-[node name="Computer2" parent="Lever console" unique_id=604864321 instance=ExtResource("12_cfybs")]
+[node name="Computer2" parent="Lever console" unique_id=604864321 instance=ExtResource("12_qqnuc")]
 position = Vector2(672, 96)
 aura_rotation_degrees = 180
 
-[node name="Computer3" parent="Lever console" unique_id=622468364 instance=ExtResource("12_cfybs")]
+[node name="Computer3" parent="Lever console" unique_id=622468364 instance=ExtResource("12_qqnuc")]
 position = Vector2(320, 96)
 aura_rotation_degrees = 90
 invert_signal = false
 
-[node name="Computer5" parent="Lever console" unique_id=1774623253 instance=ExtResource("12_cfybs")]
+[node name="Computer5" parent="Lever console" unique_id=1774623253 instance=ExtResource("12_qqnuc")]
 position = Vector2(640, 32)
 aura_rotation_degrees = 270
 invert_signal = false
 
 [node name="Table spam" type="Node" parent="." unique_id=1469037231]
 
-[node name="Table" parent="Table spam" unique_id=991496419 instance=ExtResource("8_jhmwl")]
+[node name="Table" parent="Table spam" unique_id=991496419 instance=ExtResource("8_360ww")]
 position = Vector2(448, 416)
 
-[node name="Table2" parent="Table spam" unique_id=461770057 instance=ExtResource("8_jhmwl")]
+[node name="Table2" parent="Table spam" unique_id=461770057 instance=ExtResource("8_360ww")]
 position = Vector2(608, 416)
 
-[node name="SlidingCart" parent="Table spam" unique_id=603184623 instance=ExtResource("5_81gh4")]
+[node name="SlidingCart" parent="Table spam" unique_id=603184623 instance=ExtResource("6_wjkmk")]
 position = Vector2(544, 256)
 
-[node name="SlidingCart2" parent="Table spam" unique_id=1940614223 instance=ExtResource("5_81gh4")]
+[node name="SlidingCart2" parent="Table spam" unique_id=1940614223 instance=ExtResource("6_wjkmk")]
 position = Vector2(512, 224)
 
-[node name="SlidingCart3" parent="Table spam" unique_id=1974220611 instance=ExtResource("5_81gh4")]
+[node name="SlidingCart3" parent="Table spam" unique_id=1974220611 instance=ExtResource("6_wjkmk")]
 position = Vector2(576, 192)
 orientation = 1
 
-[node name="Lever" parent="Table spam" unique_id=794836707 instance=ExtResource("10_nrybq")]
+[node name="Lever" parent="Table spam" unique_id=794836707 instance=ExtResource("11_2xxx8")]
 position = Vector2(32, 288)
 realm = 1
 outputs = Array[NodePath]([NodePath("../Computer")])
 
-[node name="Computer" parent="Table spam" unique_id=1029942260 instance=ExtResource("12_cfybs")]
+[node name="Computer" parent="Table spam" unique_id=1029942260 instance=ExtResource("12_qqnuc")]
 position = Vector2(448, 256)
 aura_rotation_degrees = 90
 

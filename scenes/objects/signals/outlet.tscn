@@ -7,5 +7,6 @@
 script = ExtResource("1_ou2v5")
 
 [node name="Outlet" type="Sprite2D" parent="." unique_id=983715138]
+z_index = -1
 position = Vector2(0, -8)
 texture = ExtResource("2_vxo5w")

@@ -96,6 +96,10 @@ func _blocker_in(center: Vector2, in_realm: int, solid_only := false) -> Node:
 			var cell := Vector2i(x, y)
 			var blocker := level.blocker_at(cell, in_realm)
 			if blocker != null:
+				# Physical treadmills are ghosts to the dream player. Keep their
+				# occupancy for the roommate, pushing and outlet power checks.
+				if level.realm == LevelBase.Realm.DREAM and blocker is Treadmill:
+					continue
 				if solid_only and _is_traversable_dream_block(blocker):
 					continue
 				# Walkables (treadmill) only block outside their walk lane.

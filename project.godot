@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Drift game jam"
-run/main_scene="uid://samvf1hiaebk"
+run/main_scene="res://scenes/intro-cutscene.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 

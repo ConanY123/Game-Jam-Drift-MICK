@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dg1aoo86dbja0" path="res://scripts/objects/pushables/sliding_cart.gd" id="1_cart"]
 [ext_resource type="Texture2D" uid="uid://c3v8ixvxei8l2" path="res://sprites/objects/Cart.png" id="2_2ucqn"]
+[ext_resource type="AudioStream" path="res://audio/SFX/cart sfx.mp3" id="3_cart_sfx"]
+[ext_resource type="AudioStream" path="res://audio/SFX/wallhit_sfx.mp3" id="4_wall_hit_sfx"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1lxwa"]
 size = Vector2(60, 28)
@@ -20,3 +22,11 @@ region_rect = Rect2(120, 8, 80, 56)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=29047720]
 position = Vector2(32, 16)
 shape = SubResource("RectangleShape2D_1lxwa")
+
+[node name="CartSfx" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_cart_sfx")
+bus = &"CleanSFX"
+
+[node name="WallHitSfx" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_wall_hit_sfx")
+bus = &"CleanSFX"

@@ -22,7 +22,11 @@ func _update_push(target: Pushable, dir: Vector2i, delta: float) -> void:
 		push_timer = 0.0
 		return
 
-	if target != null and target.realm != level.realm:
+	if (
+		target != null
+		and target.realm != level.realm
+		and not target.interactable_in_any_realm()
+	):
 		target = null
 	if target != null and not target.can_interact(dir):
 		if target != push_target:

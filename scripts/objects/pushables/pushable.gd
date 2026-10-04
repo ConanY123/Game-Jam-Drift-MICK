@@ -87,9 +87,17 @@ func can_push(dir: Vector2i) -> bool:
 func can_interact(dir: Vector2i) -> bool:
 	return can_push(dir)
 
+# When true, the player can interact with this object even while viewing the
+# other realm. Default: only in its own realm. Overridden by e.g. the treadmill.
+func interactable_in_any_realm() -> bool:
+	return false
+
 func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
 		return false
+	var push_sfx := get_node_or_null("PushSfx") as AudioStreamPlayer2D
+	if push_sfx != null:
+		push_sfx.play()
 	var target := cell + dir
 	var new_cells := get_cells(target)
 	# Claim the new cells right away; the tween is only visual.

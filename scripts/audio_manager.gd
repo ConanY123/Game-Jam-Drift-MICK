@@ -1,9 +1,10 @@
 extends Node
 
 const DREAM_REVERB_WET := 0.1
-const DREAM_MUSIC_ATTENUATION_DB := -4.0
+const DREAM_MUSIC_ATTENUATION_DB := -2.0
 const DREAM_AUDIO_BUS := "DreamFX"
 const DREAM_REVERB_EFFECT_INDEX := 0
+const LEVEL_FIVE_VOLUME_OFFSET_DB := -5.0
 
 # One reusable music player; we swap its stream per level.
 @onready var music_player: AudioStreamPlayer2D = $Music
@@ -16,6 +17,7 @@ var _dream_reverb: AudioEffectReverb
 var _reverb_tween: Tween
 var _music_volume_tween: Tween
 var _base_music_volume_db := 0.0
+var _track_volume_offset_db := 0.0
 
 # Map level number -> track. Assign these in the scene (see below) or preload.
 const TRACKS := {
@@ -23,7 +25,11 @@ const TRACKS := {
 	2: preload("res://audio/music/[TwoShot] LevelTwo.mp3"),
 	3: preload("res://audio/music/[TwoShot] LevelThree.mp3"),
 	4: preload("res://audio/music/[TwoShot] LevelFour.mp3"),
-	5: preload("res://audio/music/Dark Techno EBM Industrial beat Warriors of the Wasteland - Cybermode Beats (128k).mp3")
+	5: preload("res://audio/music/[TwoShot] LevelFive.mp3"),
+	6: preload("res://audio/music/[TwoShot] LevelSix.mp3"),
+	7: preload("res://audio/music/[TwoShot] LevelSeven.mp3"),
+	8: preload("res://audio/music/[TwoShot] LevelSeven.mp3"),
+	9: preload("res://audio/music/[TwoShot] CreditsRoll.mp3")
 }
 
 func _ready() -> void:
@@ -40,11 +46,7 @@ func _ready() -> void:
 		push_error("Audio bus '%s' is missing its reverb effect." % DREAM_AUDIO_BUS)
 		return
 	_dream_reverb.wet = 0.0
-	AudioServer.set_bus_effect_enabled(
-		_dream_audio_bus_index,
-		DREAM_REVERB_EFFECT_INDEX,
-		false
-	)
+	AudioServer.set_bus_bypass_effects(_dream_audio_bus_index, true)
 
 func set_dream_reverb(enabled: bool, fade_duration: float) -> void:
 	if _dream_reverb == null:
@@ -54,19 +56,11 @@ func set_dream_reverb(enabled: bool, fade_duration: float) -> void:
 
 	var target_wet := DREAM_REVERB_WET if enabled else 0.0
 	if enabled:
-		AudioServer.set_bus_effect_enabled(
-			_dream_audio_bus_index,
-			DREAM_REVERB_EFFECT_INDEX,
-			true
-		)
+		AudioServer.set_bus_bypass_effects(_dream_audio_bus_index, false)
 
 	if fade_duration <= 0.0:
 		_dream_reverb.wet = target_wet
-		AudioServer.set_bus_effect_enabled(
-			_dream_audio_bus_index,
-			DREAM_REVERB_EFFECT_INDEX,
-			enabled
-		)
+		AudioServer.set_bus_bypass_effects(_dream_audio_bus_index, not enabled)
 		return
 
 	_reverb_tween = create_tween()
@@ -79,11 +73,7 @@ func set_dream_reverb(enabled: bool, fade_duration: float) -> void:
 	if not enabled:
 		_reverb_tween.tween_callback(
 			func():
-				AudioServer.set_bus_effect_enabled(
-					_dream_audio_bus_index,
-					DREAM_REVERB_EFFECT_INDEX,
-					false
-				)
+				AudioServer.set_bus_bypass_effects(_dream_audio_bus_index, true)
 		)
 
 func _set_reverb_wet(wet: float) -> void:
@@ -93,7 +83,7 @@ func set_dream_music_quieter(enabled: bool, fade_duration: float) -> void:
 	if _music_volume_tween != null and _music_volume_tween.is_valid():
 		_music_volume_tween.kill()
 
-	var target_volume := _base_music_volume_db
+	var target_volume := _base_music_volume_db + _track_volume_offset_db
 	if enabled:
 		target_volume += DREAM_MUSIC_ATTENUATION_DB
 
@@ -115,6 +105,10 @@ func play_music(level_number: int) -> void:
 	if not TRACKS.has(level_number):
 		push_warning("No track for level %d" % level_number)
 		return
+	_track_volume_offset_db = (
+		LEVEL_FIVE_VOLUME_OFFSET_DB if level_number == 5 else 0.0
+	)
+	music_player.volume_db = _base_music_volume_db + _track_volume_offset_db
 	music_player.stream = TRACKS[level_number]
 	music_player.play(17.0 if level_number == 5 else 0.0)
 

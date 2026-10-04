@@ -29,7 +29,9 @@ func _move_axis(offset: Vector2) -> Node:
 			# reporting the goose so the push interaction can start charging.
 			position += offset
 			return goose_in_push_range
-	if blocker == null or _is_traversable_dream_block(blocker):
+	# Interaction targets can be walkable dream pieces. Check solid collisions
+	# separately so they cannot hide another obstacle in either realm.
+	if _blocker_at(next_position, true) == null:
 		position += offset
 	return blocker
 
@@ -65,13 +67,13 @@ func _is_traversable_dream_block(blocker: Node) -> bool:
 		and not (blocker is EnergyDrink)
 	)
 
-func _blocker_at(center: Vector2) -> Node:
-	var blocker: Node = _blocker_in(center, level.realm)
+func _blocker_at(center: Vector2, solid_only := false) -> Node:
+	var blocker: Node = _blocker_in(center, level.realm, solid_only)
 	if blocker == null and level.realm == LevelBase.Realm.DREAM:
-		blocker = _blocker_in(center, LevelBase.Realm.PHYSICAL)
+		blocker = _blocker_in(center, LevelBase.Realm.PHYSICAL, solid_only)
 	return blocker
 
-func _blocker_in(center: Vector2, in_realm: int) -> Node:
+func _blocker_in(center: Vector2, in_realm: int, solid_only := false) -> Node:
 	var search_radius := HITBOX_RADIUS + Goose.HITBOX_HALF_SIZE
 	var half := Vector2.ONE * search_radius
 	var min_cell := Grid.pos_to_cell(center - half)
@@ -81,6 +83,8 @@ func _blocker_in(center: Vector2, in_realm: int) -> Node:
 			var cell := Vector2i(x, y)
 			var blocker := level.blocker_at(cell, in_realm)
 			if blocker != null:
+				if solid_only and _is_traversable_dream_block(blocker):
+					continue
 				if blocker is Goose:
 					if level.realm == LevelBase.Realm.DREAM:
 						continue

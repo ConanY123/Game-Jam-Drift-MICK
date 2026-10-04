@@ -113,6 +113,7 @@ func _update_interaction_hint(delta: float) -> void:
 	_nearby_interactable_dir = Vector2i.ZERO
 	_nearby_signal_source = null
 	var reach := SIZE * 0.5 + 1.0
+	var player_cell := Grid.pos_to_cell(position)
 	var facing := _facing_dir
 	var clockwise := Vector2i(-facing.y, facing.x)
 	var directions: Array[Vector2i] = [
@@ -146,7 +147,17 @@ func _update_interaction_hint(delta: float) -> void:
 				break
 
 		if _nearby_interactable == null:
-			var player_cell := Grid.pos_to_cell(position)
+			for source: Node in get_tree().get_nodes_in_group("signal_sources"):
+				if (
+					source.get("manually_toggleable") == true
+					and bool(source.call("can_interact_in_realm", level.realm))
+					and Grid.pos_to_cell(level.to_local(source.global_position)) == player_cell
+				):
+					_nearby_signal_source = source
+					_interaction_hint_holdable = false
+					break
+
+		if _nearby_signal_source == null and _nearby_interactable == null:
 			for direction in directions:
 				var probe := position + Vector2(direction) * reach
 				if _blocker_in(probe, level.realm) != null:

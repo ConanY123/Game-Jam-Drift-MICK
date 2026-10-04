@@ -3,8 +3,9 @@ extends Pushable
 
 # A dream-only pickup. Tap interact next to it and your stamina is maxed out.
 #
-# - Place ONE of these under the level (e.g. under the "Dream" node). Where you
-#   drag it in the editor does not matter: it picks its own spot.
+# - Place ONE of these under the level (e.g. under the "Dream" node). By
+#   default, where you drag it in the editor does not matter: it picks its own
+#   spot. Enable `fixed_position` to keep the authored position instead.
 # - It does not exist until you enter the dream. On entering, if it is not
 #   already out, it appears on a random painted dream-floor tile.
 # - Leaving and re-entering the dream leaves it where it was (unless that spot
@@ -20,6 +21,7 @@ extends Pushable
 @export var random_seed := 0  # 0 = different every run, any other number = repeatable
 @export var route_buffer := 0  # extra cells of space to keep around the roommate's path
 @export var avoid_blocking_paths := true  # never drop it where it would wall off part of the floor
+@export var fixed_position := false  # keep the authored dream-world position; no respawn after use
 
 const NO_CELL := Vector2i(-9999, -9999)
 const NEIGHBORS := [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
@@ -31,6 +33,11 @@ var _rng := RandomNumberGenerator.new()
 func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 	realm = LevelBase.Realm.DREAM
 	super.setup(p_level, p_cell)
+	if fixed_position:
+		_active = true
+		level.realm_changed.connect(_on_realm_changed)
+		_refresh()
+		return
 	# Pushable.setup registered the editor position. We don't exist yet.
 	level.unregister(self, realm)
 	_active = false
@@ -43,6 +50,9 @@ func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 
 
 func _on_realm_changed(new_realm: int) -> void:
+	if fixed_position:
+		_refresh()
+		return
 	if new_realm != LevelBase.Realm.DREAM or level.player == null:
 		return
 	if _active and not _spot_is_still_good():

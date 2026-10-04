@@ -17,6 +17,9 @@ var moving := false
 func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 	level = p_level
 	cell = p_cell
+	# Floor objects sit below the roommate route overlay. Other pushables keep
+	# the normal layer so they can obscure the route when they overlap it.
+	z_index = -2 if is_floor else 0
 	position = Grid.cell_to_pos(cell)
 	level.register(self, get_cells(cell), realm)
 	level.realm_changed.connect(func(_r): _refresh())
@@ -87,6 +90,9 @@ func can_interact(dir: Vector2i) -> bool:
 func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
 		return false
+	var push_sfx := get_node_or_null("PushSfx") as AudioStreamPlayer2D
+	if push_sfx != null:
+		push_sfx.play()
 	var target := cell + dir
 	var new_cells := get_cells(target)
 	# Claim the new cells right away; the tween is only visual.

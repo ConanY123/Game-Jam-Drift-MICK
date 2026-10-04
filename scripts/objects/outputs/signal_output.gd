@@ -4,6 +4,7 @@ extends "res://scripts/objects/pushables/pushable.gd"
 @export var can_be_pushed := false
 @export var initially_powered := false
 @export var invert_signal := false
+@export var toggle_on_source_toggle := false
 
 var powered := false
 
@@ -23,6 +24,12 @@ func turn_on() -> void:
 
 func turn_off() -> void:
 	set_powered(false)
+
+func toggle_power() -> void:
+	set_powered(not powered)
+
+func apply_initial_signal(source_is_on: bool) -> void:
+	set_powered(source_is_on != invert_signal)
 
 func set_powered(value: bool) -> void:
 	if powered == value:

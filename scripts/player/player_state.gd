@@ -59,6 +59,19 @@ func _goose_in_push_range(center: Vector2, movement: Vector2) -> Goose:
 				return goose
 	return null
 
+func _goose_overlapping_player() -> Goose:
+	if level.realm == LevelBase.Realm.DREAM:
+		return null
+	var checked: Dictionary = {}
+	for blocker in level.solids[level.realm].values():
+		if not blocker is Goose or checked.has(blocker):
+			continue
+		checked[blocker] = true
+		var goose := blocker as Goose
+		if goose.overlaps_player_circle(position, HITBOX_RADIUS):
+			return goose
+	return null
+
 func _is_traversable_dream_block(blocker: Node) -> bool:
 	return (
 		level.realm == LevelBase.Realm.DREAM

@@ -15,6 +15,7 @@ var _destination_position := Vector2.ZERO
 
 func _ready() -> void:
 	_set_footprint()
+	add_to_group("moving_platforms")
 	super._ready()
 
 
@@ -85,6 +86,21 @@ func _claim_footprint(center_cell: Vector2i) -> bool:
 	cell = next_origin
 	level.register(self, next_cells, realm)
 	return true
+
+
+# Unlike ordinary grid-snapped floor objects, a moving platform can cover a
+# cell visually while it is between two grid positions. The roommate uses
+# this check so that support follows the platform's actual footprint.
+func supports_cell(test_cell: Vector2i) -> bool:
+	if level == null or realm != LevelBase.Realm.DREAM or not is_floor:
+		return false
+	var platform_center := level.to_local(global_position)
+	var footprint_size := Vector2(size * Grid.CELL)
+	var footprint_rect := Rect2(
+		platform_center - footprint_size * 0.5,
+		footprint_size
+	)
+	return footprint_rect.has_point(Grid.cell_to_center(test_cell))
 
 
 func _draw() -> void:

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bu5r4ry1d5pdm" path="res://scripts/objects/sources/lever.gd" id="1_lever"]
 [ext_resource type="Texture2D" path="res://sprites/objects/Switch.png" id="2_switch"]
+[ext_resource type="AudioStream" path="res://audio/SFX/Lever.mp3" id="3_lever_sfx"]
 
 [node name="Lever" type="Node2D" unique_id=873023911]
 script = ExtResource("1_lever")
@@ -12,3 +13,7 @@ position = Vector2(16, 16)
 texture = ExtResource("2_switch")
 region_enabled = true
 region_rect = Rect2(0, 0, 32, 32)
+
+[node name="InteractSfx" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_lever_sfx")
+bus = &"CleanSFX"

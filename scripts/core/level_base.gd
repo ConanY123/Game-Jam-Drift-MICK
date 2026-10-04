@@ -9,8 +9,14 @@ extends Node2D
 @export_range(0.0, 5.0, 0.1) var death_transition_duration := 1.0
 @export_range(0.0, 5.0, 0.1) var death_screen_duration := 1.25
 @export_range(0.0, 5.0, 0.1) var reset_transition_duration := 1.0
-@export_range(0.0, 5.0, 0.1) var realm_transition_duration := 1.0
+@export_range(0.0, 5.0, 0.1) var realm_transition_duration := 0.8
 @export_range(0.0, 5.0, 0.1) var completion_transition_duration := 1.0
+
+# The pink wall tiles are a second atlas source in the same TileSet,
+# laid out exactly like the normal one.
+const DREAM_WALL_SOURCE_ID := 3  # change to the pink source's ID
+
+var _wall_cells := {}  # Vector2i -> [source_id, atlas_coords, alternative]
 
 enum Realm { 
 	PHYSICAL, 
@@ -269,6 +275,11 @@ func _load_tilemaps() -> void:
 		for c in walls.get_used_cells():
 			solids[Realm.PHYSICAL][c] = self
 			solids[Realm.DREAM][c] = self
+			_wall_cells[c] = [
+				walls.get_cell_source_id(c),
+				walls.get_cell_atlas_coords(c),
+				walls.get_cell_alternative_tile(c),
+			]
 	var dream := get_node_or_null("DreamFloorLayer") as TileMapLayer
 	if dream != null:
 		for c in dream.get_used_cells():
@@ -278,17 +289,26 @@ func _update_layers() -> void:
 	var physical_background := get_node_or_null("PhysicalBackground") as CanvasItem
 	if physical_background != null:
 		physical_background.visible = realm == Realm.PHYSICAL
+		physical_background.z_index = -20
 	var dream_background := get_node_or_null("DreamBackground") as CanvasItem
 	if dream_background != null:
 		dream_background.visible = realm == Realm.DREAM
+		dream_background.z_index = -20
 	var floor_layer := get_node_or_null("FloorLayer") as TileMapLayer
 	if floor_layer != null:
 		floor_layer.visible = realm == Realm.DREAM
-		floor_layer.z_index = -2
+		floor_layer.z_index = -12
 	var dream_layer := get_node_or_null("DreamFloorLayer") as TileMapLayer
 	if dream_layer != null:
 		dream_layer.visible = realm == Realm.DREAM
-		dream_layer.z_index = 0
+		dream_layer.z_index = -10
+	var wall_layer := get_node_or_null("WallLayer") as TileMapLayer
+	if wall_layer != null:
+		for c in _wall_cells:
+			var data: Array = _wall_cells[c]
+			var source: int = DREAM_WALL_SOURCE_ID if realm == Realm.DREAM else data[0]
+			wall_layer.set_cell(c, source, data[1], data[2])
+
 # Instantiates the roommate scene on a route of cells and forwards his result.
 func add_roommate(route: Array[Vector2i]) -> Node2D:
 	var r := ROOMMATE_SCENE.instantiate()

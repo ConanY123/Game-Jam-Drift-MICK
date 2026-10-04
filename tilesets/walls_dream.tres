@@ -1,12 +1,12 @@
-[gd_resource type="TileSet" format=3 uid="uid://cx7cahqbukta7"]
+[gd_resource type="TileSet" format=3 uid="uid://bl6kq5ffl1oo6"]
 
-[ext_resource type="Texture2D" uid="uid://bc80tkfbvanue" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet.png" id="1_p5m56"]
-[ext_resource type="Texture2D" uid="uid://vsqq27g0m87r" path="res://sprites/tilesets/TilemapGOOD.png" id="2_yjhnm"]
-[ext_resource type="Texture2D" uid="uid://dl8irc6glfi27" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet_Dream.png" id="3_og555"]
-[ext_resource type="Texture2D" uid="uid://c8tbjxeqgryvx" path="res://sprites/tilesets/Tilemap-Dream.png" id="4_02bk2"]
+[ext_resource type="Texture2D" uid="uid://vsqq27g0m87r" path="res://sprites/tilesets/TilemapGOOD.png" id="1_qh4ti"]
+[ext_resource type="Texture2D" uid="uid://bc80tkfbvanue" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet.png" id="2_aebfn"]
+[ext_resource type="Texture2D" uid="uid://dl8irc6glfi27" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet_Dream.png" id="3_w1yso"]
+[ext_resource type="Texture2D" uid="uid://c8tbjxeqgryvx" path="res://sprites/tilesets/Tilemap-Dream.png" id="4_cfssn"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_02bk2"]
-texture = ExtResource("2_yjhnm")
+texture = ExtResource("1_qh4ti")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 1:0/0 = 0
@@ -205,7 +205,7 @@ texture_region_size = Vector2i(32, 32)
 14:12/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dim8o"]
-texture = ExtResource("1_p5m56")
+texture = ExtResource("2_aebfn")
 texture_region_size = Vector2i(32, 32)
 0:4/0 = 0
 1:4/0 = 0
@@ -225,8 +225,26 @@ texture_region_size = Vector2i(32, 32)
 3:7/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_p76qs"]
-texture = ExtResource("3_og555")
+texture = ExtResource("3_w1yso")
 texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+6:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+6:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+0:3/0 = 0
+2:3/0 = 0
 0:4/0 = 0
 1:4/0 = 0
 2:4/0 = 0
@@ -245,7 +263,7 @@ texture_region_size = Vector2i(32, 32)
 3:7/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mc2ms"]
-texture = ExtResource("4_02bk2")
+texture = ExtResource("4_cfssn")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 1:0/0 = 0

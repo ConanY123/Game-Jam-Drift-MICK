@@ -17,11 +17,11 @@ bus = &"Music"
 
 [node name="Victory" type="AudioStreamPlayer2D" parent="SFX" unique_id=68594816]
 stream = ExtResource("3_ybwj1")
-bus = &"SFX"
+bus = &"CleanSFX"
 
 [node name="GameOver" type="AudioStreamPlayer2D" parent="SFX" unique_id=389997892]
 stream = ExtResource("3_tlsbt")
-bus = &"SFX"
+bus = &"CleanSFX"
 
 [node name="GooseHonk" type="AudioStreamPlayer" parent="SFX"]
 stream = ExtResource("4_honk")

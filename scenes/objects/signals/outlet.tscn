@@ -1,7 +1,11 @@
 [gd_scene format=3 uid="uid://cwejs6fg3k62r"]
 
-[ext_resource type="Script" uid="uid://c3mdrht5i3wty" path="res://scripts/objects/sources/signal_source.gd" id="1_ou2v5"]
+[ext_resource type="Script" uid="uid://box4dt1og7qq5" path="res://scripts/objects/sources/signal_source.gd" id="1_ou2v5"]
+[ext_resource type="Texture2D" uid="uid://c8sw3ry5tqje7" path="res://sprites/objects/Outlet.png" id="2_vxo5w"]
 
 [node name="Outlet" type="Node2D" unique_id=568823464]
 script = ExtResource("1_ou2v5")
-outputs = []
+
+[node name="Outlet" type="Sprite2D" parent="." unique_id=983715138]
+position = Vector2(0, -8)
+texture = ExtResource("2_vxo5w")

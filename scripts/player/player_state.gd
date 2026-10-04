@@ -45,6 +45,9 @@ func _blocker_in(center: Vector2, in_realm: int) -> Node:
 		for y in range(min_cell.y, max_cell.y + 1):
 			var blocker := level.blocker_at(Vector2i(x, y), in_realm)
 			if blocker != null:
+				# Walkables (treadmill) only block outside their walk lane.
+				if blocker is Walkable and not blocker.blocks_body(center, HITBOX_SIZE * 0.5):
+					continue
 				if blocker is Door:
 					if not blocker.overlaps_player_hitbox(
 						center,
@@ -53,6 +56,9 @@ func _blocker_in(center: Vector2, in_realm: int) -> Node:
 						continue
 				return blocker
 	return null
+
+func hitbox_half() -> float:
+	return HITBOX_SIZE * 0.5
 
 func is_overlapping(in_realm: int) -> bool:
 	return _blocker_in(position, in_realm) != null

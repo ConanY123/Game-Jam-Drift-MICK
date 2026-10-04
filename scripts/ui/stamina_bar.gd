@@ -14,6 +14,8 @@ extends CanvasLayer
 @onready var _edge_effect: ColorRect = $EdgeEffect
 @onready var _edge_material: ShaderMaterial = $EdgeEffect.material
 @onready var _minimap: RealmMinimap = $RealmMinimap
+@onready var _instruction_panel: Panel = $InstructionPanel
+@onready var _instruction_text: Label = $InstructionPanel/Text
 
 const FULL_WIDTH := 168.0  # six-cell panel width minus its 12px side margins
 const BAR_HEIGHT := 20.0  # bar fill height (matches the scene)
@@ -37,6 +39,11 @@ var _edge_effect_tween: Tween
 var _realm_attempt_tween: Tween
 var _stamina_display_initialized := false
 var _speed_effects_disabled := false
+var _dream_tips_shown := false
+
+const LEVEL_0_TIPS := "Move with WASD or the Arrow Keys.\n\nPress R to restart the level.\n\nPress Esc to pause.\n\nHold Z/[Space] to interact with objects"
+const LEVEL_1_TIPS := "watch your stamina\n\nSpam Z/[Space] to push large objects"
+const DREAM_TIPS := "Welcome to the dream realm\n\nKeep the roommate away from hazards in both realms.\n\nPress C to switch realms when you have enough stamina"
 
 func _ready() -> void:
 	_speed_button.toggled.connect(_on_speed_button_toggled)
@@ -93,6 +100,10 @@ func setup(level: LevelBase) -> void:
 	_player = level.player
 	if _player == null:
 		return
+	_show_level_tips()
+	if level.realm == LevelBase.Realm.DREAM:
+		_dream_tips_shown = true
+		_show_instruction_text(DREAM_TIPS)
 	# Temporarily disabled while the minimap presentation is being revised.
 	_player.stamina_changed.connect(_on_stamina_changed)
 	level.realm_changed.connect(_on_realm_changed)
@@ -142,7 +153,26 @@ func _update_fill_tint(fraction: float) -> void:
 func _on_realm_changed(_new_realm: int) -> void:
 	if _player != null:
 		_update_fill_tint(_player.stamina / Player.MAX_STAMINA)
+	if _new_realm == LevelBase.Realm.DREAM and not _dream_tips_shown:
+		_dream_tips_shown = true
+		_show_instruction_text(DREAM_TIPS)
 	_update_world_effect()
+
+func _show_level_tips() -> void:
+	if _level == null:
+		return
+	var level_manager := get_node("/root/LevelManager")
+	match level_manager.current_level:
+		0:
+			_show_instruction_text(LEVEL_0_TIPS)
+		1:
+			_show_instruction_text(LEVEL_1_TIPS)
+		_:
+			_instruction_panel.visible = false
+
+func _show_instruction_text(text: String) -> void:
+	_instruction_text.text = text
+	_instruction_panel.visible = true
 
 func _update_world_effect() -> void:
 	if _player == null or _level == null:

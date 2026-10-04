@@ -182,6 +182,7 @@ func can_push(dir: Vector2i) -> bool:
 func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
 		return false
+	AudioManager.play_goose_honk()
 	level.unregister(self, realm)
 	cell += dir
 	level.register(self, get_cells(cell), realm)

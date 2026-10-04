@@ -290,10 +290,21 @@ func add_slidable(cell: Vector2i, size := Vector2i(1, 1), weight := 1.0, color :
 	add_child(s)  # its _ready registers it with this level
 	return s
 
-const PLAYER_SCENE := preload("res://scenes/actors/player.tscn")
+const PLAYER_SCENE_PATH := "res://scenes/actors/player.tscn"
 
 func add_player(cell: Vector2i) -> Player:
-	var p := PLAYER_SCENE.instantiate() as Player
+	var player_scene := ResourceLoader.load(
+		PLAYER_SCENE_PATH,
+		"PackedScene",
+		ResourceLoader.CACHE_MODE_IGNORE_DEEP
+	) as PackedScene
+	if player_scene == null or not player_scene.can_instantiate():
+		push_error("Could not load a valid player scene from %s." % PLAYER_SCENE_PATH)
+		return null
+	var p := player_scene.instantiate() as Player
+	if p == null:
+		push_error("The player scene did not instantiate a Player node.")
+		return null
 	p.level = self
 	p.position = Grid.cell_to_center(cell)
 	player = p

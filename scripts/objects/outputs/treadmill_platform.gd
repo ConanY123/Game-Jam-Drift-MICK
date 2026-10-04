@@ -101,6 +101,8 @@ func _physics_process(delta: float) -> void:
 		_sync_floor(progress)
 	# Smoothly follow the (fractional) progress so the tiles glide.
 	position = Grid.cell_to_pos(start_cell) + Vector2(step()) * progress * Grid.CELL
+	if show_path:
+		queue_redraw()  # keep the path anchored to the world as the node moves
 
 func _is_driven() -> bool:
 	if treadmill == null or not is_instance_valid(treadmill):
@@ -181,14 +183,31 @@ func _find_level() -> LevelBase:
 		node = node.get_parent()
 	return node as LevelBase
 
-# ---------- editor preview ----------
+# ---------- path visual ----------
 
-# In the editor: orange outline marks where it slides to.
+## Draw the travel path (rest spot -> end spot) in-game, not just the editor.
+@export_group("Path Visual")
+@export var show_path := true
+@export var path_color := Color(1.0, 0.85, 0.4, 0.5)
+
+# Visible both in the editor (anchored at the node) and at runtime. At runtime
+# the node glides, so everything is drawn relative to the fixed start cell by
+# subtracting the node's current travel offset.
 func _draw() -> void:
-	if not Engine.is_editor_hint() or distance <= 0:
+	if not show_path or distance <= 0:
 		return
 	var size := Vector2(footprint() * Grid.CELL)
-	var shift := Vector2(step() * distance * Grid.CELL)
-	draw_rect(Rect2(shift, size), Color(1.0, 0.6, 0.2, 0.2))
-	draw_rect(Rect2(shift, size), Color(1.0, 0.6, 0.2), false, 2.0)
-	draw_line(size * 0.5, shift + size * 0.5, Color(1.0, 0.6, 0.2), 2.0)
+	var travel := Vector2(step() * distance * Grid.CELL)
+	# Offset of the rest position from the node's current position, in local space.
+	var rest_local := Vector2.ZERO
+	if not Engine.is_editor_hint():
+		rest_local = Grid.cell_to_pos(start_cell) - position
+	var end_local := rest_local + travel
+	# Dashed corridor between the two endpoints.
+	var corridor_a := rest_local.min(end_local)
+	var corridor_b := (rest_local + size).max(end_local + size)
+	draw_rect(Rect2(corridor_a, corridor_b - corridor_a), Color(path_color, path_color.a * 0.25))
+	# Endpoints: rest (solid) and destination (outline).
+	draw_rect(Rect2(rest_local, size), path_color, false, 2.0)
+	draw_rect(Rect2(end_local, size), Color(path_color, path_color.a * 0.7), false, 2.0)
+	draw_line(rest_local + size * 0.5, end_local + size * 0.5, path_color, 2.0)

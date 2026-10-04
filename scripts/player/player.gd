@@ -15,7 +15,7 @@ func _ready() -> void:
 
 func _begin_fall() -> void:
 	super._begin_fall()
-	z_index = _normal_z_index if fall_edge == FallEdge.FRONT else -11
+	z_index = _normal_z_index if int(get("fall_edge")) == 2 else -11
 
 func _end_fall() -> void:
 	super._end_fall()
@@ -72,7 +72,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_recover_stamina(delta)
 	_apply_fall_visual()
-	_record_ground_position()
+	call("_record_ground_position")
 
 	if falling:
 		_update_fall(delta)
@@ -137,7 +137,7 @@ func _physics_process(delta: float) -> void:
 		interact_locked = true
 	if position != position_before_move:
 		has_moved = true
-	_record_ground_position()
+	call("_record_ground_position")
 	queue_redraw()
 
 func _draw() -> void:

@@ -17,13 +17,17 @@ var _reverb_tween: Tween
 var _music_volume_tween: Tween
 var _base_music_volume_db := 0.0
 
-# Map level number -> track. Assign these in the scene (see below) or preload.
+const LATE_GAME_TRACK := preload("res://audio/music/Dark Techno EBM Industrial beat Warriors of the Wasteland - Cybermode Beats (128k).mp3")
+
+# Music assignments for each level.
 const TRACKS := {
 	1: preload("res://audio/music/[TwoShot] LevelOne.mp3"),
 	2: preload("res://audio/music/[TwoShot] LevelTwo.mp3"),
 	3: preload("res://audio/music/[TwoShot] LevelThree.mp3"),
 	4: preload("res://audio/music/[TwoShot] LevelFour.mp3"),
-	5: preload("res://audio/music/Dark Techno EBM Industrial beat Warriors of the Wasteland - Cybermode Beats (128k).mp3")
+	5: LATE_GAME_TRACK,
+	7: LATE_GAME_TRACK,
+	8: LATE_GAME_TRACK
 }
 
 func _ready() -> void:
@@ -100,7 +104,7 @@ func play_music(level_number: int) -> void:
 		push_warning("No track for level %d" % level_number)
 		return
 	music_player.stream = TRACKS[level_number]
-	music_player.play(17.0 if level_number == 5 else 0.0)
+	music_player.play(17.0 if music_player.stream == LATE_GAME_TRACK else 0.0)
 
 func play_game_over() -> void:
 	music_player.stop()

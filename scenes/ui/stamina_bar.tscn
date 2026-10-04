@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://orhg6wx81jr5" path="res://scripts/ui/stamina_bar.gd" id="1_stam"]
 [ext_resource type="Shader" path="res://shaders/stamina_edge_effect.gdshader" id="2_edge"]
+[ext_resource type="Script" path="res://scripts/ui/realm_minimap.gd" id="3_minimap"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_panel"]
 bg_color = Color(0.08, 0.07, 0.16, 0.85)
@@ -31,6 +32,19 @@ layer = 9
 offset = Vector2(0, 0)
 transform = Transform2D(1, 0, 0, 1, 0, 0)
 script = ExtResource("1_stam")
+
+[node name="RealmMinimap" type="Control" parent="." unique_id=1692323651]
+layout_mode = 0
+anchor_left = 0.75
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 176.0
+offset_right = -16.0
+offset_bottom = 304.0
+mouse_filter = 2
+visible = false
+process_mode = 4
+script = ExtResource("3_minimap")
 
 [node name="EdgeEffect" type="ColorRect" parent="." unique_id=1946388274]
 material = SubResource("ShaderMaterial_edge")

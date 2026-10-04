@@ -11,7 +11,8 @@ const TRACKS := {
 	1: preload("res://audio/music/[TwoShot] LevelOne.mp3"),
 	2: preload("res://audio/music/[TwoShot] LevelTwo.mp3"),
 	3: preload("res://audio/music/[TwoShot] LevelThree.mp3"),
-	4: preload("res://audio/music/[TwoShot] LevelFour.mp3")
+	4: preload("res://audio/music/[TwoShot] LevelFour.mp3"),
+	5: preload("res://audio/music/Dark Techno EBM Industrial beat Warriors of the Wasteland - Cybermode Beats (128k).mp3")
 }
 
 func play_music(level_number: int) -> void:
@@ -21,7 +22,7 @@ func play_music(level_number: int) -> void:
 		push_warning("No track for level %d" % level_number)
 		return
 	music_player.stream = TRACKS[level_number]
-	music_player.play()
+	music_player.play(17.0 if level_number == 5 else 0.0)
 
 func play_game_over() -> void:
 	music_player.stop()

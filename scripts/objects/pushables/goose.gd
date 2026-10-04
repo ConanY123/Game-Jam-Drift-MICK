@@ -15,6 +15,7 @@ extends Pushable
 
 const DIRECTIONS := [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const PUSH_SLIDE_TIME := 0.12  # seconds for a pushed goose to slide one cell
+const NO_RETURN := -9999  # means "not knocked out of place"
 
 @export_enum("Left", "Right", "Up", "Down") var start_direction := 0
 # Number of tiles in the line, INCLUDING the one it starts on.
@@ -23,6 +24,8 @@ const PUSH_SLIDE_TIME := 0.12  # seconds for a pushed goose to slide one cell
 @export var seconds_per_cell := 0.6  # time to walk one tile
 @export var push_pause := 0.75  # how long it stands still after being pushed
 @export var end_pause := 0.5  # how long it stands still at each end of the line
+# After being pushed along its line, walk back to the spot it was knocked from.
+@export var return_to_spot_after_push := true
 @export var show_path := true  # draw the patrol line (handy while designing)
 
 var _origin := Vector2i.ZERO  # the cell it started on (the line's anchor)
@@ -34,6 +37,7 @@ var _speed := 0.0  # sprite slide speed in px/s
 var _stepping := false  # true while a patrol step is in progress
 var _pause_left := 0.0
 var _frozen := false  # set once the level is won or lost
+var _return_index := NO_RETURN  # spot on the line it must walk back to
 
 
 func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
@@ -82,7 +86,11 @@ func _physics_process(delta: float) -> void:
 	var target := cell + step
 	if _can_enter(target):
 		_begin_step(target)
-	elif _off_line() == 0 and level.blocker_at(target, realm) is Goose:
+	elif (
+		_off_line() == 0
+		and _return_index == NO_RETURN
+		and level.blocker_at(target, realm) is Goose
+	):
 		# Another goose is in the way: head back the other way.
 		_turn_around_if_possible()
 
@@ -92,6 +100,11 @@ func _choose_step() -> Vector2i:
 	var off_line := _off_line()
 	if off_line != 0:
 		return -_perp * signi(off_line)
+	if _return_index != NO_RETURN:
+		var gap := _return_index - _along_index()
+		if gap != 0:
+			return _along * signi(gap)
+		_return_index = NO_RETURN  # back where it was knocked from
 	if patrol_length <= 1:
 		return Vector2i.ZERO
 	var next_index := _along_index() + _heading
@@ -183,6 +196,10 @@ func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
 		return false
 	AudioManager.play_goose_honk()
+	# Remember the spot it was knocked from. Only the first push counts, so a
+	# second push before it gets back doesn't move that spot.
+	if return_to_spot_after_push and _return_index == NO_RETURN:
+		_return_index = _along_index()
 	level.unregister(self, realm)
 	cell += dir
 	level.register(self, get_cells(cell), realm)

@@ -2,6 +2,7 @@ extends Node2D
 
 const SIZE := 24.0
 const HITBOX_SIZE := 18.0
+const HITBOX_RADIUS := HITBOX_SIZE * 0.5
 const SPEED := 96.0
 const MASH_GAIN := 0.12
 const MASH_DECAY := 0.5
@@ -38,21 +39,36 @@ func _blocker_at(center: Vector2) -> Node:
 	return blocker
 
 func _blocker_in(center: Vector2, in_realm: int) -> Node:
-	var half := Vector2(HITBOX_SIZE, HITBOX_SIZE) / 2.0
+	var search_radius := HITBOX_RADIUS + Goose.HITBOX_RADIUS
+	var half := Vector2.ONE * search_radius
 	var min_cell := Grid.pos_to_cell(center - half)
 	var max_cell := Grid.pos_to_cell(center + half - Vector2(0.01, 0.01))
 	for x in range(min_cell.x, max_cell.x + 1):
 		for y in range(min_cell.y, max_cell.y + 1):
-			var blocker := level.blocker_at(Vector2i(x, y), in_realm)
+			var cell := Vector2i(x, y)
+			var blocker := level.blocker_at(cell, in_realm)
 			if blocker != null:
-				if blocker is Door:
-					if not blocker.overlaps_player_hitbox(
+				if blocker is Goose:
+					if not blocker.overlaps_player_circle(center, HITBOX_RADIUS):
+						continue
+				elif blocker is Door:
+					if not blocker.overlaps_player_circle(
 						center,
-						Vector2(HITBOX_SIZE, HITBOX_SIZE)
+						HITBOX_RADIUS
 					):
 						continue
+				elif not _circle_overlaps_cell(center, cell):
+					continue
 				return blocker
 	return null
+
+func _circle_overlaps_cell(center: Vector2, cell: Vector2i) -> bool:
+	var cell_origin := Vector2(Grid.cell_to_pos(cell))
+	var closest_point := center.clamp(
+		cell_origin,
+		cell_origin + Vector2.ONE * Grid.CELL
+	)
+	return center.distance_squared_to(closest_point) < HITBOX_RADIUS * HITBOX_RADIUS
 
 func is_overlapping(in_realm: int) -> bool:
 	return _blocker_in(position, in_realm) != null

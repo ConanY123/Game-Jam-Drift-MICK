@@ -162,7 +162,7 @@ func _draw() -> void:
 	elif realm == LevelBase.Realm.PHYSICAL:
 		if open:
 			return
-		leaf_color.a = 0.15
+		leaf_color.a = 0.35
 	else:
 		return
 

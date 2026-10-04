@@ -85,6 +85,9 @@ func _blocker_in(center: Vector2, in_realm: int, solid_only := false) -> Node:
 			if blocker != null:
 				if solid_only and _is_traversable_dream_block(blocker):
 					continue
+				# Walkables (treadmill) only block outside their walk lane.
+				if blocker is Walkable and not blocker.blocks_body(center, HITBOX_RADIUS):
+					continue
 				if blocker is Goose:
 					if level.realm == LevelBase.Realm.DREAM:
 						continue
@@ -100,6 +103,9 @@ func _blocker_in(center: Vector2, in_realm: int, solid_only := false) -> Node:
 					continue
 				return blocker
 	return null
+
+func hitbox_half() -> float:
+	return HITBOX_RADIUS
 
 func _circle_overlaps_cell(center: Vector2, cell: Vector2i) -> bool:
 	var cell_origin := Vector2(Grid.cell_to_pos(cell))

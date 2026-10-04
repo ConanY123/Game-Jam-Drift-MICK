@@ -120,7 +120,22 @@ func _show_intro_caption() -> void:
 		return
 	var caption := LEVEL_CAPTION_SCENE.instantiate()
 	add_child(caption)
-	caption.call("show_caption", caption_title, "", caption_hold)
+	caption.call(
+		"show_caption",
+		caption_title,
+		"",
+		caption_hold,
+		_level_time_label()
+	)
+
+func _level_time_label() -> String:
+	var level_manager := get_node("/root/LevelManager")
+	var level_index: int = level_manager.current_level
+	var hour := posmod(level_index, 12)
+	if hour == 0:
+		hour = 12
+	var period := "AM" if level_index < 12 else "PM"
+	return "%d:00 %s" % [hour, period]
 
 func gameplay_locked() -> bool:
 	var transitions := get_node_or_null("/root/TransitionManager")

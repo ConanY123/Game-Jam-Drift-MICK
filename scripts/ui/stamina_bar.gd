@@ -1,20 +1,20 @@
 class_name StaminaBar
 extends CanvasLayer
 
-# Stamina readout, sitting in the right-hand UI strip (play field is 768px wide;
-# the strip runs 768..1024). Mirrors result_overlay's pattern: the level
-# instantiates this and calls setup(level); we hook the player's
-# stamina_changed signal and resize the gradient fill.
+# Stamina readout and time controls in the right-hand UI strip. The level
+# instantiates this and calls setup(level); we hook the player's stamina_changed
+# signal and resize the gradient fill.
 #
 # Self-contained: it only reads the player's stamina fraction via the signal.
 
 @onready var _fill: TextureRect = $Panel/BarBG/Fill
 @onready var _label: Label = $Panel/Label
 @onready var _speed_button: Button = $SpeedButton
+@onready var _fast_forward_button: Button = $FastForwardButton
 @onready var _edge_effect: ColorRect = $EdgeEffect
 @onready var _edge_material: ShaderMaterial = $EdgeEffect.material
 
-const FULL_WIDTH := 200.0  # px width of the bar at 100% (matches the scene)
+const FULL_WIDTH := 168.0  # six-cell panel width minus its 12px side margins
 const BAR_HEIGHT := 20.0  # bar fill height (matches the scene)
 const LOW_FRACTION := 0.35  # design doc warns around 35%
 const LOW_STAMINA_EFFECT_START := 0.6
@@ -23,10 +23,11 @@ const STAMINA_BAR_TWEEN_DURATION := 0.6
 const EDGE_EFFECT_TWEEN_DURATION := 1
 const REALM_ATTEMPT_PULSE_DURATION := 0.55
 const NORMAL_TIME_SCALE := 1.0
-const FAST_TIME_SCALE := 2.0
+const FAST_TIME_SCALE := 3.0
+const FAST_FORWARD_TIME_SCALE := 16.0
 
-var _speed_button_held := false
-var _speed_key_held := false
+var _fast_forward_held := false
+var _two_x_enabled := false
 var _player: Player
 var _level: LevelBase
 var _effect_time := 0.0
@@ -36,8 +37,9 @@ var _realm_attempt_tween: Tween
 var _stamina_display_initialized := false
 
 func _ready() -> void:
-	_speed_button.button_down.connect(_on_speed_button_down)
-	_speed_button.button_up.connect(_on_speed_button_up)
+	_speed_button.toggled.connect(_on_speed_button_toggled)
+	_fast_forward_button.button_down.connect(_on_fast_forward_button_down)
+	_fast_forward_button.button_up.connect(_on_fast_forward_button_up)
 	_edge_effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_edge_effect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	get_viewport().size_changed.connect(_update_edge_effect_size)
@@ -53,19 +55,24 @@ func _process(delta: float) -> void:
 	_edge_material.set_shader_parameter("effect_time", _effect_time)
 
 func _exit_tree() -> void:
-	_speed_button_held = false
-	_speed_key_held = false
-	_update_speed_state()
+	_fast_forward_held = false
+	Engine.time_scale = NORMAL_TIME_SCALE
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		_speed_button_held = false
-		_speed_key_held = false
+		_fast_forward_held = false
+		_fast_forward_button.set_pressed_no_signal(false)
 		_update_speed_state()
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.keycode == KEY_X:
-		_speed_key_held = event.pressed
+	if (
+		event is InputEventKey
+		and event.keycode == KEY_X
+		and event.pressed
+		and not event.echo
+	):
+		_two_x_enabled = not _two_x_enabled
+		_speed_button.set_pressed_no_signal(_two_x_enabled)
 		_update_speed_state()
 
 func setup(level: LevelBase) -> void:
@@ -185,19 +192,20 @@ func _animate_edge_strength(target_strength: float) -> void:
 		EDGE_EFFECT_TWEEN_DURATION
 	)
 
-func _on_speed_button_down() -> void:
-	_speed_button_held = true
+func _on_speed_button_toggled(enabled: bool) -> void:
+	_two_x_enabled = enabled
 	_update_speed_state()
 
-func _on_speed_button_up() -> void:
-	_speed_button_held = false
+func _on_fast_forward_button_down() -> void:
+	_fast_forward_held = true
+	_update_speed_state()
+
+func _on_fast_forward_button_up() -> void:
+	_fast_forward_held = false
 	_update_speed_state()
 
 func _update_speed_state() -> void:
-	var speed_up := _speed_button_held or _speed_key_held
-	Engine.time_scale = FAST_TIME_SCALE if speed_up else NORMAL_TIME_SCALE
-	_speed_button.text = (
-		"2× SPEED ACTIVE (X)"
-		if speed_up
-		else "HOLD X FOR 2× SPEED"
-	)
+	if _fast_forward_held:
+		Engine.time_scale = FAST_FORWARD_TIME_SCALE
+	else:
+		Engine.time_scale = FAST_TIME_SCALE if _two_x_enabled else NORMAL_TIME_SCALE

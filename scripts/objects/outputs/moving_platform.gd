@@ -13,9 +13,16 @@ var _destination_position := Vector2.ZERO
 
 
 func _ready() -> void:
-	can_be_pushed = false
 	_set_footprint()
 	super._ready()
+
+
+func can_push(_dir: Vector2i) -> bool:
+	return false
+
+
+func can_interact(_dir: Vector2i) -> bool:
+	return false
 
 
 func setup(p_level: LevelBase, p_center_cell: Vector2i) -> void:

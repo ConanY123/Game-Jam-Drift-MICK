@@ -11,14 +11,9 @@ config_version=5
 [application]
 
 config/name="Drift game jam"
-run/main_scene="uid://bkn2ykjo5khnj"
+run/main_scene="uid://samvf1hiaebk"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
-run/main_scene="res://scenes/levels/level-1.tscn"
-
-[autoload]
-
-LevelManager="*res://scripts/core/level_manager.gd"
 
 [audio]
 
@@ -26,12 +21,16 @@ buses/default_bus_layout="uid://dr3s14e4ubl6x"
 
 [autoload]
 
-AudioManager="*uid://cib5dtn4aqxas"
+AudioManager="*res://scenes/levels/audio_manager.tscn"
+LevelManager="*res://scripts/core/level_manager.gd"
+TransitionManager="*res://scripts/core/transition_manager.gd"
 
 [display]
 
 window/size/viewport_width=1024
 window/size/viewport_height=576
+window/size/window_width_override=1024
+window/size/window_height_override=576
 
 [physics]
 
@@ -39,5 +38,6 @@ window/size/viewport_height=576
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"

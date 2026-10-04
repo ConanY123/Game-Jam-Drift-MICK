@@ -23,7 +23,7 @@ const STAMINA_BAR_TWEEN_DURATION := 0.6
 const EDGE_EFFECT_TWEEN_DURATION := 1
 const REALM_ATTEMPT_PULSE_DURATION := 0.55
 const NORMAL_TIME_SCALE := 1.0
-const FAST_TIME_SCALE := 2.0
+const FAST_TIME_SCALE := 3.0
 const FAST_FORWARD_TIME_SCALE := 16.0
 
 var _fast_forward_held := false

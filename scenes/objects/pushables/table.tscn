@@ -5,6 +5,9 @@
 
 [node name="Table" type="Node2D" unique_id=86256793]
 script = ExtResource("1_7vqcc")
+size = Vector2i(3, 3)
+weight = 3.0
+holdable = false
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1262660370]
 position = Vector2(0, 10.135593)

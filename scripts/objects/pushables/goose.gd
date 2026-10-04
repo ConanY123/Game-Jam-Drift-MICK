@@ -16,6 +16,9 @@ extends Pushable
 const DIRECTIONS := [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const PUSH_SLIDE_TIME := 0.12  # seconds for a pushed goose to slide one cell
 const NO_RETURN := -9999  # means "not knocked out of place"
+const HITBOX_HALF_SIZE := 6.0
+const PUSH_REACH_RADIUS := 25.0
+const BLOCKING_STAMINA_DRAIN_PER_SECOND := 0.7
 
 @export_enum("Left", "Right", "Up", "Down") var start_direction := 0
 # Number of tiles in the line, INCLUDING the one it starts on.
@@ -31,6 +34,7 @@ const NO_RETURN := -9999  # means "not knocked out of place"
 var _origin := Vector2i.ZERO  # the cell it started on (the line's anchor)
 var _along := Vector2i.LEFT  # unit vector along the line
 var _perp := Vector2i.DOWN  # unit vector across the line (sideways)
+var _target_cell := Vector2i.ZERO
 var _heading := 1  # +1 = walking along `_along`, -1 = walking back
 var _dest_pos := Vector2.ZERO  # where the sprite is sliding to
 var _speed := 0.0  # sprite slide speed in px/s
@@ -38,16 +42,22 @@ var _stepping := false  # true while a patrol step is in progress
 var _pause_left := 0.0
 var _frozen := false  # set once the level is won or lost
 var _return_index := NO_RETURN  # spot on the line it must walk back to
+var _facing_anim := "walk_left"
+
+@onready var _anim: AnimatedSprite2D = $AnimatedSprite2D
 
 
 func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 	super.setup(p_level, p_cell)
 	_origin = cell
+	_target_cell = cell
 	_along = DIRECTIONS[start_direction]
 	_perp = Vector2i(absi(_along.y), absi(_along.x))
 	_dest_pos = position
+	_facing_anim = _animation_for_direction(_along)
 	level.level_won.connect(_freeze)
 	level.level_lost.connect(_on_level_lost)
+	_update_animation()
 
 
 func _freeze() -> void:
@@ -61,8 +71,15 @@ func _on_level_lost(_reason: String) -> void:
 func _physics_process(delta: float) -> void:
 	if level == null or _frozen:
 		return
+	_update_animation()
 	# Same start rule as the roommate: nothing moves until the player does.
 	if level.player == null or not level.player.has_moved:
+		return
+	if _player_overlaps_current_position():
+		if level.realm == LevelBase.Realm.PHYSICAL:
+			level.player.drain_stamina(
+				BLOCKING_STAMINA_DRAIN_PER_SECOND * delta
+			)
 		return
 
 	_pause_left = maxf(_pause_left - delta, 0.0)
@@ -84,6 +101,9 @@ func _physics_process(delta: float) -> void:
 	if step == Vector2i.ZERO:
 		return
 	var target := cell + step
+	var player_blocks := _player_overlaps_cell(target)
+	if player_blocks and level.realm == LevelBase.Realm.PHYSICAL:
+		level.player.drain_stamina(BLOCKING_STAMINA_DRAIN_PER_SECOND * delta)
 	if _can_enter(target):
 		_begin_step(target)
 	elif (
@@ -93,6 +113,22 @@ func _physics_process(delta: float) -> void:
 	):
 		# Another goose is in the way: head back the other way.
 		_turn_around_if_possible()
+
+func _update_animation() -> void:
+	if _anim == null or _anim.sprite_frames == null:
+		return
+	if position != _dest_pos:
+		if _anim.animation != _facing_anim or not _anim.is_playing():
+			_anim.play(_facing_anim)
+	else:
+		_anim.animation = _facing_anim
+		_anim.stop()
+		_anim.frame = 0
+
+func _animation_for_direction(direction: Vector2i) -> String:
+	if direction.x != 0:
+		return "walk_right" if direction.x > 0 else "walk_left"
+	return "walk_down" if direction.y > 0 else "walk_up"
 
 
 # Decides which way to go next. Getting back onto the line always comes first.
@@ -125,7 +161,11 @@ func _off_line() -> int:
 
 # Where it is along the line: 0 = the start tile, patrol_length - 1 = far end.
 func _along_index() -> int:
-	var rel := cell - _origin
+	return _along_index_at(cell)
+
+
+func _along_index_at(at_cell: Vector2i) -> int:
+	var rel := at_cell - _origin
 	return rel.x * _along.x + rel.y * _along.y
 
 
@@ -152,23 +192,58 @@ func _can_enter(target: Vector2i) -> bool:
 
 
 func _player_overlaps_cell(c: Vector2i) -> bool:
+	if level.realm == LevelBase.Realm.DREAM:
+		return false
 	var p := level.player
 	if p == null:
 		return false
-	var hitbox := Vector2(p.HITBOX_SIZE, p.HITBOX_SIZE)
-	var player_rect := Rect2(p.position - hitbox / 2.0, hitbox)
-	var cell_rect := Rect2(Grid.cell_to_pos(c), Vector2(Grid.CELL, Grid.CELL))
-	return player_rect.intersects(cell_rect)
+	var goose_center := Grid.cell_to_center(c)
+	return _overlaps_player_circle_at(goose_center, p.position, p.HITBOX_RADIUS)
+
+
+func _player_overlaps_current_position() -> bool:
+	if level.realm == LevelBase.Realm.DREAM or level.player == null:
+		return false
+	var goose_center := (
+		level.to_local(global_position)
+		+ Vector2.ONE * (Grid.CELL * 0.5)
+	)
+	return _overlaps_player_circle_at(
+		goose_center,
+		level.player.position,
+		level.player.HITBOX_RADIUS
+	)
+
+
+func overlaps_player_circle(player_center: Vector2, player_radius: float) -> bool:
+	var goose_center := (
+		level.to_local(global_position)
+		+ Vector2.ONE * (Grid.CELL * 0.5)
+	)
+	return _overlaps_player_circle_at(goose_center, player_center, player_radius)
+
+
+func _overlaps_player_circle_at(
+	goose_center: Vector2,
+	player_center: Vector2,
+	player_radius: float
+) -> bool:
+	var closest_point := player_center.clamp(
+		goose_center - Vector2.ONE * HITBOX_HALF_SIZE,
+		goose_center + Vector2.ONE * HITBOX_HALF_SIZE
+	)
+	return player_center.distance_squared_to(closest_point) < player_radius * player_radius
 
 
 # While walking, the goose blocks BOTH the cell it is leaving and the one it is
 # entering, so what you see matches what blocks you.
 func _begin_step(target: Vector2i) -> void:
+	_facing_anim = _animation_for_direction(target - cell)
 	var both: Array[Vector2i] = [cell, target]
 	level.unregister(self, realm)
 	level.register(self, both, realm)
-	cell = target
-	_dest_pos = Grid.cell_to_pos(cell)
+	_target_cell = target
+	_dest_pos = Grid.cell_to_pos(_target_cell)
 	_speed = Grid.CELL / seconds_per_cell
 	_stepping = true
 
@@ -177,6 +252,7 @@ func _finish_step() -> void:
 	if not _stepping:
 		return
 	_stepping = false
+	cell = _target_cell
 	level.unregister(self, realm)
 	level.register(self, get_cells(cell), realm)
 
@@ -196,12 +272,14 @@ func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
 		return false
 	AudioManager.play_goose_honk()
+	_facing_anim = _animation_for_direction(dir)
 	# Remember the spot it was knocked from. Only the first push counts, so a
 	# second push before it gets back doesn't move that spot.
 	if return_to_spot_after_push and _return_index == NO_RETURN:
-		_return_index = _along_index()
+		_return_index = _along_index_at(_target_cell if _stepping else cell)
 	level.unregister(self, realm)
-	cell += dir
+	cell = (_target_cell if _stepping else cell) + dir
+	_target_cell = cell
 	level.register(self, get_cells(cell), realm)
 	_stepping = false  # cancels any patrol step in progress
 	_dest_pos = Grid.cell_to_pos(cell)
@@ -213,10 +291,9 @@ func try_push(dir: Vector2i) -> bool:
 
 func _draw() -> void:
 	super._draw()
-	if not show_path or level == null or level.realm != realm:
-		return
-	var start := Grid.cell_to_center(_origin) - position
-	var end := Grid.cell_to_center(_origin + _along * (patrol_length - 1)) - position
-	draw_line(start, end, Color(1.0, 1.0, 1.0, 0.25), 2.0)
-	draw_circle(start, 3.0, Color(1.0, 1.0, 1.0, 0.35))
-	draw_circle(end, 3.0, Color(1.0, 1.0, 1.0, 0.35))
+	if show_path and level != null and level.realm == realm:
+		var start := Grid.cell_to_center(_origin) - position
+		var end := Grid.cell_to_center(_origin + _along * (patrol_length - 1)) - position
+		draw_line(start, end, Color(1.0, 1.0, 1.0, 0.25), 2.0)
+		draw_circle(start, 3.0, Color(1.0, 1.0, 1.0, 0.35))
+		draw_circle(end, 3.0, Color(1.0, 1.0, 1.0, 0.35))

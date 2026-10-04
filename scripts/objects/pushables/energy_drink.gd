@@ -103,33 +103,84 @@ func _remove() -> void:
 func _spawn() -> void:
 	var start := _player_start_cell()
 	var reach := _reachable(start, NO_CELL)
-	var banned := _banned_cells()
+	var preferred_candidates: Array[Vector2i] = []
+	var remaining_candidates: Array[Vector2i] = []
+	_collect_candidates(start, reach, _banned_cells(), preferred_candidates, remaining_candidates)
 
-	var candidates: Array[Vector2i] = []
+	if _try_spawn_from_candidates(preferred_candidates, start, reach, avoid_blocking_paths):
+		return
+	if _try_spawn_from_candidates(remaining_candidates, start, reach, avoid_blocking_paths):
+		return
+	if avoid_blocking_paths:
+		if _try_spawn_from_candidates(preferred_candidates, start, reach, false):
+			return
+		if _try_spawn_from_candidates(remaining_candidates, start, reach, false):
+			return
+
+	preferred_candidates.clear()
+	remaining_candidates.clear()
+	_collect_candidates(start, reach, {}, preferred_candidates, remaining_candidates)
+	if _try_spawn_from_candidates(preferred_candidates, start, reach, avoid_blocking_paths):
+		push_warning("EnergyDrink: using a reserved roommate-route tile because no safer spot was available.")
+		return
+	if _try_spawn_from_candidates(remaining_candidates, start, reach, avoid_blocking_paths):
+		push_warning("EnergyDrink: using a reserved roommate-route tile because no safer spot was available.")
+		return
+	if avoid_blocking_paths:
+		if _try_spawn_from_candidates(preferred_candidates, start, reach, false):
+			push_warning("EnergyDrink: using a reserved roommate-route tile because no safer spot was available.")
+			return
+		if _try_spawn_from_candidates(remaining_candidates, start, reach, false):
+			push_warning("EnergyDrink: using a reserved roommate-route tile because no safer spot was available.")
+			return
+	push_warning("EnergyDrink: no valid spot found on the dream floor.")
+
+
+func _collect_candidates(
+	start: Vector2i,
+	reach: Dictionary,
+	banned: Dictionary,
+	preferred_candidates: Array[Vector2i],
+	remaining_candidates: Array[Vector2i]
+) -> void:
 	for c: Vector2i in level.dream_floor.keys():
 		if c == start or banned.has(c) or _player_overlaps(c):
 			continue
-		if level.blocker_at(c, LevelBase.Realm.PHYSICAL) != null:
+		var physical_blocker := level.blocker_at(c, LevelBase.Realm.PHYSICAL)
+		if physical_blocker != null and not (
+			level.realm == LevelBase.Realm.DREAM and physical_blocker is Goose
+		):
 			continue
 		if level.blocker_at(c, LevelBase.Realm.DREAM) != null:
 			continue
 		if _touches(c, reach):
-			candidates.append(c)
+			var distance := absi(c.x - start.x) + absi(c.y - start.y)
+			if distance >= 2 and distance <= 4:
+				preferred_candidates.append(c)
+			else:
+				remaining_candidates.append(c)
 
-	while not candidates.is_empty():
-		var i := _rng.randi_range(0, candidates.size() - 1)
-		var pick := candidates[i]
-		candidates.remove_at(i)
+func _try_spawn_from_candidates(
+	candidates: Array[Vector2i],
+	start: Vector2i,
+	reach: Dictionary,
+	preserve_paths: bool
+) -> bool:
+	var remaining: Array[Vector2i] = candidates.duplicate()
+	while not remaining.is_empty():
+		var i := _rng.randi_range(0, remaining.size() - 1)
+		var pick := remaining[i]
+		remaining.remove_at(i)
 		var without := _reachable(start, pick)
 		if not _touches(pick, without):
 			continue
-		if avoid_blocking_paths:
+		if preserve_paths:
 			var lost := reach.size() - without.size() - (1 if reach.has(pick) else 0)
 			if lost > 0:
 				continue
 		_place(pick)
-		return
-	push_warning("EnergyDrink: no valid spot found on the dream floor.")
+		return true
+	return false
 
 
 # When we come back to a drink that is already out: is it still usable?
@@ -137,24 +188,21 @@ func _spot_is_still_good() -> bool:
 	var start := _player_start_cell()
 	if start == cell or _player_overlaps(cell):
 		return false
-	if level.blocker_at(cell, LevelBase.Realm.PHYSICAL) != null:
+	var physical_blocker := level.blocker_at(cell, LevelBase.Realm.PHYSICAL)
+	if physical_blocker != null and not (
+		level.realm == LevelBase.Realm.DREAM and physical_blocker is Goose
+	):
 		return false
 	return _touches(cell, _reachable(start, cell))
 
 
-# Cells the drink must stay off: the roommate's route and every goose's line.
+# Cells the drink should stay off: the roommate's route.
 func _banned_cells() -> Dictionary:
 	var banned := {}
 	for c in _route_cells():
 		for dx in range(-route_buffer, route_buffer + 1):
 			for dy in range(-route_buffer, route_buffer + 1):
 				banned[c + Vector2i(dx, dy)] = true
-	var geese := {}
-	for obj in level.solids[LevelBase.Realm.PHYSICAL].values():
-		if obj is Goose and not geese.has(obj):
-			geese[obj] = true
-			for c in obj.patrol_cells():
-				banned[c] = true
 	return banned
 
 
@@ -202,7 +250,10 @@ func _player_overlaps(c: Vector2i) -> bool:
 func _walkable(c: Vector2i, blocked: Vector2i) -> bool:
 	if c == blocked or not level.dream_floor.has(c):
 		return false
-	if level.blocker_at(c, LevelBase.Realm.PHYSICAL) != null:
+	var physical_blocker := level.blocker_at(c, LevelBase.Realm.PHYSICAL)
+	if physical_blocker != null and not (
+		level.realm == LevelBase.Realm.DREAM and physical_blocker is Goose
+	):
 		return false
 	var b := level.blocker_at(c, LevelBase.Realm.DREAM)
 	if b == null:

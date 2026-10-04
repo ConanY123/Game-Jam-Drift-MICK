@@ -1,7 +1,7 @@
 extends Node
 
 const DREAM_REVERB_WET := 0.1
-const DREAM_MUSIC_ATTENUATION_DB := -4.0
+const DREAM_MUSIC_ATTENUATION_DB := -8.0
 const DREAM_AUDIO_BUS := "DreamFX"
 const DREAM_REVERB_EFFECT_INDEX := 0
 
@@ -40,11 +40,7 @@ func _ready() -> void:
 		push_error("Audio bus '%s' is missing its reverb effect." % DREAM_AUDIO_BUS)
 		return
 	_dream_reverb.wet = 0.0
-	AudioServer.set_bus_effect_enabled(
-		_dream_audio_bus_index,
-		DREAM_REVERB_EFFECT_INDEX,
-		false
-	)
+	AudioServer.set_bus_bypass_effects(_dream_audio_bus_index, true)
 
 func set_dream_reverb(enabled: bool, fade_duration: float) -> void:
 	if _dream_reverb == null:
@@ -54,19 +50,11 @@ func set_dream_reverb(enabled: bool, fade_duration: float) -> void:
 
 	var target_wet := DREAM_REVERB_WET if enabled else 0.0
 	if enabled:
-		AudioServer.set_bus_effect_enabled(
-			_dream_audio_bus_index,
-			DREAM_REVERB_EFFECT_INDEX,
-			true
-		)
+		AudioServer.set_bus_bypass_effects(_dream_audio_bus_index, false)
 
 	if fade_duration <= 0.0:
 		_dream_reverb.wet = target_wet
-		AudioServer.set_bus_effect_enabled(
-			_dream_audio_bus_index,
-			DREAM_REVERB_EFFECT_INDEX,
-			enabled
-		)
+		AudioServer.set_bus_bypass_effects(_dream_audio_bus_index, not enabled)
 		return
 
 	_reverb_tween = create_tween()
@@ -79,11 +67,7 @@ func set_dream_reverb(enabled: bool, fade_duration: float) -> void:
 	if not enabled:
 		_reverb_tween.tween_callback(
 			func():
-				AudioServer.set_bus_effect_enabled(
-					_dream_audio_bus_index,
-					DREAM_REVERB_EFFECT_INDEX,
-					false
-				)
+				AudioServer.set_bus_bypass_effects(_dream_audio_bus_index, true)
 		)
 
 func _set_reverb_wet(wet: float) -> void:

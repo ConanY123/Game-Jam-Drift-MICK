@@ -2,6 +2,7 @@ extends Node2D
 
 const SIZE := 24.0
 const HITBOX_SIZE := 18.0
+const HITBOX_RADIUS := HITBOX_SIZE * 0.5
 const SPEED := 96.0
 const MASH_GAIN := 0.12
 const MASH_DECAY := 0.5
@@ -18,10 +19,43 @@ var falling := false
 func _move_axis(offset: Vector2) -> Node:
 	if offset == Vector2.ZERO:
 		return null
-	var blocker := _blocker_at(position + offset)
+	var next_position := position + offset
+	var blocker := _blocker_at(next_position)
+	if blocker == null:
+		var goose_in_push_range := _goose_in_push_range(next_position, offset)
+		if goose_in_push_range != null:
+			# Push reach is an interaction range, not a collision boundary. Let
+			# the player keep walking until the real hitboxes touch, while still
+			# reporting the goose so the push interaction can start charging.
+			position += offset
+			return goose_in_push_range
 	if blocker == null or _is_traversable_dream_block(blocker):
 		position += offset
 	return blocker
+
+func _goose_in_push_range(center: Vector2, movement: Vector2) -> Goose:
+	if level.realm == LevelBase.Realm.DREAM:
+		return null
+	var realms: Array[int] = [level.realm]
+	var checked: Dictionary = {}
+	for in_realm in realms:
+		for blocker in level.solids[in_realm].values():
+			if not blocker is Goose or checked.has(blocker):
+				continue
+			checked[blocker] = true
+			var goose := blocker as Goose
+			var goose_center := (
+				level.to_local(goose.global_position)
+				+ Vector2.ONE * (Grid.CELL * 0.5)
+			)
+			if movement.dot(goose_center - position) <= 0.0:
+				continue
+			if goose.overlaps_player_circle(
+				center,
+				Goose.PUSH_REACH_RADIUS
+			):
+				return goose
+	return null
 
 func _is_traversable_dream_block(blocker: Node) -> bool:
 	return (
@@ -38,27 +72,44 @@ func _blocker_at(center: Vector2) -> Node:
 	return blocker
 
 func _blocker_in(center: Vector2, in_realm: int) -> Node:
-	var half := Vector2(HITBOX_SIZE, HITBOX_SIZE) / 2.0
+	var search_radius := HITBOX_RADIUS + Goose.HITBOX_HALF_SIZE
+	var half := Vector2.ONE * search_radius
 	var min_cell := Grid.pos_to_cell(center - half)
 	var max_cell := Grid.pos_to_cell(center + half - Vector2(0.01, 0.01))
 	for x in range(min_cell.x, max_cell.x + 1):
 		for y in range(min_cell.y, max_cell.y + 1):
-			var blocker := level.blocker_at(Vector2i(x, y), in_realm)
+			var cell := Vector2i(x, y)
+			var blocker := level.blocker_at(cell, in_realm)
 			if blocker != null:
 				# Walkables (treadmill) only block outside their walk lane.
-				if blocker is Walkable and not blocker.blocks_body(center, HITBOX_SIZE * 0.5):
+				if blocker is Walkable and not blocker.blocks_body(center, HITBOX_RADIUS):
 					continue
-				if blocker is Door:
-					if not blocker.overlaps_player_hitbox(
+				if blocker is Goose:
+					if level.realm == LevelBase.Realm.DREAM:
+						continue
+					if not blocker.overlaps_player_circle(center, HITBOX_RADIUS):
+						continue
+				elif blocker is Door:
+					if not blocker.overlaps_player_circle(
 						center,
-						Vector2(HITBOX_SIZE, HITBOX_SIZE)
+						HITBOX_RADIUS
 					):
 						continue
+				elif not _circle_overlaps_cell(center, cell):
+					continue
 				return blocker
 	return null
 
 func hitbox_half() -> float:
-	return HITBOX_SIZE * 0.5
+	return HITBOX_RADIUS
+
+func _circle_overlaps_cell(center: Vector2, cell: Vector2i) -> bool:
+	var cell_origin := Vector2(Grid.cell_to_pos(cell))
+	var closest_point := center.clamp(
+		cell_origin,
+		cell_origin + Vector2.ONE * Grid.CELL
+	)
+	return center.distance_squared_to(closest_point) < HITBOX_RADIUS * HITBOX_RADIUS
 
 func is_overlapping(in_realm: int) -> bool:
 	return _blocker_in(position, in_realm) != null

@@ -89,7 +89,7 @@ func _run_covered_action(
 		_transitioning = false
 	)
 
-func _on_scene_changed(_scene: Node) -> void:
+func _on_scene_changed() -> void:
 	if _waiting_for_scene_change:
 		_scene_changed = true
 

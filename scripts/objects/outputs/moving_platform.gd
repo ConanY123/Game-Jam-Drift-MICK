@@ -14,9 +14,16 @@ var _destination_position := Vector2.ZERO
 
 
 func _ready() -> void:
-	can_be_pushed = false
 	_set_footprint()
 	super._ready()
+
+
+func can_push(_dir: Vector2i) -> bool:
+	return false
+
+
+func can_interact(_dir: Vector2i) -> bool:
+	return false
 
 
 func setup(p_level: LevelBase, p_center_cell: Vector2i) -> void:
@@ -86,7 +93,11 @@ func _draw() -> void:
 	if level.realm != realm and realm == LevelBase.Realm.DREAM:
 		return
 
-	var alpha := 1.0 if level.realm == realm else 0.15
+	var alpha := 1.0
+	if level.realm != realm:
+		alpha = 0.35 if (
+			level.realm == LevelBase.Realm.DREAM and realm == LevelBase.Realm.PHYSICAL
+		) else 0.15
 	var footprint_size := Vector2(size * Grid.CELL)
 	var rect := Rect2(-footprint_size * 0.5 + Vector2.ONE, footprint_size - Vector2(2.0, 2.0))
 	draw_rect(rect, Color(color, alpha))

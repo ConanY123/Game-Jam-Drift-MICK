@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://2fh4n2427dab"]
 
 [ext_resource type="Script" uid="uid://cwdrn2l6oh6v4" path="res://scripts/objects/outputs/computer.gd" id="1_computer"]
+[ext_resource type="Texture2D" uid="uid://7y3rosphekhm" path="res://sprites/objects/Computer (1).png" id="2_computer_sprite"]
 
 [node name="Computer" type="Node2D" unique_id=1958667487]
 script = ExtResource("1_computer")
@@ -8,3 +9,9 @@ can_be_pushed = true
 aura_rotation_degrees = 0
 start_on = false
 invert_signal = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=568086803]
+position = Vector2(16, 16)
+texture = ExtResource("2_computer_sprite")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 32)

@@ -1,7 +1,14 @@
 [gd_scene format=3 uid="uid://or60rgjdpxpt"]
 
 [ext_resource type="Script" uid="uid://bu5r4ry1d5pdm" path="res://scripts/objects/sources/lever.gd" id="1_lever"]
+[ext_resource type="Texture2D" path="res://sprites/objects/Switch.png" id="2_switch"]
 
 [node name="Lever" type="Node2D" unique_id=873023911]
 script = ExtResource("1_lever")
 manually_toggleable = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=438496157]
+position = Vector2(16, 16)
+texture = ExtResource("2_switch")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 32)

@@ -4,4 +4,4 @@
 
 [node name="Door" type="Node2D" unique_id=351519647]
 script = ExtResource("1_ym8hq")
-color = Color(0.6, 0.4, 0.25, 1)
+color = Color(0.02745098, 0.16470589, 0.32156864, 1)

@@ -35,14 +35,7 @@ func _ready() -> void:
 	_refresh()
 
 func can_interact(_dir: Vector2i) -> bool:
-	if moving or inactive or open or level == null:
-		return false
-	for c in _collision_cells(_open_angle()):
-		if level.in_push_ban(c):
-			return false
-		if not level.is_free(c, self, realm):
-			return false
-	return true
+	return not moving and not inactive and not open and level != null
 
 # The player calls this when the interact timer completes against us. Return
 # true so the player's key-lock triggers (one press = one interaction).
@@ -82,40 +75,30 @@ func _collision_cells(angle_degrees: float) -> Array[Vector2i]:
 			cells.append(cell + Vector2i(x, y))
 	return cells
 
-func overlaps_player_hitbox(player_center: Vector2, hitbox_size: Vector2) -> bool:
+func overlaps_player_circle(player_center: Vector2, player_radius: float) -> bool:
 	if moving:
 		return false
-	return _overlaps_player_hitbox_at(player_center, hitbox_size, _leaf_angle)
+	return _overlaps_player_circle_at(player_center, player_radius, _leaf_angle)
 
-func _overlaps_player_hitbox_at(
+func _overlaps_player_circle_at(
 	player_center: Vector2,
-	hitbox_size: Vector2,
+	player_radius: float,
 	angle_degrees: float
 ) -> bool:
 	var angle := deg_to_rad(-angle_degrees)
 	var forward := Vector2.RIGHT.rotated(angle)
-	var side := Vector2.DOWN.rotated(angle)
-	var leaf_center := Vector2(
-		LEAF_LENGTH * 0.5,
-		LEAF_COLLISION_THICKNESS * 0.5
-	).rotated(angle)
 	var local_player_center := to_local(level.to_global(player_center))
-	var separation := local_player_center - leaf_center
-	var player_half := hitbox_size * 0.5
-	var leaf_half := Vector2(LEAF_LENGTH, LEAF_COLLISION_THICKNESS) * 0.5
-
-	for axis in [Vector2.RIGHT, Vector2.DOWN, forward, side]:
-		var player_radius := (
-			player_half.x * absf(axis.x)
-			+ player_half.y * absf(axis.y)
-		)
-		var leaf_radius := (
-			leaf_half.x * absf(axis.dot(forward))
-			+ leaf_half.y * absf(axis.dot(side))
-		)
-		if absf(separation.dot(axis)) >= player_radius + leaf_radius:
-			return false
-	return true
+	var closest_distance := clampf(
+		local_player_center.dot(forward),
+		0.0,
+		LEAF_LENGTH
+	)
+	var closest_point := forward * closest_distance
+	var combined_radius := player_radius + LEAF_COLLISION_THICKNESS * 0.5
+	return (
+		local_player_center.distance_squared_to(closest_point)
+		< combined_radius * combined_radius
+	)
 
 func _animate_swing(target_angle: float) -> void:
 	if _swing_tween != null and _swing_tween.is_running():
@@ -132,19 +115,11 @@ func _animate_swing(target_angle: float) -> void:
 	_swing_tween.tween_callback(_finish_swing.bind(target_angle))
 
 func _finish_swing(target_angle: float) -> void:
-	var target_cells := _collision_cells(target_angle)
 	if open:
-		for c in target_cells:
-			if not level.is_free(c, self, realm):
-				open = false
-				_refresh()
-				level.register(self, _collision_cells(start_angle_degrees), realm)
-				_animate_swing(start_angle_degrees)
-				return
 		inactive = true
 		level.unregister(self, realm)
 	else:
-		level.register(self, target_cells, realm)
+		level.register(self, _collision_cells(target_angle), realm)
 	moving = false
 
 func _set_leaf_angle(angle: float) -> void:
@@ -162,7 +137,7 @@ func _draw() -> void:
 	elif realm == LevelBase.Realm.PHYSICAL:
 		if open:
 			return
-		leaf_color.a = 0.15
+		leaf_color.a = 0.35
 	else:
 		return
 

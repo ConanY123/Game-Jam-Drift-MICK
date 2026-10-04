@@ -1,27 +1,15 @@
 class_name Lever
 extends "res://scripts/objects/sources/signal_source.gd"
 
-const LEVER_SIZE := 26.0
+@onready var _sprite: Sprite2D = $Sprite2D
 
 func _ready() -> void:
 	manually_toggleable = true
+	turned_on.connect(_update_sprite)
+	turned_off.connect(_update_sprite)
 	super._ready()
+	_update_sprite()
 
-func _draw() -> void:
-	var color := Color("#37c96b") if is_on else Color("#e34b4b")
-	draw_rect(
-		Rect2(
-			Vector2.ONE * (Grid.CELL - LEVER_SIZE) * 0.5,
-			Vector2.ONE * LEVER_SIZE
-		),
-		color
-	)
-	draw_rect(
-		Rect2(
-			Vector2.ONE * (Grid.CELL - LEVER_SIZE) * 0.5,
-			Vector2.ONE * LEVER_SIZE
-		),
-		Color("#222222"),
-		false,
-		2.0
-	)
+func _update_sprite() -> void:
+	var frame_x := 32.0 if is_on else 0.0
+	_sprite.region_rect.position.x = frame_x

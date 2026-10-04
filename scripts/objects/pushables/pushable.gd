@@ -33,17 +33,23 @@ func _ready() -> void:
 
 # Sprite follows the same realm rules as the drawn rectangle
 func _refresh() -> void:
-	var sprite := get_node_or_null("Sprite2D")
+	var sprite := _get_sprite_visual()
 	if sprite != null:
 		if level.realm == realm:
 			sprite.visible = true
 			sprite.modulate.a = 1.0
 		elif realm == LevelBase.Realm.PHYSICAL:
 			sprite.visible = true
-			sprite.modulate.a = 0.15  # physical object seen from the dream
+			sprite.modulate.a = 0.35  # physical object seen from the dream
 		else:
 			sprite.visible = false  # dream object seen from the physical realm
 	queue_redraw()
+
+func _get_sprite_visual() -> CanvasItem:
+	var sprite := get_node_or_null("Sprite2D") as CanvasItem
+	if sprite == null:
+		sprite = get_node_or_null("AnimatedSprite2D") as CanvasItem
+	return sprite
 
 # Swap this for a footprint array later if you want L-shaped desks.
 func get_cells(origin: Vector2i) -> Array[Vector2i]:
@@ -97,10 +103,10 @@ func _draw() -> void:
 	if level == null:
 		return
 	var rect := Rect2(Vector2(1, 1), Vector2(size * Grid.CELL) - Vector2(2, 2))
-	var has_sprite := get_node_or_null("Sprite2D") != null
+	var has_sprite := _get_sprite_visual() != null
 	if level.realm == realm:
 		if not has_sprite: 
 			draw_rect(rect, color)
 	elif realm == LevelBase.Realm.PHYSICAL:
 		# Physical object seen from the dream: faint, still solid, but not touchable.
-		draw_rect(rect, Color(color, 0.15))
+		draw_rect(rect, Color(color, 0.35))

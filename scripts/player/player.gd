@@ -3,13 +3,26 @@ extends "res://scripts/player/player_abilities.gd"
 
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
 var _base_scale := Vector2.ONE
+var _normal_z_index := 20
 
 func _ready() -> void:
 	_setup_input()
-	z_index = 10
+	z_index = _normal_z_index
+	_normal_z_index = z_index
 	_base_scale = _sprite.scale
 	if level != null:
 		level.realm_changed.connect(_on_realm_changed)
+
+func _begin_fall() -> void:
+	super._begin_fall()
+	z_index = _normal_z_index if fall_edge == FallEdge.FRONT else -11
+
+func _end_fall() -> void:
+	super._end_fall()
+	z_index = _normal_z_index
+
+func _on_fall_return_started() -> void:
+	z_index = _normal_z_index
 
 func _on_realm_changed(new_realm: int) -> void:
 	if falling and new_realm == LevelBase.Realm.PHYSICAL:
@@ -59,6 +72,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_recover_stamina(delta)
 	_apply_fall_visual()
+	_record_ground_position()
 
 	if falling:
 		_update_fall(delta)
@@ -123,6 +137,7 @@ func _physics_process(delta: float) -> void:
 		interact_locked = true
 	if position != position_before_move:
 		has_moved = true
+	_record_ground_position()
 	queue_redraw()
 
 func _draw() -> void:

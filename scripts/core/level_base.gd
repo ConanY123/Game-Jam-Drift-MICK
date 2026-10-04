@@ -6,11 +6,23 @@ extends Node2D
 
 @export var debug_grid := true
 @export var level_number: int = 1
+@export_group("Intro Caption")
+@export var caption_title := ""
+@export_range(0.0, 6.0, 0.1) var caption_hold := 2.0
+@export_group("")
 @export_range(0.0, 5.0, 0.1) var death_transition_duration := 1.0
 @export_range(0.0, 5.0, 0.1) var death_screen_duration := 1.25
 @export_range(0.0, 5.0, 0.1) var reset_transition_duration := 1.0
-@export_range(0.0, 5.0, 0.1) var realm_transition_duration := 1.0
+@export_range(0.0, 5.0, 0.1) var realm_transition_duration := 0.8
 @export_range(0.0, 5.0, 0.1) var completion_transition_duration := 1.0
+
+# The pink wall tiles are a second atlas source in the same TileSet,
+# laid out exactly like the normal one.
+const DREAM_WALL_SOURCE_ID := 6  # change to the pink source's ID
+const PHYSICAL_WALL_SOURCE_ID := 0
+const MERGED_WALL_ATLAS_OFFSET := Vector2i(15, 0)
+
+var _wall_cells := {}  # Vector2i -> [source_id, atlas_coords, alternative]
 
 enum Realm { 
 	PHYSICAL, 
@@ -24,6 +36,7 @@ signal level_lost(reason: String)
 const ROOMMATE_SCENE := preload("res://scenes/actors/roommate.tscn")
 const RESULT_OVERLAY_SCENE := preload("res://scenes/ui/result_overlay.tscn")
 const STAMINA_BAR_SCENE := preload("res://scenes/ui/stamina_bar.tscn")
+const LEVEL_CAPTION_SCENE := preload("res://scenes/ui/level_caption.tscn")
 
 var realm := Realm.PHYSICAL
 var roommate: Node2D
@@ -91,6 +104,7 @@ func _ready() -> void:
 	var stamina_bar := STAMINA_BAR_SCENE.instantiate()
 	add_child(stamina_bar)
 	stamina_bar.call("setup", self)
+	_show_intro_caption()
 	AudioManager.play_music(level_number)   # start this level's track (runs on load + every retry)
 	level_won.connect(_on_level_won)
 	level_lost.connect(_on_level_lost)
@@ -98,6 +112,30 @@ func _ready() -> void:
 
 func build() -> void:
 	pass  # levels override this
+
+# Shows the themed title card at level start. Each level sets caption_title /
+# caption_subtitle in the editor (or in build()). Empty title = no card.
+func _show_intro_caption() -> void:
+	if caption_title.strip_edges().is_empty():
+		return
+	var caption := LEVEL_CAPTION_SCENE.instantiate()
+	add_child(caption)
+	caption.call(
+		"show_caption",
+		caption_title,
+		"",
+		caption_hold,
+		_level_time_label()
+	)
+
+func _level_time_label() -> String:
+	var level_manager := get_node("/root/LevelManager")
+	var level_index: int = level_manager.current_level
+	var hour := posmod(level_index, 12)
+	if hour == 0:
+		hour = 12
+	var period := "AM" if level_index < 12 else "PM"
+	return "%d:00 %s" % [hour, period]
 
 func gameplay_locked() -> bool:
 	var transitions := get_node_or_null("/root/TransitionManager")
@@ -269,6 +307,11 @@ func _load_tilemaps() -> void:
 		for c in walls.get_used_cells():
 			solids[Realm.PHYSICAL][c] = self
 			solids[Realm.DREAM][c] = self
+			_wall_cells[c] = [
+				walls.get_cell_source_id(c),
+				walls.get_cell_atlas_coords(c),
+				walls.get_cell_alternative_tile(c),
+			]
 	var dream := get_node_or_null("DreamFloorLayer") as TileMapLayer
 	if dream != null:
 		for c in dream.get_used_cells():
@@ -278,15 +321,34 @@ func _update_layers() -> void:
 	var physical_background := get_node_or_null("PhysicalBackground") as CanvasItem
 	if physical_background != null:
 		physical_background.visible = realm == Realm.PHYSICAL
+		physical_background.z_index = -20
 	var dream_background := get_node_or_null("DreamBackground") as CanvasItem
 	if dream_background != null:
 		dream_background.visible = realm == Realm.DREAM
+		dream_background.z_index = -20
 	var floor_layer := get_node_or_null("FloorLayer") as TileMapLayer
 	if floor_layer != null:
 		floor_layer.visible = realm == Realm.DREAM
+		floor_layer.z_index = -12
 	var dream_layer := get_node_or_null("DreamFloorLayer") as TileMapLayer
 	if dream_layer != null:
 		dream_layer.visible = realm == Realm.DREAM
+		dream_layer.z_index = -10
+	var wall_layer := get_node_or_null("WallLayer") as TileMapLayer
+	if wall_layer != null:
+		for c in _wall_cells:
+			var data: Array = _wall_cells[c]
+			var original_source: int = data[0]
+			var atlas_coords: Vector2i = data[1]
+			if original_source == 2 or original_source == 3:
+				atlas_coords += MERGED_WALL_ATLAS_OFFSET
+			var source := (
+				DREAM_WALL_SOURCE_ID
+				if realm == Realm.DREAM
+				else PHYSICAL_WALL_SOURCE_ID
+			)
+			wall_layer.set_cell(c, source, atlas_coords, data[2])
+
 # Instantiates the roommate scene on a route of cells and forwards his result.
 func add_roommate(route: Array[Vector2i]) -> Node2D:
 	var r := ROOMMATE_SCENE.instantiate()
@@ -359,6 +421,6 @@ func _draw() -> void:
 		var points := PackedVector2Array()
 		for cell in debug_path:
 			points.append(Grid.cell_to_center(cell))
-		draw_polyline(points, Color(1.0, 1.0, 1.0, 0.8), 3.0, true)
+		draw_polyline(points, Color(1.0, 1.0, 1.0, 0.55), 3.0, true)
 		for point in points:
-			draw_circle(point, 4.0, Color(1.0, 0.9, 0.3, 0.95))
+			draw_circle(point, 4.0, Color(1.0, 1.0, 1.0, 0.55))

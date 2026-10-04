@@ -6,6 +6,10 @@ extends Node2D
 
 @export var debug_grid := true
 @export var level_number: int = 1
+@export_group("Intro Caption")
+@export var caption_title := ""
+@export_range(0.0, 6.0, 0.1) var caption_hold := 2.0
+@export_group("")
 @export_range(0.0, 5.0, 0.1) var death_transition_duration := 1.0
 @export_range(0.0, 5.0, 0.1) var death_screen_duration := 1.25
 @export_range(0.0, 5.0, 0.1) var reset_transition_duration := 1.0
@@ -30,6 +34,7 @@ signal level_lost(reason: String)
 const ROOMMATE_SCENE := preload("res://scenes/actors/roommate.tscn")
 const RESULT_OVERLAY_SCENE := preload("res://scenes/ui/result_overlay.tscn")
 const STAMINA_BAR_SCENE := preload("res://scenes/ui/stamina_bar.tscn")
+const LEVEL_CAPTION_SCENE := preload("res://scenes/ui/level_caption.tscn")
 
 var realm := Realm.PHYSICAL
 var roommate: Node2D
@@ -97,6 +102,7 @@ func _ready() -> void:
 	var stamina_bar := STAMINA_BAR_SCENE.instantiate()
 	add_child(stamina_bar)
 	stamina_bar.call("setup", self)
+	_show_intro_caption()
 	AudioManager.play_music(level_number)   # start this level's track (runs on load + every retry)
 	level_won.connect(_on_level_won)
 	level_lost.connect(_on_level_lost)
@@ -104,6 +110,15 @@ func _ready() -> void:
 
 func build() -> void:
 	pass  # levels override this
+
+# Shows the themed title card at level start. Each level sets caption_title /
+# caption_subtitle in the editor (or in build()). Empty title = no card.
+func _show_intro_caption() -> void:
+	if caption_title.strip_edges().is_empty():
+		return
+	var caption := LEVEL_CAPTION_SCENE.instantiate()
+	add_child(caption)
+	caption.call("show_caption", caption_title, "", caption_hold)
 
 func gameplay_locked() -> bool:
 	var transitions := get_node_or_null("/root/TransitionManager")

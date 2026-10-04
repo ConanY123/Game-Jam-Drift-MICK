@@ -8,6 +8,8 @@
 
 [node name="Level0" type="Node2D" unique_id=154351776]
 script = ExtResource("1_pet1o")
+caption_title = "Tutorial"
+caption_hold = 2.0
 
 [node name="PhysicalBackground" type="Sprite2D" parent="." unique_id=399650428]
 z_index = -20

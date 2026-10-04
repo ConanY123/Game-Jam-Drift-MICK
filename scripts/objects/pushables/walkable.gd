@@ -28,11 +28,16 @@ extends Pushable
 func setup(p_level: LevelBase, _p_cell: Vector2i) -> void:
 	level = p_level
 	rotation = snappedf(rotation, PI / 2.0)
+	# Snap the whole footprint to the grid. The node origin is the entrance
+	# corner, which after a rotation is NOT the footprint's top-left, so snap by
+	# the bounding rect's top-left and shift the node by that same delta. This
+	# keeps the registered cells (always a top-left origin + size) aligned with
+	# the rotated visual footprint, so pushing and walking work when rotated.
 	var bounds := footprint_rect()
-	var snapped_cell := Vector2i((bounds.position / Grid.CELL).round())
-	var delta := Vector2(snapped_cell * Grid.CELL) - bounds.position
-	global_position += level.global_transform.basis_xform(delta)
-	cell = snapped_cell
+	var snapped_top_left := Vector2((bounds.position / Grid.CELL).round()) * Grid.CELL
+	var delta := snapped_top_left - bounds.position
+	global_position = level.to_global(level.to_local(global_position) + delta)
+	cell = Vector2i((snapped_top_left / Grid.CELL).round())
 	size = Vector2i((bounds.size / Grid.CELL).round()).max(Vector2i.ONE)
 	level.register(self, get_cells(cell), realm)
 	level.realm_changed.connect(func(_r): _refresh())
@@ -110,6 +115,8 @@ func _in_walk_lane(center: Vector2, half: float) -> bool:
 	)
 
 # Called from the player's collision query. False = let the body through.
+# Walls off everything except the walk lane, in either realm, so the object can
+# be stepped onto and pushed from both the physical and dream views.
 func blocks_body(center: Vector2, half: float) -> bool:
 	if not _overlaps(center, half):
 		return false

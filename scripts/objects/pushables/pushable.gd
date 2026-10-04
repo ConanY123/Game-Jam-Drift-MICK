@@ -87,6 +87,11 @@ func can_push(dir: Vector2i) -> bool:
 func can_interact(dir: Vector2i) -> bool:
 	return can_push(dir)
 
+# When true, the player can interact with this object even while viewing the
+# other realm. Default: only in its own realm. Overridden by e.g. the treadmill.
+func interactable_in_any_realm() -> bool:
+	return false
+
 func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
 		return false

@@ -16,7 +16,15 @@ extends Node2D
 # The sprite needs animations named walk_down, walk_up, walk_left, walk_right.
 
 const SPEED := 24.0  # slow sleepwalker pace; player (96) is ~4x faster
-const FALL_SPEED := 360.0  # how fast he drops into the void on a dream fail
+const FALL_DROP_CELLS := 2.0
+const FALL_OUT_TIME := 0.35
+const FALL_SPIN := TAU * 1.0
+const SLEEP_Z_COLORS := {
+	LevelBase.Realm.PHYSICAL: Color("#173b78"),
+	LevelBase.Realm.DREAM: Color("#ff5bbd"),
+}
+const SLEEP_Z_INTERVAL := 0.75
+const SLEEP_Z_LIFETIME := 1.5
 
 signal won
 signal lost(reason: String)
@@ -29,8 +37,13 @@ var index := 0  # waypoint we are walking toward
 var finished := false
 var dead := false
 var falling := false  # dream-fail death animation in progress
+var fall_t := 0.0
+var fall_from := Vector2.ZERO
 
 var _facing_anim := "walk_down"  # last direction he was heading
+var _anim_base_scale := Vector2.ONE
+var _sleep_z_timer := 0.25
+var _sleep_z_particles: Array[Label] = []
 
 # Finds the AnimatedSprite2D automatically: a child named "AnimatedSprite2D" or
 # "BodyVisual" first, otherwise any AnimatedSprite2D child.
@@ -54,13 +67,72 @@ func setup(p_level: LevelBase, p_route: Array[Vector2i]) -> void:
 	level = p_level
 	route = p_route
 	_rebuild_waypoints()
+	_connect_realm_changed()
 
 func _ready() -> void:
 	# Allow either setup() (code spawn) or an inspector-authored route.
 	if waypoints.is_empty() and route.size() > 0:
 		_rebuild_waypoints()
+	_connect_realm_changed()
+	if _anim != null:
+		_anim_base_scale = _anim.scale
 	_update_animation()
 	queue_redraw()
+
+func _process(delta: float) -> void:
+	if level == null:
+		return
+	_update_sleep_z_particles(delta)
+
+func _connect_realm_changed() -> void:
+	if level != null and not level.realm_changed.is_connected(_on_realm_changed):
+		level.realm_changed.connect(_on_realm_changed)
+
+func _on_realm_changed(_new_realm: LevelBase.Realm) -> void:
+	var outline_color: Color = SLEEP_Z_COLORS[level.realm]
+	for particle in _sleep_z_particles:
+		if is_instance_valid(particle):
+			particle.add_theme_color_override("font_outline_color", outline_color)
+
+func _update_sleep_z_particles(delta: float) -> void:
+	if not dead and not falling:
+		_sleep_z_timer -= delta
+		if _sleep_z_timer <= 0.0:
+			_spawn_sleep_z()
+			_sleep_z_timer = SLEEP_Z_INTERVAL
+
+func _spawn_sleep_z() -> void:
+	var particle := Label.new()
+	particle.text = "Z"
+	particle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	particle.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	particle.add_theme_font_size_override("font_size", randi_range(9, 13))
+	particle.add_theme_color_override("font_color", Color("#f4f2ff"))
+	particle.add_theme_color_override(
+		"font_outline_color",
+		SLEEP_Z_COLORS[level.realm]
+	)
+	particle.add_theme_constant_override("outline_size", 2)
+	particle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	particle.size = Vector2(20.0, 18.0)
+	add_child(particle)
+	particle.position = Vector2(randf_range(-9.0, 9.0) - 10.0, -32.0)
+	_sleep_z_particles.append(particle)
+
+	var lifetime := randf_range(1.1, SLEEP_Z_LIFETIME)
+	var tween := create_tween().set_parallel()
+	tween.tween_property(
+		particle,
+		"position",
+		particle.position + Vector2(randf_range(-8.0, 8.0), -27.0),
+		lifetime
+	)
+	tween.tween_property(particle, "modulate:a", 0.0, lifetime)
+	tween.chain().tween_callback(_remove_sleep_z.bind(particle))
+
+func _remove_sleep_z(particle: Label) -> void:
+	_sleep_z_particles.erase(particle)
+	particle.queue_free()
 
 func _rebuild_waypoints() -> void:
 	waypoints = PackedVector2Array()
@@ -180,13 +252,24 @@ func _begin_fall() -> void:
 	if dead or falling:
 		return
 	falling = true
+	fall_t = 0.0
+	fall_from = position
+	if _anim != null:
+		_anim.rotation = 0.0
+		_anim.scale = _anim_base_scale
+		_anim.modulate.a = 1.0
 	queue_redraw()
 
 func _update_fall(delta: float) -> void:
-	position.y += FALL_SPEED * delta
+	fall_t += delta / FALL_OUT_TIME
+	var t := clampf(fall_t, 0.0, 1.0)
+	position.y = fall_from.y + FALL_DROP_CELLS * Grid.CELL * t
+	if _anim != null:
+		_anim.rotation = FALL_SPIN * t
+		_anim.scale = _anim_base_scale * (1.0 - t)
+		_anim.modulate.a = 1.0 - t
 	queue_redraw()
-	var field_bottom := Grid.FIELD_ROWS * Grid.CELL
-	if position.y > field_bottom + Grid.CELL:
+	if t >= 1.0:
 		falling = false
 		_die("fell through a gap in the dream")
 

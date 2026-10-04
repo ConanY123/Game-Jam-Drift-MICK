@@ -18,7 +18,9 @@ extends Node2D
 
 # The pink wall tiles are a second atlas source in the same TileSet,
 # laid out exactly like the normal one.
-const DREAM_WALL_SOURCE_ID := 3  # change to the pink source's ID
+const DREAM_WALL_SOURCE_ID := 6  # change to the pink source's ID
+const PHYSICAL_WALL_SOURCE_ID := 0
+const MERGED_WALL_ATLAS_OFFSET := Vector2i(15, 0)
 
 var _wall_cells := {}  # Vector2i -> [source_id, atlas_coords, alternative]
 
@@ -321,8 +323,16 @@ func _update_layers() -> void:
 	if wall_layer != null:
 		for c in _wall_cells:
 			var data: Array = _wall_cells[c]
-			var source: int = DREAM_WALL_SOURCE_ID if realm == Realm.DREAM else data[0]
-			wall_layer.set_cell(c, source, data[1], data[2])
+			var original_source: int = data[0]
+			var atlas_coords: Vector2i = data[1]
+			if original_source == 2 or original_source == 3:
+				atlas_coords += MERGED_WALL_ATLAS_OFFSET
+			var source := (
+				DREAM_WALL_SOURCE_ID
+				if realm == Realm.DREAM
+				else PHYSICAL_WALL_SOURCE_ID
+			)
+			wall_layer.set_cell(c, source, atlas_coords, data[2])
 
 # Instantiates the roommate scene on a route of cells and forwards his result.
 func add_roommate(route: Array[Vector2i]) -> Node2D:

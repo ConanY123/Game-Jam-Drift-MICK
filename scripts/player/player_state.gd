@@ -3,7 +3,6 @@ extends Node2D
 const SIZE := 24.0
 const HITBOX_SIZE := 18.0
 const HITBOX_RADIUS := HITBOX_SIZE * 0.5
-const GOOSE_PUSH_REACH_EXTRA := 16.0
 const SPEED := 96.0
 const MASH_GAIN := 0.12
 const MASH_DECAY := 0.5
@@ -23,7 +22,13 @@ func _move_axis(offset: Vector2) -> Node:
 	var next_position := position + offset
 	var blocker := _blocker_at(next_position)
 	if blocker == null:
-		blocker = _goose_in_push_range(next_position, offset)
+		var goose_in_push_range := _goose_in_push_range(next_position, offset)
+		if goose_in_push_range != null:
+			# Push reach is an interaction range, not a collision boundary. Let
+			# the player keep walking until the real hitboxes touch, while still
+			# reporting the goose so the push interaction can start charging.
+			position += offset
+			return goose_in_push_range
 	if blocker == null or _is_traversable_dream_block(blocker):
 		position += offset
 	return blocker
@@ -47,7 +52,7 @@ func _goose_in_push_range(center: Vector2, movement: Vector2) -> Goose:
 				continue
 			if goose.overlaps_player_circle(
 				center,
-				HITBOX_RADIUS + GOOSE_PUSH_REACH_EXTRA
+				Goose.PUSH_REACH_RADIUS
 			):
 				return goose
 	return null
@@ -67,7 +72,7 @@ func _blocker_at(center: Vector2) -> Node:
 	return blocker
 
 func _blocker_in(center: Vector2, in_realm: int) -> Node:
-	var search_radius := HITBOX_RADIUS + Goose.HITBOX_RADIUS
+	var search_radius := HITBOX_RADIUS + Goose.HITBOX_HALF_SIZE
 	var half := Vector2.ONE * search_radius
 	var min_cell := Grid.pos_to_cell(center - half)
 	var max_cell := Grid.pos_to_cell(center + half - Vector2(0.01, 0.01))

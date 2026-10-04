@@ -16,7 +16,8 @@ extends Pushable
 const DIRECTIONS := [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const PUSH_SLIDE_TIME := 0.12  # seconds for a pushed goose to slide one cell
 const NO_RETURN := -9999  # means "not knocked out of place"
-const HITBOX_RADIUS := 8.0
+const HITBOX_HALF_SIZE := 6.0
+const PUSH_REACH_RADIUS := 25.0
 const BLOCKING_STAMINA_DRAIN_PER_SECOND := 0.7
 
 @export_enum("Left", "Right", "Up", "Down") var start_direction := 0
@@ -33,6 +34,7 @@ const BLOCKING_STAMINA_DRAIN_PER_SECOND := 0.7
 var _origin := Vector2i.ZERO  # the cell it started on (the line's anchor)
 var _along := Vector2i.LEFT  # unit vector along the line
 var _perp := Vector2i.DOWN  # unit vector across the line (sideways)
+var _target_cell := Vector2i.ZERO
 var _heading := 1  # +1 = walking along `_along`, -1 = walking back
 var _dest_pos := Vector2.ZERO  # where the sprite is sliding to
 var _speed := 0.0  # sprite slide speed in px/s
@@ -48,6 +50,7 @@ var _facing_anim := "walk_left"
 func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 	super.setup(p_level, p_cell)
 	_origin = cell
+	_target_cell = cell
 	_along = DIRECTIONS[start_direction]
 	_perp = Vector2i(absi(_along.y), absi(_along.x))
 	_dest_pos = position
@@ -71,6 +74,12 @@ func _physics_process(delta: float) -> void:
 	_update_animation()
 	# Same start rule as the roommate: nothing moves until the player does.
 	if level.player == null or not level.player.has_moved:
+		return
+	if _player_overlaps_current_position():
+		if level.realm == LevelBase.Realm.PHYSICAL:
+			level.player.drain_stamina(
+				BLOCKING_STAMINA_DRAIN_PER_SECOND * delta
+			)
 		return
 
 	_pause_left = maxf(_pause_left - delta, 0.0)
@@ -152,7 +161,11 @@ func _off_line() -> int:
 
 # Where it is along the line: 0 = the start tile, patrol_length - 1 = far end.
 func _along_index() -> int:
-	var rel := cell - _origin
+	return _along_index_at(cell)
+
+
+func _along_index_at(at_cell: Vector2i) -> int:
+	var rel := at_cell - _origin
 	return rel.x * _along.x + rel.y * _along.y
 
 
@@ -185,10 +198,20 @@ func _player_overlaps_cell(c: Vector2i) -> bool:
 	if p == null:
 		return false
 	var goose_center := Grid.cell_to_center(c)
-	var combined_radius := HITBOX_RADIUS + p.HITBOX_RADIUS
-	return (
-		p.position.distance_squared_to(goose_center)
-		< combined_radius * combined_radius
+	return _overlaps_player_circle_at(goose_center, p.position, p.HITBOX_RADIUS)
+
+
+func _player_overlaps_current_position() -> bool:
+	if level.realm == LevelBase.Realm.DREAM or level.player == null:
+		return false
+	var goose_center := (
+		level.to_local(global_position)
+		+ Vector2.ONE * (Grid.CELL * 0.5)
+	)
+	return _overlaps_player_circle_at(
+		goose_center,
+		level.player.position,
+		level.player.HITBOX_RADIUS
 	)
 
 
@@ -197,11 +220,19 @@ func overlaps_player_circle(player_center: Vector2, player_radius: float) -> boo
 		level.to_local(global_position)
 		+ Vector2.ONE * (Grid.CELL * 0.5)
 	)
-	var combined_radius := HITBOX_RADIUS + player_radius
-	return (
-		player_center.distance_squared_to(goose_center)
-		< combined_radius * combined_radius
+	return _overlaps_player_circle_at(goose_center, player_center, player_radius)
+
+
+func _overlaps_player_circle_at(
+	goose_center: Vector2,
+	player_center: Vector2,
+	player_radius: float
+) -> bool:
+	var closest_point := player_center.clamp(
+		goose_center - Vector2.ONE * HITBOX_HALF_SIZE,
+		goose_center + Vector2.ONE * HITBOX_HALF_SIZE
 	)
+	return player_center.distance_squared_to(closest_point) < player_radius * player_radius
 
 
 # While walking, the goose blocks BOTH the cell it is leaving and the one it is
@@ -211,8 +242,8 @@ func _begin_step(target: Vector2i) -> void:
 	var both: Array[Vector2i] = [cell, target]
 	level.unregister(self, realm)
 	level.register(self, both, realm)
-	cell = target
-	_dest_pos = Grid.cell_to_pos(cell)
+	_target_cell = target
+	_dest_pos = Grid.cell_to_pos(_target_cell)
 	_speed = Grid.CELL / seconds_per_cell
 	_stepping = true
 
@@ -221,6 +252,7 @@ func _finish_step() -> void:
 	if not _stepping:
 		return
 	_stepping = false
+	cell = _target_cell
 	level.unregister(self, realm)
 	level.register(self, get_cells(cell), realm)
 
@@ -244,9 +276,10 @@ func try_push(dir: Vector2i) -> bool:
 	# Remember the spot it was knocked from. Only the first push counts, so a
 	# second push before it gets back doesn't move that spot.
 	if return_to_spot_after_push and _return_index == NO_RETURN:
-		_return_index = _along_index()
+		_return_index = _along_index_at(_target_cell if _stepping else cell)
 	level.unregister(self, realm)
-	cell += dir
+	cell = (_target_cell if _stepping else cell) + dir
+	_target_cell = cell
 	level.register(self, get_cells(cell), realm)
 	_stepping = false  # cancels any patrol step in progress
 	_dest_pos = Grid.cell_to_pos(cell)
@@ -258,10 +291,9 @@ func try_push(dir: Vector2i) -> bool:
 
 func _draw() -> void:
 	super._draw()
-	if not show_path or level == null or level.realm != realm:
-		return
-	var start := Grid.cell_to_center(_origin) - position
-	var end := Grid.cell_to_center(_origin + _along * (patrol_length - 1)) - position
-	draw_line(start, end, Color(1.0, 1.0, 1.0, 0.25), 2.0)
-	draw_circle(start, 3.0, Color(1.0, 1.0, 1.0, 0.35))
-	draw_circle(end, 3.0, Color(1.0, 1.0, 1.0, 0.35))
+	if show_path and level != null and level.realm == realm:
+		var start := Grid.cell_to_center(_origin) - position
+		var end := Grid.cell_to_center(_origin + _along * (patrol_length - 1)) - position
+		draw_line(start, end, Color(1.0, 1.0, 1.0, 0.25), 2.0)
+		draw_circle(start, 3.0, Color(1.0, 1.0, 1.0, 0.35))
+		draw_circle(end, 3.0, Color(1.0, 1.0, 1.0, 0.35))

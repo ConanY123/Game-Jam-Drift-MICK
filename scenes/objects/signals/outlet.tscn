@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cwejs6fg3k62r"]
+
+[ext_resource type="Script" uid="uid://c3mdrht5i3wty" path="res://scripts/objects/sources/signal_source.gd" id="1_ou2v5"]
+
+[node name="Outlet" type="Node2D" unique_id=568823464]
+script = ExtResource("1_ou2v5")
+outputs = []

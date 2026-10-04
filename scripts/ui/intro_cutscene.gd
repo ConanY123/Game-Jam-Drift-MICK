@@ -1,5 +1,7 @@
 extends Control
 
+@export_range(1, 9, 1) var level_number := 1
+
 const PLAYER_SCENE_PATH := "res://scenes/actors/player.tscn"
 const ROOMMATE_SCENE: PackedScene = preload("res://scenes/actors/roommate.tscn")
 const LEVEL_ZERO_SCENE: PackedScene = preload("res://scenes/levels/level-0.tscn")
@@ -62,6 +64,7 @@ var _pause_button: Control
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_PASS
+	AudioManager.play_music(level_number)
 	_disable_gameplay_ui()
 	_build_stage()
 	_build_backdrop()

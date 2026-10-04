@@ -17,6 +17,7 @@ point_count = 19
 
 [node name="Level8" type="Node2D" unique_id=62386616]
 script = ExtResource("8_level_script")
+level_number = 9
 
 [node name="PhysicalBackground" type="Sprite2D" parent="." unique_id=762350681]
 z_index = -10

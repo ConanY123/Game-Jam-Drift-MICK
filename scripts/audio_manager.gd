@@ -28,7 +28,8 @@ const TRACKS := {
 	5: preload("res://audio/music/[TwoShot] LevelFive.mp3"),
 	6: preload("res://audio/music/[TwoShot] LevelSix.mp3"),
 	7: preload("res://audio/music/[TwoShot] LevelSeven.mp3"),
-	8: preload("res://audio/music/[TwoShot] LevelSeven.mp3")
+	8: preload("res://audio/music/[TwoShot] LevelSeven.mp3"),
+	9: preload("res://audio/music/[TwoShot] CreditsRoll.mp3")
 }
 
 func _ready() -> void:

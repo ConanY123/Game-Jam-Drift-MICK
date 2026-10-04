@@ -17,7 +17,7 @@ extends CanvasLayer
 const FULL_WIDTH := 168.0  # six-cell panel width minus its 12px side margins
 const BAR_HEIGHT := 20.0  # bar fill height (matches the scene)
 const LOW_FRACTION := 0.35  # design doc warns around 35%
-const LOW_STAMINA_EFFECT_START := 0.6
+const LOW_STAMINA_EFFECT_START := 0.5
 const DREAM_LOW_STAMINA_EFFECT_STRENGTH := 0.38
 const STAMINA_BAR_TWEEN_DURATION := 0.6
 const EDGE_EFFECT_TWEEN_DURATION := 1

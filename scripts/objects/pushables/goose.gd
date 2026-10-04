@@ -15,13 +15,17 @@ extends Pushable
 
 const DIRECTIONS := [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const PUSH_SLIDE_TIME := 0.12  # seconds for a pushed goose to slide one cell
+const NO_RETURN := -9999  # means "not knocked out of place"
 
 @export_enum("Left", "Right", "Up", "Down") var start_direction := 0
 # Number of tiles in the line, INCLUDING the one it starts on.
 # 8 means it starts on tile 1 and walks to tile 8 before turning back.
 @export var patrol_length := 8
-@export var seconds_per_cell := 0.8  # time to walk one tile
-@export var push_pause := 0.25  # how long it stands still after being pushed
+@export var seconds_per_cell := 0.6  # time to walk one tile
+@export var push_pause := 0.75  # how long it stands still after being pushed
+@export var end_pause := 0.5  # how long it stands still at each end of the line
+# After being pushed along its line, walk back to the spot it was knocked from.
+@export var return_to_spot_after_push := true
 @export var show_path := true  # draw the patrol line (handy while designing)
 
 var _origin := Vector2i.ZERO  # the cell it started on (the line's anchor)
@@ -33,6 +37,7 @@ var _speed := 0.0  # sprite slide speed in px/s
 var _stepping := false  # true while a patrol step is in progress
 var _pause_left := 0.0
 var _frozen := false  # set once the level is won or lost
+var _return_index := NO_RETURN  # spot on the line it must walk back to
 
 
 func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
@@ -81,21 +86,63 @@ func _physics_process(delta: float) -> void:
 	var target := cell + step
 	if _can_enter(target):
 		_begin_step(target)
+	elif (
+		_off_line() == 0
+		and _return_index == NO_RETURN
+		and level.blocker_at(target, realm) is Goose
+	):
+		# Another goose is in the way: head back the other way.
+		_turn_around_if_possible()
 
 
 # Decides which way to go next. Getting back onto the line always comes first.
 func _choose_step() -> Vector2i:
-	var rel := cell - _origin
-	var off_line := rel.x * _perp.x + rel.y * _perp.y
+	var off_line := _off_line()
 	if off_line != 0:
 		return -_perp * signi(off_line)
+	if _return_index != NO_RETURN:
+		var gap := _return_index - _along_index()
+		if gap != 0:
+			return _along * signi(gap)
+		_return_index = NO_RETURN  # back where it was knocked from
 	if patrol_length <= 1:
 		return Vector2i.ZERO
-	var along_index := rel.x * _along.x + rel.y * _along.y
-	var next_index := along_index + _heading
+	var next_index := _along_index() + _heading
 	if next_index < 0 or next_index > patrol_length - 1:
+		# Reached the end of the line: turn around, resting first if asked to.
 		_heading = -_heading
+		if end_pause > 0.0:
+			_pause_left = end_pause
+			return Vector2i.ZERO
 	return _along * _heading
+
+
+# How many cells sideways from its line it is (0 = on the line).
+func _off_line() -> int:
+	var rel := cell - _origin
+	return rel.x * _perp.x + rel.y * _perp.y
+
+
+# Where it is along the line: 0 = the start tile, patrol_length - 1 = far end.
+func _along_index() -> int:
+	var rel := cell - _origin
+	return rel.x * _along.x + rel.y * _along.y
+
+
+# Every cell on this goose's patrol line (other objects use this to stay clear).
+func patrol_cells() -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for i in patrol_length:
+		cells.append(_origin + _along * i)
+	return cells
+
+
+# Only turns if the way back is still on the line, so a goose pinned against
+# the end of its line just waits instead of flip-flopping.
+func _turn_around_if_possible() -> void:
+	var back_index := _along_index() - _heading
+	if back_index >= 0 and back_index <= patrol_length - 1:
+		_heading = -_heading
 
 
 func _can_enter(target: Vector2i) -> bool:
@@ -148,6 +195,11 @@ func can_push(dir: Vector2i) -> bool:
 func try_push(dir: Vector2i) -> bool:
 	if not can_push(dir):
 		return false
+	AudioManager.play_goose_honk()
+	# Remember the spot it was knocked from. Only the first push counts, so a
+	# second push before it gets back doesn't move that spot.
+	if return_to_spot_after_push and _return_index == NO_RETURN:
+		_return_index = _along_index()
 	level.unregister(self, realm)
 	cell += dir
 	level.register(self, get_cells(cell), realm)

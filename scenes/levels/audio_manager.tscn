@@ -4,6 +4,7 @@
 [ext_resource type="AudioStream" uid="uid://b7rt5i4454q4h" path="res://audio/music/[TwoShot] LevelOne.mp3" id="2_ybwj1"]
 [ext_resource type="AudioStream" uid="uid://dcau6l57nt2po" path="res://audio/SFX/Game Over SFX.mp3" id="3_tlsbt"]
 [ext_resource type="AudioStream" uid="uid://dx54ajn4yr4tj" path="res://audio/SFX/Victory.mp3" id="3_ybwj1"]
+[ext_resource type="AudioStream" path="res://audio/SFX/honk-sound.mp3" id="4_honk"]
 
 [node name="Audio Manager" type="Node" unique_id=1463628371]
 script = ExtResource("1_5mdwd")
@@ -20,4 +21,8 @@ bus = &"SFX"
 
 [node name="GameOver" type="AudioStreamPlayer2D" parent="SFX" unique_id=389997892]
 stream = ExtResource("3_tlsbt")
+bus = &"SFX"
+
+[node name="GooseHonk" type="AudioStreamPlayer" parent="SFX"]
+stream = ExtResource("4_honk")
 bus = &"SFX"

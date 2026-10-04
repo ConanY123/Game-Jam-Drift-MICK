@@ -8,7 +8,6 @@ extends Node2D
 @export var level_number: int = 1
 @export_group("Intro Caption")
 @export var caption_title := ""
-@export_multiline var caption_subtitle := ""
 @export_range(0.0, 6.0, 0.1) var caption_hold := 2.0
 @export_group("")
 @export_range(0.0, 5.0, 0.1) var death_transition_duration := 1.0
@@ -113,7 +112,7 @@ func _show_intro_caption() -> void:
 		return
 	var caption := LEVEL_CAPTION_SCENE.instantiate()
 	add_child(caption)
-	caption.call("show_caption", caption_title, caption_subtitle, caption_hold)
+	caption.call("show_caption", caption_title, "", caption_hold)
 
 func gameplay_locked() -> bool:
 	var transitions := get_node_or_null("/root/TransitionManager")

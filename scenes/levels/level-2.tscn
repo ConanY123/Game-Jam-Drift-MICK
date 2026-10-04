@@ -18,8 +18,7 @@ point_count = 8
 [node name="Level2" type="Node2D" unique_id=960693337]
 script = ExtResource("1_lvl2")
 level_number = 2
-caption_title = "Chapter Two"
-caption_subtitle = "Deeper into the dream"
+caption_title = "Mess in V1"
 caption_hold = 2.0
 
 [node name="PhysicalBackground" type="Sprite2D" parent="." unique_id=2084994310]

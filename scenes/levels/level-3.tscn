@@ -1,13 +1,13 @@
 [gd_scene format=4 uid="uid://dyesiwxbfqlgb"]
 
 [ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="1_smlxm"]
-[ext_resource type="Script" path="res://scripts/levels/level_3.gd" id="1_x5sbd"]
+[ext_resource type="Script" uid="uid://bi3fusqx4bnu8" path="res://scripts/levels/level_3.gd" id="1_x5sbd"]
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="2_x5sbd"]
 [ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="3_orn5u"]
 
 [sub_resource type="Curve2D" id="Curve2D_tkmqy"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 88, 80, 0, 0, 0, 0, 88, 192, 0, 0, 0, 0, 192, 192, 0, 0, 0, 0, 192, 288, 0, 0, 0, 0, 312, 288, 0, 0, 0, 0, 312, 496, 0, 0, 0, 0, 656, 496, 0, 0, 0, 0, 656, 312, 0, 0, 0, 0, 656, 64)
+"points": PackedVector2Array(0, 0, 0, 0, 88, 80, 0, 0, 0, 0, 88, 208, 0, 0, 0, 0, 168, 208, 0, 0, 0, 0, 168, 296, 0, 0, 0, 0, 312, 296, 0, 0, 0, 0, 312, 488, 0, 0, 0, 0, 656, 488, 0, 0, 0, 0, 656, 312, 0, 0, 0, 0, 656, 64)
 }
 point_count = 9
 

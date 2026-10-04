@@ -1,9 +1,17 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://col3tgbgnyr4y"]
 
 [ext_resource type="Script" uid="uid://cw8shw2ppvyh7" path="res://scripts/objects/pushables/energy_drink.gd" id="1_drink"]
+[ext_resource type="Texture2D" uid="uid://bc80tkfbvanue" path="res://sprites/tilesets/Table_Chair_Wall_Spritesheet.png" id="2_fw72f"]
 
-[node name="EnergyDrink" type="Node2D"]
+[node name="EnergyDrink" type="Node2D" unique_id=448676819]
 script = ExtResource("1_drink")
 color = Color(0.3, 1, 0.45, 1)
 holdable = false
 realm = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1690082028]
+position = Vector2(16, 16)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_fw72f")
+region_enabled = true
+region_rect = Rect2(104, 64, 16, 32)

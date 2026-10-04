@@ -87,6 +87,10 @@ func _draw() -> void:
 		return
 	if level.realm != realm and realm == LevelBase.Realm.DREAM:
 		return
-	var alpha := 1.0 if level.realm == realm else 0.15
+	var alpha := 1.0
+	if level.realm != realm:
+		alpha = 0.35 if (
+			level.realm == LevelBase.Realm.DREAM and realm == LevelBase.Realm.PHYSICAL
+		) else 0.15
 	if _is_aura_showing():
 		draw_rect(_aura_rect(), Color(1.0, 0.12, 0.12, 0.22 * alpha))

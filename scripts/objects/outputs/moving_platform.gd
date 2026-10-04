@@ -2,6 +2,7 @@ class_name MovingPlatform
 extends "res://scripts/objects/outputs/signal_output.gd"
 
 @export_enum("Horizontal", "Vertical") var orientation := 0
+@export var footprint := Vector2i(3, 1)
 # Destinations are grid coordinates for the center cell of the platform.
 @export var off_destination := Vector2i.ZERO
 @export var on_destination := Vector2i.ZERO
@@ -34,7 +35,10 @@ func setup(p_level: LevelBase, p_center_cell: Vector2i) -> void:
 
 
 func _set_footprint() -> void:
-	size = Vector2i(3, 1) if orientation == 0 else Vector2i(1, 3)
+	if footprint != Vector2i.ZERO:
+		size = footprint
+	else:
+		size = Vector2i(3, 1) if orientation == 0 else Vector2i(1, 3)
 
 
 func _center_offset() -> Vector2i:
@@ -89,7 +93,11 @@ func _draw() -> void:
 	if level.realm != realm and realm == LevelBase.Realm.DREAM:
 		return
 
-	var alpha := 1.0 if level.realm == realm else 0.15
+	var alpha := 1.0
+	if level.realm != realm:
+		alpha = 0.35 if (
+			level.realm == LevelBase.Realm.DREAM and realm == LevelBase.Realm.PHYSICAL
+		) else 0.15
 	var footprint_size := Vector2(size * Grid.CELL)
 	var rect := Rect2(-footprint_size * 0.5 + Vector2.ONE, footprint_size - Vector2(2.0, 2.0))
 	draw_rect(rect, Color(color, alpha))

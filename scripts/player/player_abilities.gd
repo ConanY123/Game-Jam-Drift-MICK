@@ -3,25 +3,29 @@ extends "res://scripts/player/player_interactions.gd"
 const FALL_DROP_CELLS := 2.0
 const FALL_OUT_TIME := 0.35
 const FALL_IN_TIME := 0.45
-const FALL_SPIN := TAU * 2.0
+const FALL_SPIN := TAU * 1.0
 const ARROW_SCENE := preload("res://scenes/objects/archery/arrow.tscn")
 const SHOOT_COOLDOWN := 0.3
 
 enum FallPhase { NONE, OUT, IN }
+enum FallEdge { VOID, TOP, FRONT, SIDE }
 
 var has_bow := false
 var aiming := false
 var aim_dir := Vector2.RIGHT
 var shoot_cd := 0.0
 var fall_phase := FallPhase.NONE
+var fall_edge := FallEdge.VOID
 var fall_t := 0.0
 var fall_from := Vector2.ZERO
 var land_target := Vector2.ZERO
+var last_ground_position := Vector2.ZERO
 var draw_spin := 0.0
 var draw_scale := 1.0
 var draw_alpha := 1.0
 
 func _begin_fall() -> void:
+	fall_edge = _detect_fall_edge(position - last_ground_position) as FallEdge
 	falling = true
 	fall_phase = FallPhase.OUT
 	fall_t = 0.0
@@ -33,6 +37,25 @@ func _begin_fall() -> void:
 	push_target = null
 	push_timer = 0.0
 	interact_locked = false
+
+func _detect_fall_edge(movement_from_ground: Vector2) -> int:
+	if absf(movement_from_ground.y) >= absf(movement_from_ground.x):
+		if movement_from_ground.y < 0.0:
+			return FallEdge.TOP
+		if movement_from_ground.y > 0.0:
+			return FallEdge.FRONT
+	elif movement_from_ground.x != 0.0:
+		return FallEdge.SIDE
+	return FallEdge.VOID
+
+func _record_ground_position() -> void:
+	if (
+		not falling
+		and level != null
+		and level.realm == LevelBase.Realm.DREAM
+		and level.is_dream_floor(Grid.pos_to_cell(position))
+	):
+		last_ground_position = position
 
 func _end_fall() -> void:
 	falling = false
@@ -55,6 +78,7 @@ func _update_fall(delta: float) -> void:
 				fall_t = 0.0
 				fall_from = Vector2(land_target.x, -SIZE)
 				position = fall_from
+				_on_fall_return_started()
 		FallPhase.IN:
 			fall_t += delta / FALL_IN_TIME
 			var t := clampf(fall_t, 0.0, 1.0)
@@ -68,6 +92,9 @@ func _update_fall(delta: float) -> void:
 				_end_fall()
 		_:
 			_end_fall()
+
+func _on_fall_return_started() -> void:
+	pass
 
 func _update_bow() -> bool:
 	if Input.is_action_pressed("interact"):

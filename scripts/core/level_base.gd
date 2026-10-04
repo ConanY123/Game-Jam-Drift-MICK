@@ -299,9 +299,11 @@ func _update_layers() -> void:
 	var floor_layer := get_node_or_null("FloorLayer") as TileMapLayer
 	if floor_layer != null:
 		floor_layer.visible = realm == Realm.DREAM
+		floor_layer.z_index = -2
 	var dream_layer := get_node_or_null("DreamFloorLayer") as TileMapLayer
 	if dream_layer != null:
 		dream_layer.visible = realm == Realm.DREAM
+		dream_layer.z_index = 0
 # Instantiates the roommate scene on a route of cells and forwards his result.
 func add_roommate(route: Array[Vector2i]) -> Node2D:
 	var r := ROOMMATE_SCENE.instantiate()

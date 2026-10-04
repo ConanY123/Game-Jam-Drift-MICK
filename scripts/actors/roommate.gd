@@ -158,6 +158,13 @@ func _physics_process(delta: float) -> void:
 	if index >= waypoints.size():
 		return
 
+	# Held in place by a walkable (powered treadmill) until it's pushed off him.
+	var walkable := _walkable_here()
+	if walkable != null and walkable.holds_roommate(self):
+		_check_hazards()
+		queue_redraw()
+		return
+
 	# Walk toward the current waypoint at a steady pace.
 	var target := waypoints[index]
 	var to_target := target - position
@@ -215,6 +222,20 @@ func _update_animation() -> void:
 func current_cell() -> Vector2i:
 	return Grid.pos_to_cell(position)
 
+# Axis he's currently walking along (zero when done).
+func move_direction() -> Vector2:
+	if index >= waypoints.size():
+		return Vector2.ZERO
+	return (waypoints[index] - position).normalized()
+
+func _walkable_here() -> Walkable:
+	var cell := current_cell()
+	for in_realm in [LevelBase.Realm.PHYSICAL, LevelBase.Realm.DREAM]:
+		var b := level.blocker_at(cell, in_realm)
+		if b is Walkable:
+			return b as Walkable
+	return null
+
 # Judged on actual world state, not the realm currently being viewed.
 func _check_hazards() -> void:
 	var cell := current_cell()
@@ -234,8 +255,14 @@ func _check_hazards() -> void:
 
 	# A removable obstacle left on his path in the physical world kills him.
 	# Walls shouldn't be authored onto the route, so only Pushables count.
+	# Walkables (treadmill) decide for themselves.
 	var phys := level.blocker_at(cell, LevelBase.Realm.PHYSICAL)
-	if phys is Pushable and not phys is Goose:
+	if phys is Walkable:
+		var reason: String = phys.roommate_hazard(self)
+		if reason != "":
+			_die(reason, true)
+		return
+	elif phys is Pushable and not phys is Goose:
 		_die("hit an obstacle in the real world", true)
 		return
 
@@ -246,7 +273,11 @@ func _check_hazards() -> void:
 
 	# A deadly solid object sitting in the dream (non-floor) also kills.
 	var dream_obj := level.blocker_at(cell, LevelBase.Realm.DREAM)
-	if dream_obj is Pushable and not dream_obj.is_floor:
+	if dream_obj is Walkable:
+		var dream_reason: String = dream_obj.roommate_hazard(self)
+		if dream_reason != "":
+			_die(dream_reason, true)
+	elif dream_obj is Pushable and not dream_obj.is_floor:
 		_die("hit something in the dream", true)
 
 func _finish() -> void:

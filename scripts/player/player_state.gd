@@ -3,6 +3,7 @@ extends Node2D
 const SIZE := 24.0
 const HITBOX_SIZE := 18.0
 const HITBOX_RADIUS := HITBOX_SIZE * 0.5
+const GOOSE_PUSH_REACH_EXTRA := 16.0
 const SPEED := 96.0
 const MASH_GAIN := 0.12
 const MASH_DECAY := 0.5
@@ -19,10 +20,37 @@ var falling := false
 func _move_axis(offset: Vector2) -> Node:
 	if offset == Vector2.ZERO:
 		return null
-	var blocker := _blocker_at(position + offset)
+	var next_position := position + offset
+	var blocker := _blocker_at(next_position)
+	if blocker == null:
+		blocker = _goose_in_push_range(next_position, offset)
 	if blocker == null or _is_traversable_dream_block(blocker):
 		position += offset
 	return blocker
+
+func _goose_in_push_range(center: Vector2, movement: Vector2) -> Goose:
+	if level.realm == LevelBase.Realm.DREAM:
+		return null
+	var realms: Array[int] = [level.realm]
+	var checked: Dictionary = {}
+	for in_realm in realms:
+		for blocker in level.solids[in_realm].values():
+			if not blocker is Goose or checked.has(blocker):
+				continue
+			checked[blocker] = true
+			var goose := blocker as Goose
+			var goose_center := (
+				level.to_local(goose.global_position)
+				+ Vector2.ONE * (Grid.CELL * 0.5)
+			)
+			if movement.dot(goose_center - position) <= 0.0:
+				continue
+			if goose.overlaps_player_circle(
+				center,
+				HITBOX_RADIUS + GOOSE_PUSH_REACH_EXTRA
+			):
+				return goose
+	return null
 
 func _is_traversable_dream_block(blocker: Node) -> bool:
 	return (
@@ -49,6 +77,8 @@ func _blocker_in(center: Vector2, in_realm: int) -> Node:
 			var blocker := level.blocker_at(cell, in_realm)
 			if blocker != null:
 				if blocker is Goose:
+					if level.realm == LevelBase.Realm.DREAM:
+						continue
 					if not blocker.overlaps_player_circle(center, HITBOX_RADIUS):
 						continue
 				elif blocker is Door:

@@ -17,6 +17,7 @@ const DIRECTIONS := [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const PUSH_SLIDE_TIME := 0.12  # seconds for a pushed goose to slide one cell
 const NO_RETURN := -9999  # means "not knocked out of place"
 const HITBOX_RADIUS := 8.0
+const BLOCKING_STAMINA_DRAIN_PER_SECOND := 0.7
 
 @export_enum("Left", "Right", "Up", "Down") var start_direction := 0
 # Number of tiles in the line, INCLUDING the one it starts on.
@@ -91,6 +92,9 @@ func _physics_process(delta: float) -> void:
 	if step == Vector2i.ZERO:
 		return
 	var target := cell + step
+	var player_blocks := _player_overlaps_cell(target)
+	if player_blocks and level.realm == LevelBase.Realm.PHYSICAL:
+		level.player.drain_stamina(BLOCKING_STAMINA_DRAIN_PER_SECOND * delta)
 	if _can_enter(target):
 		_begin_step(target)
 	elif (
@@ -175,6 +179,8 @@ func _can_enter(target: Vector2i) -> bool:
 
 
 func _player_overlaps_cell(c: Vector2i) -> bool:
+	if level.realm == LevelBase.Realm.DREAM:
+		return false
 	var p := level.player
 	if p == null:
 		return false

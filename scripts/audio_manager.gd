@@ -1,9 +1,10 @@
 extends Node
 
 const DREAM_REVERB_WET := 0.1
-const DREAM_MUSIC_ATTENUATION_DB := -8.0
+const DREAM_MUSIC_ATTENUATION_DB := -2.0
 const DREAM_AUDIO_BUS := "DreamFX"
 const DREAM_REVERB_EFFECT_INDEX := 0
+const LEVEL_FIVE_VOLUME_OFFSET_DB := -5.0
 
 # One reusable music player; we swap its stream per level.
 @onready var music_player: AudioStreamPlayer2D = $Music
@@ -16,6 +17,7 @@ var _dream_reverb: AudioEffectReverb
 var _reverb_tween: Tween
 var _music_volume_tween: Tween
 var _base_music_volume_db := 0.0
+var _track_volume_offset_db := 0.0
 
 # Map level number -> track. Assign these in the scene (see below) or preload.
 const TRACKS := {
@@ -23,7 +25,9 @@ const TRACKS := {
 	2: preload("res://audio/music/[TwoShot] LevelTwo.mp3"),
 	3: preload("res://audio/music/[TwoShot] LevelThree.mp3"),
 	4: preload("res://audio/music/[TwoShot] LevelFour.mp3"),
-	5: preload("res://audio/music/Dark Techno EBM Industrial beat Warriors of the Wasteland - Cybermode Beats (128k).mp3")
+	5: preload("res://audio/music/[TwoShot] LevelFive.mp3"),
+	6: preload("res://audio/music/[TwoShot] LevelSix.mp3"),
+	7: preload("res://audio/music/[TwoShot] LevelSeven.mp3")
 }
 
 func _ready() -> void:
@@ -77,7 +81,7 @@ func set_dream_music_quieter(enabled: bool, fade_duration: float) -> void:
 	if _music_volume_tween != null and _music_volume_tween.is_valid():
 		_music_volume_tween.kill()
 
-	var target_volume := _base_music_volume_db
+	var target_volume := _base_music_volume_db + _track_volume_offset_db
 	if enabled:
 		target_volume += DREAM_MUSIC_ATTENUATION_DB
 
@@ -99,6 +103,10 @@ func play_music(level_number: int) -> void:
 	if not TRACKS.has(level_number):
 		push_warning("No track for level %d" % level_number)
 		return
+	_track_volume_offset_db = (
+		LEVEL_FIVE_VOLUME_OFFSET_DB if level_number == 5 else 0.0
+	)
+	music_player.volume_db = _base_music_volume_db + _track_volume_offset_db
 	music_player.stream = TRACKS[level_number]
 	music_player.play(17.0 if level_number == 5 else 0.0)
 

@@ -24,13 +24,18 @@ buses/default_bus_layout="uid://dr3s14e4ubl6x"
 AudioManager="*res://scenes/levels/audio_manager.tscn"
 LevelManager="*res://scripts/core/level_manager.gd"
 TransitionManager="*res://scripts/core/transition_manager.gd"
+GameplayUI="*res://scripts/core/gameplay_ui.gd"
 
 [display]
 
 window/size/viewport_width=1024
 window/size/viewport_height=576
-window/size/window_width_override=1024
-window/size/window_height_override=576
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/size/mode=2
+window/size/resizable=false
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [physics]
 

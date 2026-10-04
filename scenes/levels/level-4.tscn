@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="3_8mmlf"]
 [ext_resource type="TileSet" uid="uid://cx7cahqbukta7" path="res://tilesets/tileset1.tres" id="4_7vhjv"]
 [ext_resource type="PackedScene" path="res://scenes/objects/pushables/goose.tscn" id="5_l56ll"]
-[ext_resource type="PackedScene" uid="uid://col3tgbgnyr4y" path="res://scenes/objects/pushables/energy_drink.tscn" id="6_y6uma"]
+[ext_resource type="PackedScene" path="res://scenes/objects/pushables/energy_drink.tscn" id="6_y6uma"]
 
 [sub_resource type="Curve2D" id="Curve2D_ug4f8"]
 _data = {

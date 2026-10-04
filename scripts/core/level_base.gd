@@ -103,6 +103,8 @@ func _ready() -> void:
 	build()
 	_update_layers()
 	realm_changed.connect(func(_r): _update_layers())
+	AudioManager.set_dream_reverb(realm == Realm.DREAM, 0.0)
+	AudioManager.set_dream_music_quieter(realm == Realm.DREAM, 0.0)
 	var overlay := RESULT_OVERLAY_SCENE.instantiate()
 	add_child(overlay)
 	result_overlay = overlay
@@ -179,6 +181,14 @@ func switch_realm() -> void:
 func _apply_realm_switch() -> void:
 	realm = Realm.DREAM if realm == Realm.PHYSICAL else Realm.PHYSICAL
 	realm_changed.emit(realm)
+	AudioManager.set_dream_reverb(
+		realm == Realm.DREAM,
+		realm_transition_duration * 0.5
+	)
+	AudioManager.set_dream_music_quieter(
+		realm == Realm.DREAM,
+		realm_transition_duration * 0.5
+	)
 	queue_redraw()
 
 func _reset_level() -> bool:

@@ -35,14 +35,7 @@ func _ready() -> void:
 	_refresh()
 
 func can_interact(_dir: Vector2i) -> bool:
-	if moving or inactive or open or level == null:
-		return false
-	for c in _collision_cells(_open_angle()):
-		if level.in_push_ban(c):
-			return false
-		if not level.is_free(c, self, realm):
-			return false
-	return true
+	return not moving and not inactive and not open and level != null
 
 # The player calls this when the interact timer completes against us. Return
 # true so the player's key-lock triggers (one press = one interaction).
@@ -132,19 +125,11 @@ func _animate_swing(target_angle: float) -> void:
 	_swing_tween.tween_callback(_finish_swing.bind(target_angle))
 
 func _finish_swing(target_angle: float) -> void:
-	var target_cells := _collision_cells(target_angle)
 	if open:
-		for c in target_cells:
-			if not level.is_free(c, self, realm):
-				open = false
-				_refresh()
-				level.register(self, _collision_cells(start_angle_degrees), realm)
-				_animate_swing(start_angle_degrees)
-				return
 		inactive = true
 		level.unregister(self, realm)
 	else:
-		level.register(self, target_cells, realm)
+		level.register(self, _collision_cells(target_angle), realm)
 	moving = false
 
 func _set_leaf_angle(angle: float) -> void:

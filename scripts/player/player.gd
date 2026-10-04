@@ -3,11 +3,11 @@ extends "res://scripts/player/player_abilities.gd"
 
 @onready var _sprite: AnimatedSprite2D = $AnimatedSprite2D
 var _base_scale := Vector2.ONE
-var _normal_z_index := 10
+var _normal_z_index := 20
 
 func _ready() -> void:
 	_setup_input()
-	z_index = 10
+	z_index = _normal_z_index
 	_normal_z_index = z_index
 	_base_scale = _sprite.scale
 	if level != null:
@@ -15,7 +15,7 @@ func _ready() -> void:
 
 func _begin_fall() -> void:
 	super._begin_fall()
-	z_index = _normal_z_index if fall_edge == FallEdge.FRONT else -1
+	z_index = _normal_z_index if fall_edge == FallEdge.FRONT else -11
 
 func _end_fall() -> void:
 	super._end_fall()

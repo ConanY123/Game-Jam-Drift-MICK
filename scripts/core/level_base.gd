@@ -37,6 +37,7 @@ const ROOMMATE_SCENE := preload("res://scenes/actors/roommate.tscn")
 const RESULT_OVERLAY_SCENE := preload("res://scenes/ui/result_overlay.tscn")
 const STAMINA_BAR_SCENE := preload("res://scenes/ui/stamina_bar.tscn")
 const LEVEL_CAPTION_SCENE := preload("res://scenes/ui/level_caption.tscn")
+const ROOMMATE_PATH_OVERLAY_SCRIPT := preload("res://scripts/core/roommate_path_overlay.gd")
 
 var realm := Realm.PHYSICAL
 var roommate: Node2D
@@ -51,6 +52,7 @@ var debug_path: Array[Vector2i] = []  # placeholder until the roommate exists
 
 var dream_floor := {}  # Vector2i -> true
 var player: Player
+var roommate_path_overlay: RoommatePathOverlay
 var result_overlay: Node
 var _level_ended := false
 
@@ -100,6 +102,11 @@ func player_over_dream_gap() -> bool:
 
 func _ready() -> void:
 	_load_tilemaps()
+	roommate_path_overlay = ROOMMATE_PATH_OVERLAY_SCRIPT.new()
+	# Keep the route above floor objects, but below ordinary obstacles.
+	roommate_path_overlay.z_index = -1
+	roommate_path_overlay.z_as_relative = false
+	add_child(roommate_path_overlay)
 	build()
 	_update_layers()
 	realm_changed.connect(func(_r): _update_layers())
@@ -366,6 +373,9 @@ func _update_layers() -> void:
 
 # Instantiates the roommate scene on a route of cells and forwards his result.
 func add_roommate(route: Array[Vector2i]) -> Node2D:
+	debug_path = route
+	if roommate_path_overlay != null:
+		roommate_path_overlay.set_cells(route)
 	var r := ROOMMATE_SCENE.instantiate()
 	r.z_index = 10
 	r.z_as_relative = false
@@ -411,6 +421,8 @@ func route_from_path2d(path_node_name := "RoommatePath") -> Array[Vector2i]:
 func add_roommate_from_path(path_node_name := "RoommatePath") -> Node2D:
 	var cells := route_from_path2d(path_node_name)
 	debug_path = cells
+	if roommate_path_overlay != null:
+		roommate_path_overlay.set_cells(cells)
 	queue_redraw()
 	if cells.size() < 2:
 		return null
@@ -431,11 +443,3 @@ func _draw() -> void:
 		for row in range(Grid.FIELD_ROWS + 1):
 			var y := float(row * Grid.CELL)
 			draw_line(Vector2(0.0, y), Vector2(field_size.x, y), grid_color)
-
-	if debug_path.size() >= 2:
-		var points := PackedVector2Array()
-		for cell in debug_path:
-			points.append(Grid.cell_to_center(cell))
-		draw_polyline(points, Color(1.0, 1.0, 1.0, 0.55), 3.0, true)
-		for point in points:
-			draw_circle(point, 4.0, Color(1.0, 1.0, 1.0, 0.55))

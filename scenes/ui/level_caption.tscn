@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://blvcap0lvl01"]
+[gd_scene format=3 uid="uid://blvcap0lvl01"]
 
 [ext_resource type="Script" path="res://scripts/ui/level_caption.gd" id="1_caption"]
 [ext_resource type="FontFile" uid="uid://bxuiaxugc326w" path="res://sprites/Kenney Pixel.ttf" id="2_font"]

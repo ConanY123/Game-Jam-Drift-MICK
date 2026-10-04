@@ -1,10 +1,9 @@
 class_name LevelCaption
 extends CanvasLayer
 
-# Small arcade-style title card that flashes in the UI strip next to the stamina
-# bar at level start. LevelBase instantiates this and calls show_caption() with
-# the level's name. It blinks a couple of times, holds, then fades out and frees
-# itself so it never lingers over the HUD.
+# Small arcade-style title card that appears in the top of the UI strip at
+# level start. LevelBase instantiates this and calls show_caption() with the
+# level's name. It stays visible for the duration of the level.
 #
 # Deliberately flat and hard-edged (no glow/anti-aliased shadow) for an 8-bit
 # look. Swap the default font for a pixel font (e.g. Press Start 2P) on the Tag
@@ -21,14 +20,14 @@ func _ready() -> void:
 	visible = false
 
 
-# subtitle is accepted but ignored (kept for call-site compatibility). hold is
-# how long the card stays up after the flash-in before fading out.
+# Extra arguments are accepted for call-site compatibility.
 func show_caption(
 	title: String,
 	_subtitle: String = "",
-	hold := 2.0,
+	_hold := 2.0,
+	tag_text := "LEVEL",
 	_fade_in := 0.6,
-	fade_out := 0.6
+	_fade_out := 0.6
 ) -> void:
 	if title.strip_edges().is_empty():
 		queue_free()
@@ -36,6 +35,7 @@ func show_caption(
 	if not is_node_ready():
 		await ready
 
+	_tag.text = tag_text
 	_title.text = title.to_upper()
 	visible = true
 	_card.modulate.a = 0.0
@@ -53,7 +53,3 @@ func show_caption(
 	tween.tween_property(_card, "modulate:a", 1.0, 0.07)
 	tween.parallel().tween_property(_card, "scale", Vector2(1.08, 1.08), 0.07)
 	tween.tween_property(_card, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	# Hold, then fade out and clean up.
-	tween.tween_interval(hold)
-	tween.tween_property(_card, "modulate:a", 0.0, fade_out).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
-	tween.tween_callback(queue_free)

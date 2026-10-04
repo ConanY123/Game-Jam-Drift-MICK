@@ -14,8 +14,7 @@ point_count = 9
 [node name="Level3" type="Node2D" unique_id=522251794]
 script = ExtResource("1_x5sbd")
 level_number = 3
-caption_title = "On Pace at PAC"
-caption_hold = 2.0
+caption_title = "PAC Empty"
 
 [node name="PhysicalBackground" type="Sprite2D" parent="." unique_id=1780651044]
 z_index = -10

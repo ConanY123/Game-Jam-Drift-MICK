@@ -16,6 +16,7 @@ extends Node2D
 # The sprite needs animations named walk_down, walk_up, walk_left, walk_right.
 
 const SPEED := 24.0  # slow sleepwalker pace; player (96) is ~4x faster
+const HITBOX_RADIUS := 9.0
 const FALL_DROP_CELLS := 2.0
 const FALL_OUT_TIME := 0.35
 const FALL_SPIN := TAU * 1.0
@@ -218,10 +219,23 @@ func current_cell() -> Vector2i:
 func _check_hazards() -> void:
 	var cell := current_cell()
 
+	# Geese use a pixel-space hitbox. Do not use their occupied grid cell here:
+	# that cell includes a large area around the visible goose and can wake the
+	# roommate before the goose actually touches him.
+	var checked_geese: Dictionary = {}
+	for obj in level.solids[LevelBase.Realm.PHYSICAL].values():
+		if not obj is Goose or checked_geese.has(obj):
+			continue
+		checked_geese[obj] = true
+		var goose := obj as Goose
+		if goose.overlaps_player_circle(position, HITBOX_RADIUS):
+			_die("hit an obstacle in the real world", true)
+			return
+
 	# A removable obstacle left on his path in the physical world kills him.
 	# Walls shouldn't be authored onto the route, so only Pushables count.
 	var phys := level.blocker_at(cell, LevelBase.Realm.PHYSICAL)
-	if phys is Pushable:
+	if phys is Pushable and not phys is Goose:
 		_die("hit an obstacle in the real world", true)
 		return
 

@@ -28,7 +28,7 @@ anchors_preset = -1
 anchor_left = 0.75
 anchor_right = 1.0
 offset_left = 32.0
-offset_top = 216.0
+offset_top = 32.0
 offset_right = -32.0
 grow_horizontal = 2
 mouse_filter = 2
@@ -42,7 +42,7 @@ theme_override_constants/separation = 4
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.95, 0.6, 1)
 theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 32
 text = "LEVEL"
 horizontal_alignment = 1
 

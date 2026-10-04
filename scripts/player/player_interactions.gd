@@ -64,6 +64,11 @@ func _spend_stamina(amount: float) -> void:
 	if is_zero_approx(stamina) and level.realm == LevelBase.Realm.PHYSICAL:
 		level.switch_realm()
 
+func drain_stamina(amount: float) -> void:
+	if is_zero_approx(stamina):
+		return
+	_spend_stamina(amount)
+
 func _restore_stamina(amount: float) -> void:
 	stamina = clampf(stamina + amount, 0.0, MAX_STAMINA)
 	stamina_changed.emit(stamina / MAX_STAMINA)

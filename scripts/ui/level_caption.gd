@@ -40,14 +40,20 @@ func show_caption(
 	visible = true
 	_card.modulate.a = 0.0
 
+	# Let the container compute its final size, then scale from its own center so
+	# the "pop" doesn't drift sideways in the strip.
+	await get_tree().process_frame
+	_card.pivot_offset = _card.size * 0.5
+	_card.scale = Vector2(0.92, 0.92)
+
 	var tween := create_tween()
-	# Arcade flash-in: a few hard blinks before settling.
-	tween.tween_property(_card, "modulate:a", 1.0, 0.08)
-	tween.tween_property(_card, "modulate:a", 0.0, 0.08)
-	tween.tween_property(_card, "modulate:a", 1.0, 0.08)
-	tween.tween_property(_card, "modulate:a", 0.0, 0.08)
-	tween.tween_property(_card, "modulate:a", 1.0, 0.08)
+	# Arcade flash-in: a couple of hard blinks, then a quick pop to full size.
+	tween.tween_property(_card, "modulate:a", 1.0, 0.07)
+	tween.tween_property(_card, "modulate:a", 0.0, 0.07)
+	tween.tween_property(_card, "modulate:a", 1.0, 0.07)
+	tween.parallel().tween_property(_card, "scale", Vector2(1.08, 1.08), 0.07)
+	tween.tween_property(_card, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	# Hold, then fade out and clean up.
 	tween.tween_interval(hold)
-	tween.tween_property(_card, "modulate:a", 0.0, fade_out)
+	tween.tween_property(_card, "modulate:a", 0.0, fade_out).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_callback(queue_free)

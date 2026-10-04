@@ -9,6 +9,7 @@ can_be_pushed = true
 aura_rotation_degrees = 0
 start_on = false
 invert_signal = true
+toggle_on_source_toggle = true
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=568086803]
 position = Vector2(16, 16)

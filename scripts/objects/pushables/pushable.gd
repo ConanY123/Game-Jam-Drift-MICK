@@ -17,6 +17,9 @@ var moving := false
 func setup(p_level: LevelBase, p_cell: Vector2i) -> void:
 	level = p_level
 	cell = p_cell
+	# Floor objects sit below the roommate route overlay. Other pushables keep
+	# the normal layer so they can obscure the route when they overlap it.
+	z_index = -2 if is_floor else 0
 	position = Grid.cell_to_pos(cell)
 	level.register(self, get_cells(cell), realm)
 	level.realm_changed.connect(func(_r): _refresh())

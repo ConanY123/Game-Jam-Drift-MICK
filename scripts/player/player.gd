@@ -120,6 +120,11 @@ func _physics_process(delta: float) -> void:
 	if hit_y is Pushable:
 		target = hit_y
 		direction = Vector2i(0, int(signf(step.y)))
+	if target == null:
+		var overlapping_goose := _goose_overlapping_player()
+		if overlapping_goose != null:
+			target = overlapping_goose
+			direction = _facing_dir
 	if target == null and input == Vector2.ZERO and push_target != null:
 		target = push_target
 		direction = push_dir

@@ -5,6 +5,10 @@
 [ext_resource type="Texture2D" uid="uid://dly3parmmprc1" path="res://sprites/backgrounds/NIGHT BACKGROUND.png" id="3_vn0ko"]
 [ext_resource type="PackedScene" uid="uid://d31oy45evjsvb" path="res://scenes/objects/pushables/chair.tscn" id="3_yyv8b"]
 [ext_resource type="Texture2D" uid="uid://bq7hpngdvkqg6" path="res://sprites/backgrounds/DREAM BACKGROUND.png" id="4_n4s7l"]
+[ext_resource type="FontFile" uid="uid://bxuiaxugc326w" path="res://sprites/Kenney Pixel.ttf" id="5_n4s7l"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_vn0ko"]
+font = ExtResource("5_n4s7l")
 
 [node name="Level0" type="Node2D" unique_id=154351776]
 script = ExtResource("1_pet1o")
@@ -50,3 +54,14 @@ position = Vector2(480, 320)
 
 [node name="Chair3" parent="." unique_id=568925557 instance=ExtResource("3_yyv8b")]
 position = Vector2(512, 256)
+
+[node name="Label" type="Label" parent="." unique_id=1036069602]
+visible = false
+offset_left = 250.0
+offset_top = 214.0
+offset_right = 481.0
+offset_bottom = 256.0
+text = "Arrow Keys to move
+[Z]to push the chair out of 
+your roomates path"
+label_settings = SubResource("LabelSettings_vn0ko")

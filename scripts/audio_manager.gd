@@ -28,7 +28,7 @@ const TRACKS := {
 	5: preload("res://audio/music/[TwoShot] LevelFive.mp3"),
 	6: preload("res://audio/music/[TwoShot] LevelSix.mp3"),
 	7: preload("res://audio/music/[TwoShot] LevelSeven.mp3"),
-	8: preload("res://audio/music/[TwoShot] LevelSeven.mp3"),
+	8: preload("res://audio/music/[TwoShot] LevelFive.mp3"),
 	9: preload("res://audio/music/[TwoShot] CreditsRoll.mp3")
 }
 
@@ -105,12 +105,13 @@ func play_music(level_number: int) -> void:
 	if not TRACKS.has(level_number):
 		push_warning("No track for level %d" % level_number)
 		return
+	var uses_level_five_track := level_number == 5 or level_number == 8
 	_track_volume_offset_db = (
-		LEVEL_FIVE_VOLUME_OFFSET_DB if level_number == 5 else 0.0
+		LEVEL_FIVE_VOLUME_OFFSET_DB if uses_level_five_track else 0.0
 	)
 	music_player.volume_db = _base_music_volume_db + _track_volume_offset_db
 	music_player.stream = TRACKS[level_number]
-	music_player.play(17.0 if level_number == 5 else 0.0)
+	music_player.play(17.0 if uses_level_five_track else 0.0)
 
 func play_game_over() -> void:
 	music_player.stop()

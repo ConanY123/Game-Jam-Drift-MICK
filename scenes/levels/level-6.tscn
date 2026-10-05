@@ -146,7 +146,7 @@ can_be_pushed = false
 invert_signal = false
 
 [node name="T3" parent="Stacks" unique_id=1684027355 instance=ExtResource("7_computer")]
-position = Vector2(191, 32)
+position = Vector2(192, 32)
 aura_rotation_degrees = 180
 can_be_pushed = false
 

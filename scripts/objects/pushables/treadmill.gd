@@ -17,7 +17,8 @@ extends Walkable
 #     unpowered_crash_fraction of the way through
 
 @export_range(0, 3, 1) var power_radius := 1
-@export var belt_speed := 96.0
+@export var belt_speed := Player.SPEED
+@export var belt_ramp_distance := 32.0
 @export_range(0.0, 1.0, 0.05) var unpowered_crash_fraction := 0.8
 
 # Signal outputs the treadmill drives while it is running (same contract as
@@ -175,12 +176,16 @@ func _apply_belt(delta: float) -> void:
 		return
 	if not body_on_walkway(p.position, p.hitbox_half()):
 		return
-	# The belt drags the player back toward the entrance, but only enough that
-	# they can still make headway when they actively run inward. When idle, the
-	# belt carries them out; when running against it, they advance (slowly).
-	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	var pushing_in := input.dot(forward_axis()) > 0.1
-	var drag := belt_speed * (0.5 if pushing_in else 1.0)
+	# Ease the belt in over the first cell from the entrance. Once the player is
+	# 32 pixels in, the belt reaches full walking-speed pushback, allowing the
+	# player to run against it without advancing or being pushed off the belt.
+	var distance_from_entrance := maxf(_local_coords(p.position).x, 0.0)
+	var ramp := 1.0 if belt_ramp_distance <= 0.0 else clampf(
+		distance_from_entrance / belt_ramp_distance,
+		0.0,
+		1.0
+	)
+	var drag := belt_speed * ramp
 	# Goes through the player's own collision, so the belt can't shove them
 	# into a wall behind the entrance.
 	p._move_axis(-forward_axis() * drag * delta)

@@ -13,7 +13,7 @@ extends CanvasLayer
 @onready var _fast_forward_button: Button = $FastForwardButton
 @onready var _edge_effect: ColorRect = $EdgeEffect
 @onready var _edge_material: ShaderMaterial = $EdgeEffect.material
-@onready var _minimap: RealmMinimap = $RealmMinimap
+# @onready var _minimap: RealmMinimap = $RealmMinimap
 @onready var _instruction_panel: Panel = $InstructionPanel
 @onready var _instruction_text: Label = $InstructionPanel/Text
 
